@@ -22,7 +22,7 @@ function Card({ img, title, description, date, time }: CardProps) {
 }
 
 export default function Home() {
-  const tabs = ["Proximas", "Mañana", "Tarde", "Noche", "Todas"] as const;
+  const tabs = ["Proximas", "Por la mañana", "Por la tarde", "Por la noche", "Todas"] as const;
   const [activeTab, setActiveTab] = useState<(typeof tabs)[number]>("Proximas");
   const [selectedDate, setSelectedDate] = useState("");
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -151,13 +151,13 @@ export default function Home() {
 
       let timeMatch = true;
       switch (activeTab) {
-        case "Mañana":
+        case "Por la mañana":
           timeMatch = hour >= 9 && hour < 15;
           break;
-        case "Tarde":
+        case "Por la tarde":
           timeMatch = hour >= 15 && hour < 22;
           break;
-        case "Noche":
+        case "Por la noche":
           timeMatch = hour >= 22 || hour < 9;
           break;
         case "Proximas":
