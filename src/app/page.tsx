@@ -125,13 +125,13 @@ export default function Home() {
 
   // Refs para auto-scroll centrado
   const scrollerRef = useRef<HTMLDivElement | null>(null);
-  const chipRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+  const chipRefs = useRef<Map<string, HTMLButtonElement | null>>(new Map());
 
 
   // Auto-scroll: centra el chip seleccionado en el carrusel de fechas
   useEffect(() => {
     const container = scrollerRef.current;
-    const chip = selectedDate ? chipRefs.current[selectedDate] : null;
+    const chip = selectedDate ? chipRefs.current.get(selectedDate) : null;
     if (!container || !chip) return;
     const containerRect = container.getBoundingClientRect();
     const chipRect = chip.getBoundingClientRect();
@@ -269,7 +269,7 @@ export default function Home() {
             {orderedDates.map((d) => (
               <button
                 key={d}
-                ref={(el) => (chipRefs.current[d] = el)}
+                ref={(el) => { chipRefs.current.set(d, el); }}
                 onClick={() => {
                   if (selectedDate === d) {
                     setSelectedDate("");
@@ -288,7 +288,7 @@ export default function Home() {
                 {/* Badges */}
                 {isOngoingDate(d) && (
                   <span className="absolute -right-2 -top-2 rounded-full bg-red-500 px-2 py-0.5 text-[10px] font-semibold text-white">
-                    En curso
+                    En curso 
                   </span>
                 )}
                 {!isOngoingDate(d) && isSoon(d) && (
