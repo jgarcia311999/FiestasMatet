@@ -1,22 +1,96 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 
-type CardProps = { img: string; title: string; description: string; date: string; time: string };
+type CardProps = {
+  img?: string;
+  title: string;
+  description: string;
+  date: string;
+  time: string;
+  location?: string;
+  isSingle?: boolean;
+  isPast?: boolean;
+  onToggle?: () => void;
+  forceExpanded?: boolean;
+};
 
-function Card({ img, title, description, date, time }: CardProps) {
+function ClientDate({ isoDate }: { isoDate: string }) {
+  const [formatted, setFormatted] = useState("");
+  useEffect(() => {
+    setFormatted(
+      new Date(isoDate + "T00:00:00").toLocaleDateString("es-ES", {
+        weekday: "long",
+        day: "numeric",
+        month: "long",
+      }).toUpperCase()
+    );
+  }, [isoDate]);
+  return formatted ? <time className="block text-sm font-bold text-gray-800">{formatted}</time> : null;
+}
+
+function Card({
+  img,
+  title,
+  description,
+  date,
+  time,
+  location,
+  isSingle,
+  isPast,
+  onToggle,
+  forceExpanded,
+}: CardProps) {
+  const [expanded, setExpanded] = useState(false);
+  const hour = parseInt(time.split(":")[0], 10);
+  let label = "";
+  if (hour >= 9 && hour < 15) label = "Por la mañana";
+  else if (hour >= 15 && hour < 22) label = "Por la tarde";
+  else label = "Por la noche";
+
+  const isExpanded = forceExpanded || expanded;
+
   return (
-    <article className="min-w-[220px] rounded-3xl bg-white p-4 shadow">
-      <div className="h-40 w-full overflow-hidden rounded-2xl bg-gray-200">
-        <img src={img} alt={title} className="h-full w-full object-cover" />
+    <article
+      className={
+        (isSingle ? "" : "border-b border-gray-200 ") +
+        "pb-4 bg-transparent shadow-none rounded-none" +
+        (isPast ? " opacity-50 pointer-events-none" : "")
+      }
+    >
+      {/* Hora y ubicación */}
+      <div
+        className="flex items-center gap-1 text-xs text-gray-500"
+        onClick={() => {
+          if (onToggle) {
+            onToggle();
+          } else if (!forceExpanded) {
+            setExpanded((prev) => !prev);
+          }
+        }}
+        style={{ cursor: onToggle || !forceExpanded ? "pointer" : undefined }}
+      >
+        <span>
+          {label}, a las {time}
+        </span>
+        {location && (
+          <span className="flex items-center gap-1">
+            📍 <span>{location}</span>
+          </span>
+        )}
       </div>
-      <div className="mt-3 px-2">
-        <h3 className="text-sm font-semibold leading-tight">{title}</h3>
-        <p className="mt-2 text-xs text-gray-600">{description}</p>
-        <div className="mt-3 flex items-center justify-between text-xs text-gray-500">
-          <time>{date}</time>
-          <time>{time}</time>
+
+      {/* Imagen opcional */}
+      {img && (
+        <div className="mt-2 h-40 w-full overflow-hidden rounded-2xl bg-gray-200">
+          <img src={img} alt={title} className="h-full w-full object-cover" />
         </div>
-      </div>
+      )}
+
+      {/* Título */}
+      <h3 className="mt-2 text-base font-semibold text-gray-800">{title}</h3>
+
+      {/* Descripción */}
+      <p className="mt-1 text-sm text-gray-700">{description}</p>
     </article>
   );
 }
@@ -26,73 +100,76 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState<(typeof tabs)[number]>("Proximas");
   const [selectedDate, setSelectedDate] = useState("");
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [expandedDates, setExpandedDates] = useState<string[]>([]);
+  // Track expanded cards by unique key `${date}-${time}`
+  const [expandedCards, setExpandedCards] = useState<Set<string>>(new Set());
   const fiestas = [
     // --- AGOSTO (primeras tres se mantienen en agosto) ---
-    { title: "Día de los jubilados", img: "/next.svg", description: "Jornada dedicada a nuestros mayores.", date: "2025-08-08", time: "12:00" },
-    { title: "Merienda con Dúo Musical Gonsy", img: "/next.svg", description: "Merienda de confraternidad amenizada por Gonsy.", date: "2025-08-08", time: "20:30" },
+    { title: "Día de los jubilados", img: "/bannerGenerico.png", description: "Jornada dedicada a nuestros mayores.", date: "2025-08-08", time: "12:00", location: "" },
+    { title: "Merienda con Dúo Musical Gonsy", img: "/bannerDisco.png", description: "Merienda de confraternidad amenizada por Gonsy.", date: "2025-08-08", time: "20:30", location: "" },
 
-    { title: "Concurso de adornos de balcones", img: "/next.svg", description: "Inicio del 5º concurso (hasta el 17 a las 12:00).", date: "2025-08-09", time: "09:00" },
-    { title: "Torneo de fútbol sala", img: "/next.svg", description: "Eliminatorias del torneo.", date: "2025-08-09", time: "18:00" },
-    { title: "Disco móvil con animación", img: "/next.svg", description: "Música y animación para todos.", date: "2025-08-09", time: "23:59" },
+    { title: "Concurso de adornos de balcones", img: "/bannerGenerico.png", description: "Inicio del 5º concurso (hasta el 17 a las 12:00).", date: "2025-08-09", time: "09:00", location: "" },
+    { title: "Torneo de fútbol sala", img: "/bannerGenerico.png", description: "Eliminatorias del torneo.", date: "2025-08-09", time: "18:00", location: "" },
+    { title: "Disco móvil con animación", img: "/bannerDisco.png", description: "Música y animación para todos.", date: "2025-08-09", time: "23:59", location: "" },
 
-    { title: "Torneo de fútbol sala", img: "/next.svg", description: "Nueva jornada del torneo.", date: "2025-08-10", time: "18:00" },
-    { title: "Disco móvil", img: "/next.svg", description: "Sesión nocturna.", date: "2025-08-10", time: "23:59" },
+    { title: "Torneo de fútbol sala", img: "/bannerGenerico.png", description: "Nueva jornada del torneo.", date: "2025-08-10", time: "18:00", location: "" },
+    { title: "Disco móvil", img: "/bannerDisco.png", description: "Sesión nocturna.", date: "2025-08-10", time: "23:59", location: "" },
 
     // --- SEPTIEMBRE (resto de eventos pasan a septiembre) ---
-    { title: "Parque infantil", img: "/next.svg", description: "Atracciones infantiles para los peques.", date: "2025-09-11", time: "18:00" },
-    { title: "Cine Búfalo Kids", img: "/next.svg", description: "Sesión de cine para público infantil.", date: "2025-09-11", time: "23:30" },
+    { title: "Parque infantil", img: "/bannerNinyos.png", description: "Atracciones infantiles para los peques.", date: "2025-09-11", time: "18:00", location: "" },
+    { title: "Cine Búfalo Kids", img: "/bannerNinyos.png", description: "Sesión de cine para público infantil.", date: "2025-09-11", time: "23:30", location: "" },
 
-    { title: "Teatro: Las aventuras de Elsa y Pato", img: "/next.svg", description: "Espectáculo teatral familiar.", date: "2025-09-12", time: "23:00" },
+    { title: "Teatro: Las aventuras de Elsa y Pato", img: "/bannerGenerico.png", description: "Espectáculo teatral familiar.", date: "2025-09-12", time: "23:00", location: "" },
 
-    { title: "Concurso de paellas", img: "/next.svg", description: "Tradicional concurso popular.", date: "2025-09-13", time: "21:00" },
-    { title: "Noche de Playbacks", img: "/next.svg", description: "Actuaciones y diversión.", date: "2025-09-13", time: "23:59" },
+    { title: "Concurso de paellas", img: "/bannerGenerico.png", description: "Tradicional concurso popular.", date: "2025-09-13", time: "21:00", location: "" },
+    { title: "Noche de Playbacks", img: "/bannerDisco.png", description: "Actuaciones y diversión.", date: "2025-09-13", time: "23:59", location: "" },
 
-    { title: "Volteo de campanas y cohetes", img: "/next.svg", description: "Inicio oficial de fiestas.", date: "2025-09-14", time: "13:30" },
-    { title: "Cabalgata de disfraces", img: "/next.svg", description: "Desfile y reparto de fartons con horchata.", date: "2025-09-14", time: "19:00" },
-    { title: "Orquesta LEGADO", img: "/next.svg", description: "Baile y música en directo.", date: "2025-09-14", time: "23:59" },
+    { title: "Volteo de campanas y cohetes", img: "/bannerGenerico.png", description: "Inicio oficial de fiestas.", date: "2025-09-14", time: "13:30", location: "" },
+    { title: "Cabalgata de disfraces", img: "/bannerGenerico.png", description: "Desfile y reparto de fartons con horchata.", date: "2025-09-14", time: "19:00", location: "" },
+    { title: "Orquesta LEGADO", img: "/bannerDisco.png", description: "Baile y música en directo.", date: "2025-09-14", time: "23:59", location: "" },
 
-    { title: "Pasacalles (Asunción)", img: "/next.svg", description: "Celebración de Ntra. Sra. de la Asunción.", date: "2025-09-15", time: "11:30" },
-    { title: "Eucaristía solemne (Asunción)", img: "/next.svg", description: "Misa mayor en honor a la Virgen.", date: "2025-09-15", time: "12:00" },
-    { title: "Procesión (Asunción)", img: "/next.svg", description: "Procesión por las calles del pueblo.", date: "2025-09-15", time: "21:00" },
-    { title: "Orquesta CONTRABANDA", img: "/next.svg", description: "Verbena nocturna.", date: "2025-09-15", time: "23:59" },
+    { title: "Pasacalles (Asunción)", img: "/bannerGenerico.png", description: "Celebración de Ntra. Sra. de la Asunción.", date: "2025-09-15", time: "11:30", location: "" },
+    { title: "Eucaristía solemne (Asunción)", img: "/bannerGenerico.png", description: "Misa mayor en honor a la Virgen.", date: "2025-09-15", time: "12:00", location: "" },
+    { title: "Procesión (Asunción)", img: "/bannerGenerico.png", description: "Procesión por las calles del pueblo.", date: "2025-09-15", time: "21:00", location: "" },
+    { title: "Orquesta CONTRABANDA", img: "/bannerDisco.png", description: "Verbena nocturna.", date: "2025-09-15", time: "23:59", location: "" },
 
-    { title: "Volteo y cohetes (Virgen del Rosario)", img: "/next.svg", description: "Inicio de las fiestas de la Virgen del Rosario.", date: "2025-09-16", time: "13:30" },
-    { title: "Ofrenda de flores", img: "/next.svg", description: "Ofrenda a la Virgen.", date: "2025-09-16", time: "20:00" },
-    { title: "Rock en Matet", img: "/next.svg", description: "MENUDA G-TA + EL SALMÓN (tributo) + Disco móvil.", date: "2025-09-16", time: "23:59" },
+    { title: "Volteo y cohetes (Virgen del Rosario)", img: "/bannerGenerico.png", description: "Inicio de las fiestas de la Virgen del Rosario.", date: "2025-09-16", time: "13:30", location: "" },
+    { title: "Ofrenda de flores", img: "/bannerGenerico.png", description: "Ofrenda a la Virgen.", date: "2025-09-16", time: "20:00", location: "" },
+    { title: "Rock en Matet", img: "/bannerDisco.png", description: "MENUDA G-TA + EL SALMÓN (tributo) + Disco móvil.", date: "2025-09-16", time: "23:59", location: "" },
 
-    { title: "Pasacalles y recogida de Clavarias", img: "/next.svg", description: "Fiesta en honor a Ntra. Sra. del Rosario.", date: "2025-09-17", time: "11:30" },
-    { title: "Eucaristía solemne (Rosario)", img: "/next.svg", description: "Misa mayor.", date: "2025-09-17", time: "12:00" },
-    { title: "Procesión (Rosario)", img: "/next.svg", description: "Procesión y traca final.", date: "2025-09-17", time: "21:00" },
-    { title: "Orquesta VENUS", img: "/next.svg", description: "Verbena nocturna.", date: "2025-09-17", time: "23:59" },
+    { title: "Pasacalles y recogida de Clavarias", img: "/bannerGenerico.png", description: "Fiesta en honor a Ntra. Sra. del Rosario.", date: "2025-09-17", time: "11:30", location: "" },
+    { title: "Eucaristía solemne (Rosario)", img: "/bannerGenerico.png", description: "Misa mayor.", date: "2025-09-17", time: "12:00", location: "" },
+    { title: "Procesión (Rosario)", img: "/bannerGenerico.png", description: "Procesión y traca final.", date: "2025-09-17", time: "21:00", location: "" },
+    { title: "Orquesta VENUS", img: "/bannerDisco.png", description: "Verbena nocturna.", date: "2025-09-17", time: "23:59", location: "" },
 
-    { title: "Día de Almas: Eucaristía en la Ermita", img: "/next.svg", description: "Misa en Santa Bárbara.", date: "2025-09-18", time: "10:30" },
-    { title: "Montaje de barreras", img: "/next.svg", description: "Preparativos para los toros.", date: "2025-09-18", time: "09:00" },
+    { title: "Día de Almas: Eucaristía en la Ermita", img: "/bannerGenerico.png", description: "Misa en Santa Bárbara.", date: "2025-09-18", time: "10:30", location: "" },
+    { title: "Montaje de barreras", img: "/bannerToros.png", description: "Preparativos para los toros.", date: "2025-09-18", time: "09:00", location: "" },
 
-    { title: "Montaje de barreras", img: "/next.svg", description: "Trabajos durante todo el día.", date: "2025-09-19", time: "09:00" },
-    { title: "Montaje de barreras", img: "/next.svg", description: "Trabajos durante todo el día.", date: "2025-09-20", time: "09:00" },
-    { title: "Montaje de barreras", img: "/next.svg", description: "Trabajos durante todo el día.", date: "2025-09-21", time: "09:00" },
-    { title: "Toro embolado (La Morada)", img: "/next.svg", description: "Espectáculo nocturno.", date: "2025-09-21", time: "00:30" },
+    { title: "Montaje de barreras", img: "/bannerToros.png", description: "Trabajos durante todo el día.", date: "2025-09-19", time: "09:00", location: "" },
+    { title: "Montaje de barreras", img: "/bannerToros.png", description: "Trabajos durante todo el día.", date: "2025-09-20", time: "09:00", location: "" },
+    { title: "Montaje de barreras", img: "/bannerToros.png", description: "Trabajos durante todo el día.", date: "2025-09-21", time: "09:00", location: "" },
+    { title: "Toro embolado (La Morada)", img: "/bannerToros.png", description: "Espectáculo nocturno.", date: "2025-09-21", time: "00:30", location: "" },
 
-    { title: "1º Día de toros: Entrada infantil", img: "/next.svg", description: "Actividades infantiles.", date: "2025-09-22", time: "11:00" },
-    { title: "Entrada y prueba (Capota)", img: "/next.svg", description: "Entrada de toros y prueba de ganado.", date: "2025-09-22", time: "14:00" },
-    { title: "Suelta y toro de la merienda (Capota)", img: "/next.svg", description: "Tarde de vaquillas.", date: "2025-09-22", time: "18:00" },
-    { title: "Toro embolado (Capota)", img: "/next.svg", description: "Espectáculo nocturno.", date: "2025-09-22", time: "23:59" },
+    { title: "1º Día de toros: Entrada infantil", img: "/bannerToros.png", description: "Actividades infantiles.", date: "2025-09-22", time: "11:00", location: "" },
+    { title: "Entrada y prueba (Capota)", img: "/bannerToros.png", description: "Entrada de toros y prueba de ganado.", date: "2025-09-22", time: "14:00", location: "" },
+    { title: "Suelta y toro de la merienda (Capota)", img: "/bannerToros.png", description: "Tarde de vaquillas.", date: "2025-09-22", time: "18:00", location: "" },
+    { title: "Toro embolado (Capota)", img: "/bannerToros.png", description: "Espectáculo nocturno.", date: "2025-09-22", time: "23:59", location: "" },
 
-    { title: "2º Día de toros: Entrada infantil", img: "/next.svg", description: "Actividades infantiles.", date: "2025-09-23", time: "11:00" },
-    { title: "Pasacalle Xarançaina", img: "/next.svg", description: "Agrupación Musical Xaranga Xarançaina.", date: "2025-09-23", time: "13:00" },
-    { title: "Entrada y prueba (El Cid)", img: "/next.svg", description: "Entrada de toros y prueba de ganado.", date: "2025-09-23", time: "14:00" },
-    { title: "Suelta y toro de la merienda (El Cid)", img: "/next.svg", description: "Tarde de vaquillas.", date: "2025-09-23", time: "18:00" },
-    { title: "Toro embolado (El Cid)", img: "/next.svg", description: "Espectáculo nocturno.", date: "2025-09-23", time: "23:59" },
+    { title: "2º Día de toros: Entrada infantil", img: "/bannerToros.png", description: "Actividades infantiles.", date: "2025-09-23", time: "11:00", location: "" },
+    { title: "Pasacalle Xarançaina", img: "/bannerGenerico.png", description: "Agrupación Musical Xaranga Xarançaina.", date: "2025-09-23", time: "13:00", location: "" },
+    { title: "Entrada y prueba (El Cid)", img: "/bannerToros.png", description: "Entrada de toros y prueba de ganado.", date: "2025-09-23", time: "14:00", location: "" },
+    { title: "Suelta y toro de la merienda (El Cid)", img: "/bannerToros.png", description: "Tarde de vaquillas.", date: "2025-09-23", time: "18:00", location: "" },
+    { title: "Toro embolado (El Cid)", img: "/bannerToros.png", description: "Espectáculo nocturno.", date: "2025-09-23", time: "23:59", location: "" },
 
-    { title: "3º Día de toros: Trashumancia de \"Mansets\"", img: "/next.svg", description: "Recorrido de reses por las calles.", date: "2025-09-24", time: "12:30" },
-    { title: "Entrada y prueba (La Morada)", img: "/next.svg", description: "Entrada de toros y prueba de ganado.", date: "2025-09-24", time: "14:00" },
-    { title: "Suelta y toro de la merienda (La Morada)", img: "/next.svg", description: "Cierre taurino de tarde.", date: "2025-09-24", time: "18:00" },
+    { title: "3º Día de toros: Trashumancia de \"Mansets\"", img: "/bannerToros.png", description: "Recorrido de reses por las calles.", date: "2025-09-24", time: "12:30", location: "" },
+    { title: "Entrada y prueba (La Morada)", img: "/bannerToros.png", description: "Entrada de toros y prueba de ganado.", date: "2025-09-24", time: "14:00", location: "" },
+    { title: "Suelta y toro de la merienda (La Morada)", img: "/bannerToros.png", description: "Cierre taurino de tarde.", date: "2025-09-24", time: "18:00", location: "" },
   ];
 
   // Helpers for dates
-  const today = new Date();
+  const [now, setNow] = useState<Date>(new Date());
   const pad = (n: number) => (n < 10 ? `0${n}` : `${n}`);
-  const todayStr = `${today.getFullYear()}-${pad(today.getMonth() + 1)}-${pad(today.getDate())}`; // YYYY-MM-DD
+  const todayStr = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
   const addDays = (iso: string, days: number) => {
     const d = new Date(iso + "T00:00:00");
     d.setDate(d.getDate() + days);
@@ -110,11 +187,13 @@ export default function Home() {
   const orderedDates = [...futureDates];
 
   // Badge helpers
-  const isSoon = (d: string) => d > todayStr && d <= next3Limit;
+  const isSoon = (d: string) => {
+    if (!now || !todayStr || !next3Limit) return false;
+    return d > todayStr && d <= next3Limit;
+  };
   const isOngoingDate = (d: string) => {
-    if (d !== todayStr) return false;
+    if (!now || d !== todayStr) return false;
     // Consider an event "en curso" si comenzó hace <= 2h y ya ha pasado su hora de inicio
-    const now = new Date();
     return fiestas.some((f) => {
       if (f.date !== d) return false;
       const start = new Date(`${f.date}T${f.time}:00`);
@@ -141,8 +220,6 @@ export default function Home() {
   }, [selectedDate]);
 
   function filterFiestas() {
-    const now = new Date();
-
     return fiestas.filter((f) => {
       const fiestaDate = new Date(`${f.date}T${f.time}:00`);
       const hour = fiestaDate.getHours();
@@ -173,6 +250,17 @@ export default function Home() {
   }
 
   const fiestasFiltradas = filterFiestas();
+
+  // Group fiestas by date
+  function groupByDate(events: typeof fiestasFiltradas) {
+    const grouped: Record<string, typeof fiestasFiltradas> = {};
+    events.forEach((f) => {
+      if (!grouped[f.date]) grouped[f.date] = [];
+      grouped[f.date].push(f);
+    });
+    return grouped;
+  }
+  const groupedFiestas = groupByDate(fiestasFiltradas);
 
   return (
     <main className="min-h-screen bg-gray-100">
@@ -256,8 +344,54 @@ export default function Home() {
 
         {/* Cards list (filtered) */}
         <div className="mt-5 flex flex-col gap-4">
-          {fiestasFiltradas.map((f, i) => (
-            <Card key={i} img={f.img} title={f.title} description={f.description} date={f.date} time={f.time} />
+          {Object.entries(groupedFiestas).map(([date, events], i) => (
+            <article key={i} className="rounded-3xl bg-white px-2 py-4 shadow">
+              <button
+                onClick={() => {
+                  setExpandedDates((prev) =>
+                    prev.includes(date) ? prev.filter((d) => d !== date) : [...prev, date]
+                  );
+                }}
+                className="w-full text-left"
+              >
+                <ClientDate isoDate={date} />
+              </button>
+              <div className="mt-3 flex flex-col gap-3">
+                {events.map((f, j) => {
+                  const eventDate = new Date(`${f.date}T${f.time}:00`);
+                  const isPast = eventDate < new Date();
+                  const cardKey = `${f.date}-${f.time}`;
+                  return (
+                    <Card
+                      key={j}
+                      img={f.img}
+                      title={f.title}
+                      description={f.description}
+                      date={f.date}
+                      time={f.time}
+                      location={f.location}
+                      isSingle={events.length === 1}
+                      isPast={isPast}
+                      onToggle={() => {
+                        setExpandedCards(prev => {
+                          const newSet = new Set(prev);
+                          if (newSet.has(cardKey)) newSet.delete(cardKey);
+                          else newSet.add(cardKey);
+                          return newSet;
+                        });
+                      }}
+                      forceExpanded={
+                        expandedDates.includes(date) ||
+                        activeTab === "Por la mañana" ||
+                        activeTab === "Por la tarde" ||
+                        activeTab === "Por la noche" ||
+                        expandedCards.has(cardKey)
+                      }
+                    />
+                  );
+                })}
+              </div>
+            </article>
           ))}
         </div>
       </div>
