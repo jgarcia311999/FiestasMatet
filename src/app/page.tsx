@@ -57,9 +57,9 @@ function Card({
         (isPast ? " opacity-50 pointer-events-none" : "")
       }
     >
-      {/* Hora y ubicación */}
+      {/* Header (Title) */}
       <div
-        className="flex items-center gap-1 text-xs text-gray-500"
+        className="flex items-center justify-between gap-2 text-base font-semibold text-gray-800"
         onClick={() => {
           if (onToggle) {
             onToggle();
@@ -68,29 +68,38 @@ function Card({
           }
         }}
         style={{ cursor: onToggle || !forceExpanded ? "pointer" : undefined }}
+        aria-expanded={!!isExpanded}
       >
-        <span>
-          {label}, a las {time}
-        </span>
-        {location && (
-          <span className="flex items-center gap-1">
-            📍 <span>{location}</span>
-          </span>
-        )}
+        <h3 className="truncate">{title}</h3>
+        <span className="text-xs text-gray-500">{isExpanded ? "▲" : "▼"}</span>
       </div>
 
-      {/* Imagen opcional */}
-      {img && (
-        <div className="mt-2 h-40 w-full overflow-hidden rounded-2xl bg-gray-200">
-          <img src={img} alt={title} className="h-full w-full object-cover" />
+      {/* Expanded content */}
+      {isExpanded && (
+        <div className="mt-2">
+          {/* Hora y ubicación */}
+          <div className="flex items-center gap-1 text-xs text-gray-500">
+            <span>
+              {label}, a las {time}
+            </span>
+            {location && (
+              <span className="flex items-center gap-1">
+                📍 <span>{location}</span>
+              </span>
+            )}
+          </div>
+
+          {/* Imagen opcional */}
+          {img && (
+            <div className="mt-2 h-40 w-full overflow-hidden rounded-2xl bg-gray-200">
+              <img src={img} alt={title} className="h-full w-full object-cover" />
+            </div>
+          )}
+
+          {/* Descripción */}
+          <p className="mt-2 text-sm text-gray-700">{description}</p>
         </div>
       )}
-
-      {/* Título */}
-      <h3 className="mt-2 text-base font-semibold text-gray-800">{title}</h3>
-
-      {/* Descripción */}
-      <p className="mt-1 text-sm text-gray-700">{description}</p>
     </article>
   );
 }
