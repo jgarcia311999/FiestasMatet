@@ -345,7 +345,7 @@ export default function Home() {
         {/* Cards list (filtered) */}
         <div className="mt-5 flex flex-col gap-4">
           {Object.entries(groupedFiestas).map(([date, events], i) => (
-            <article key={i} className="rounded-3xl bg-white px-2 py-4 shadow">
+            <article key={i} className="rounded-3xl bg-white p-4 shadow">
               <button
                 onClick={() => {
                   setExpandedDates((prev) =>
