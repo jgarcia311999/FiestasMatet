@@ -264,7 +264,7 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-gray-100">
-      <div className="mx-auto max-w-sm px-5 pb-32 pt-7">
+      <div className="mx-auto max-w-sm px-1 pb-32 pt-7">
         {/* Top bar */}
         <div className="flex justify-end gap-2">
           <button
@@ -397,9 +397,9 @@ export default function Home() {
       </div>
 
       {/* Bottom date scroller */}
-      <nav className="fixed inset-x-0 bottom-4 mx-auto w-[92%] max-w-sm rounded-3xl bg-white/95 shadow-lg backdrop-blur">
-        <div ref={scrollerRef} className="overflow-x-auto scroll-px-6">
-          <div className="flex items-center gap-2 pl-6 pr-8 py-4">
+      <nav className="fixed inset-x-0 bottom-4 mx-auto w-full max-w-sm rounded-3xl bg-white/95 shadow-lg backdrop-blur">
+        <div ref={scrollerRef} className="overflow-x-auto scroll-px-1">
+          <div className="flex items-center gap-2 px-2 py-4">
             {orderedDates.map((d) => (
               <button
                 key={d}
