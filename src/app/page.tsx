@@ -40,7 +40,7 @@ function Card({
   onToggle,
   forceExpanded,
 }: CardProps) {
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(true);
   const hour = parseInt(time.split(":")[0], 10);
   let label = "";
   if (hour >= 9 && hour < 15) label = "Por la mañana";
