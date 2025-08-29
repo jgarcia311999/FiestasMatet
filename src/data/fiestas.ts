@@ -19,6 +19,23 @@ export const fiestas: Fiesta[] = [
     { title: "Torneo de fútbol sala", img: "/bannerGenerico.png", description: "Nueva jornada del torneo.", date: "2025-08-10", time: "18:00", location: "" },
     { title: "Disco móvil", img: "/bannerDisco.png", description: "Sesión nocturna.", date: "2025-08-10", time: "23:59", location: "" },
 
+    { title: "Tardeo en la plaza", img: "/bannerGenerico.png", description: "Música ambiente y tapas.", date: "2025-08-30", time: "19:00", location: "" },
+    { title: "Verbena popular", img: "/bannerDisco.png", description: "Música hasta la madrugada.", date: "2025-08-30", time: "23:00", location: "" },
+    { title: "Cine al aire libre", img: "/bannerNinyos.png", description: "Proyección familiar bajo las estrellas.", date: "2025-09-01", time: "22:00", location: "" },
+    { title: "Taller de astronomía", img: "/bannerGenerico.png", description: "Observación de estrellas con telescopio.", date: "2025-09-01", time: "20:00", location: "" },
+    { title: "Taller infantil de manualidades", img: "/bannerNinyos.png", description: "Actividades creativas para peques.", date: "2025-09-02", time: "18:00", location: "" },
+    { title: "Exposición de pintura local", img: "/bannerGenerico.png", description: "Muestra de artistas de Matet.", date: "2025-09-02", time: "19:30", location: "" },
+    { title: "Concierto acústico en la fuente", img: "/bannerDisco.png", description: "Repertorio acústico para todos los públicos.", date: "2025-09-04", time: "21:30", location: "" },
+    { title: "Monólogo cómico", img: "/bannerGenerico.png", description: "Sesión de humor para todos.", date: "2025-09-04", time: "23:00", location: "" },
+    { title: "Ruta guiada por el casco antiguo", img: "/bannerGenerico.png", description: "Paseo comentado por las calles de Matet.", date: "2025-09-06", time: "10:00", location: "" },
+    { title: "Degustación gastronómica", img: "/bannerGenerico.png", description: "Tapas y productos locales.", date: "2025-09-06", time: "13:00", location: "" },
+    { title: "Torneo de guiñote", img: "/bannerGenerico.png", description: "Inscripciones media hora antes.", date: "2025-09-07", time: "17:00", location: "" },
+    { title: "Cine clásico", img: "/bannerNinyos.png", description: "Proyección de una película clásica.", date: "2025-09-07", time: "22:00", location: "" },
+    { title: "DJ Sunset en la era", img: "/bannerDisco.png", description: "Sesión al atardecer.", date: "2025-09-09", time: "20:00", location: "" },
+    { title: "Noche de karaoke", img: "/bannerDisco.png", description: "Diversión cantando en grupo.", date: "2025-09-09", time: "23:30", location: "" },
+    { title: "Mercadillo de artesanía", img: "/bannerGenerico.png", description: "Puestos locales y productos de proximidad.", date: "2025-09-10", time: "11:00", location: "" },
+    { title: "Exhibición de danza", img: "/bannerGenerico.png", description: "Actuación de danza folclórica.", date: "2025-09-10", time: "19:00", location: "" },
+
     // --- SEPTIEMBRE (resto de eventos pasan a septiembre) ---
     { title: "Parque infantil", img: "/bannerNinyos.png", description: "Atracciones infantiles para los peques.", date: "2025-09-11", time: "18:00", location: "" },
     { title: "Cine Búfalo Kids", img: "/bannerNinyos.png", description: "Sesión de cine para público infantil.", date: "2025-09-11", time: "23:30", location: "" },
