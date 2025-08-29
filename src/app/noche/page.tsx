@@ -77,7 +77,7 @@ export default function Noche() {
       <div className="mx-auto max-w-sm px-1 pt-10 pb-24">
         {/* Headline */}
         <h1 className="font-serif text-[36px] leading-[1.05] tracking-tight text-[#FFD966]">
-          Disfrut de todas las noches de fiesta de <strong className="block mt-2 text-[#FFD966]">MATET</strong>
+          Disfruta de todas las noches de fiesta de <strong className="block mt-2 text-[#FFD966]">MATET</strong>
         </h1>
 
         {/* Divider rows of chips */}
