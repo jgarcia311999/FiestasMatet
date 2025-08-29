@@ -61,6 +61,15 @@ function getEventosPorFecha(fiestaLista: Fiesta[], dateKey: string): Fiesta[] {
   return byDate.sort((a, b) => parseTime(a.time) - parseTime(b.time));
 }
 
+function getFranjaHorariaLabel(time: string): string {
+  const [hhStr, mmStr] = (time || "00:00").split(":");
+  const hh = Number(hhStr);
+  // Mañana: 06:00–13:59, Tarde: 14:00–20:59, Noche: 21:00–05:59
+  if (hh >= 6 && hh < 14) return "de la mañana";
+  if (hh >= 14 && hh < 21) return "de la tarde";
+  return "de la noche";
+}
+
 export default function ProximasPage() {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
@@ -82,24 +91,25 @@ export default function ProximasPage() {
           secciones.map((sec, idx) => (
             <div key={sec.key}>
               <div
-                className="grid grid-cols-3 text-[11px] uppercase tracking-[0.18em] py-2 gap-x-4 cursor-pointer"
+                className="text-lg uppercase tracking-[0.18em] py-2 cursor-pointer"
                 onClick={() => setOpenIndex(openIndex === idx ? null : idx)}
               >
                 <span className="border-b border-transparent">{sec.label}</span>
               </div>
               {openIndex === idx && (
                 <>
-                  <div className="p-2 text-sm">
+                  <div className="p-2 text-base">
                     {getEventosPorFecha(fiestasData, sec.key).length === 0 ? (
                       <div className="italic">Sin eventos para este día</div>
                     ) : (
                       <ul className="space-y-1">
                         {getEventosPorFecha(fiestasData, sec.key).map((ev, i) => (
-                          <li key={i}>A las {ev.time} - {ev.title}</li>
+                          <li key={i} className="text-lg">A las {ev.time} {getFranjaHorariaLabel(ev.time)} - {ev.title}</li>
                         ))}
                       </ul>
                     )}
                   </div>
+                  {/*
                   <div className="mt-5 mb-5 relative h-[180px] rounded-3xl bg-[#083279] overflow-hidden">
                     <div className="absolute inset-0 flex items-center justify-center">
                       <div className="h-24 w-24 rounded-full border border-[#0C2335] flex items-center justify-center">
@@ -110,6 +120,7 @@ export default function ProximasPage() {
                       </div>
                     </div>
                   </div>
+                  */}
                 </>
               )}
               <div className="border-t border-[#0C2335]" />
@@ -119,16 +130,9 @@ export default function ProximasPage() {
 
         {/* Call to action serif */}
         <div className="mt-8">
-          <p className="font-serif text-[28px] leading-tight">Let’s start</p>
-          <p className="font-serif text-[28px] leading-tight">something</p>
-          <p className="mt-2 text-[12px]">hi@203.com</p>
-        </div>
-
-        {/* Footer */}
-        <div className="mt-8 flex items-center justify-between text-[11px] uppercase tracking-[0.18em] opacity-90">
-          <span>203.@ 2023</span>
-          <span>About</span>
-          <span>Contact</span>
+          <p className="font-serif text-[28px] leading-tight">Matet</p>
+          <p className="font-serif text-[28px] leading-tight">es su gente</p>
+          <p className="mt-2 text-[12px]">@comision2026</p>
         </div>
       </div>
     </main>
