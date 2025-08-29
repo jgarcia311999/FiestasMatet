@@ -1,5 +1,4 @@
 "use client";
-import { useState } from "react";
 import { fiestas as fiestasData, type Fiesta } from "../../data/fiestas";
 
 
@@ -71,8 +70,6 @@ function getFranjaHorariaLabel(time: string): string {
 }
 
 export default function ProximasPage() {
-  const [openIndex, setOpenIndex] = useState<number | null>(null);
-
   const secciones = getSecciones(fiestasData);
 
   return (
@@ -92,37 +89,34 @@ export default function ProximasPage() {
             <div key={sec.key}>
               <div
                 className="text-lg uppercase tracking-[0.18em] py-2 cursor-pointer"
-                onClick={() => setOpenIndex(openIndex === idx ? null : idx)}
               >
                 <span className="border-b border-transparent">{sec.label}</span>
               </div>
-              {openIndex === idx && (
-                <>
-                  <div className="p-2 text-base">
-                    {getEventosPorFecha(fiestasData, sec.key).length === 0 ? (
-                      <div className="italic">Sin eventos para este día</div>
-                    ) : (
-                      <ul className="space-y-1">
-                        {getEventosPorFecha(fiestasData, sec.key).map((ev, i) => (
-                          <li key={i} className="text-lg">A las {ev.time} {getFranjaHorariaLabel(ev.time)} - {ev.title}</li>
-                        ))}
-                      </ul>
-                    )}
-                  </div>
-                  {/*
-                  <div className="mt-5 mb-5 relative h-[180px] rounded-3xl bg-[#083279] overflow-hidden">
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="h-24 w-24 rounded-full border border-[#0C2335] flex items-center justify-center">
-                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <line x1="12" y1="4" x2="12" y2="18" stroke="#0C2335" strokeWidth="2"/>
-                          <polyline points="6,12 12,18 18,12" stroke="#0C2335" strokeWidth="2" fill="none"/>
-                        </svg>
-                      </div>
+              <>
+                <div className="p-2 text-base">
+                  {getEventosPorFecha(fiestasData, sec.key).length === 0 ? (
+                    <div className="italic">Sin eventos para este día</div>
+                  ) : (
+                    <ul className="space-y-1">
+                      {getEventosPorFecha(fiestasData, sec.key).map((ev, i) => (
+                        <li key={i} className="text-lg">A las {ev.time} {getFranjaHorariaLabel(ev.time)} - {ev.title}</li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+                {/*
+                <div className="mt-5 mb-5 relative h-[180px] rounded-3xl bg-[#083279] overflow-hidden">
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="h-24 w-24 rounded-full border border-[#0C2335] flex items-center justify-center">
+                      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <line x1="12" y1="4" x2="12" y2="18" stroke="#0C2335" strokeWidth="2"/>
+                        <polyline points="6,12 12,18 18,12" stroke="#0C2335" strokeWidth="2" fill="none"/>
+                      </svg>
                     </div>
                   </div>
-                  */}
-                </>
-              )}
+                </div>
+                */}
+              </>
               <div className="border-t border-[#0C2335]" />
             </div>
           ))
