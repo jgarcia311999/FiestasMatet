@@ -1,7 +1,7 @@
 export default function Home2Page() {
   return (
-    <main className="min-h-screen bg-gray-100">
-      <div className="mx-auto max-w-sm px-1 pb-20 pt-7 text-black">
+    <main className="min-h-screen bg-[#E7DAD1]">
+      <div className="mx-auto max-w-sm px-1 pb-2 pt-7 text-black">
 
         <h1 className="text-[64px] leading-none font-semibold mt-6">MATET</h1>
         <div className="border-t border-[#0C2335] mt-3" />
@@ -57,7 +57,7 @@ export default function Home2Page() {
           </div>
         </div>
 
-        <div className="mt-8 text-right text-[12px] uppercase tracking-[0.2em] text-[#0C2335]">
+        <div className="mt-8 mb-8 text-right text-[12px] uppercase tracking-[0.2em] text-[#0C2335]">
           Busca por fecha →
         </div>
       </div>
