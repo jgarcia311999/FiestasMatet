@@ -80,7 +80,7 @@ export default function ProximasPage() {
       <div className="mx-auto max-w-sm px-1 pt-10 pb-24">
         {/* Headline */}
         <h1 className="font-serif text-[36px] leading-[1.05] tracking-tight">
-          Enterate de todas las proximas fiestas de <strong>MATET</strong>
+          Enterate de todas las proximas fiestas de <strong className="block mt-2">MATET</strong>
         </h1>
 
         {/* Divider rows of chips */}
