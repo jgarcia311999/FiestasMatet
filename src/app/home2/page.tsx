@@ -55,24 +55,26 @@ export default function Home2Page() {
         </Link>
 
         {/* Card */}
-        <div className="mt-8 relative h-[250px] rounded-3xl bg-[#083279] overflow-hidden">
-          <div className="absolute top-3 left-4 text-[10px] uppercase tracking-[0.2em] text-[#FFD966]">No llegues hasta el amanecer</div>
+        <Link href="/noche">
+          <div className="mt-8 relative h-[250px] rounded-3xl bg-[#083279] overflow-hidden">
+            <div className="absolute top-3 left-4 text-[10px] uppercase tracking-[0.2em] text-[#FFD966]">No llegues hasta el amanecer</div>
 
-          {/* Giant word behind */}
-          <div className="absolute bottom-[-6px] left-4 right-4 text-[80px] leading-none font-semibold text-[#FFD966]/90 select-none">
-            Noche
-          </div>
+            {/* Giant word behind */}
+            <div className="absolute bottom-[-6px] left-4 right-4 text-[80px] leading-none font-semibold text-[#FFD966]/90 select-none">
+              Noche
+            </div>
 
-          {/* Center circle with arrow */}
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="h-28 w-28 rounded-full border border-[#FFD966] flex items-center justify-center text-[#FFD966] mb-6">
-              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <line x1="3" y1="21" x2="21" y2="3" stroke="currentColor" strokeWidth="2"/>
-                <polyline points="6,3 21,3 21,18" stroke="currentColor" strokeWidth="2" fill="none"/>
-              </svg>
+            {/* Center circle with arrow */}
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="h-28 w-28 rounded-full border border-[#FFD966] flex items-center justify-center text-[#FFD966] mb-6">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <line x1="3" y1="21" x2="21" y2="3" stroke="currentColor" strokeWidth="2"/>
+                  <polyline points="6,3 21,3 21,18" stroke="currentColor" strokeWidth="2" fill="none"/>
+                </svg>
+              </div>
             </div>
           </div>
-        </div>
+        </Link>
 
         {/* New Card */}
         <div className="mt-8 relative h-[250px] rounded-3xl bg-[#a3b18a] overflow-hidden">
