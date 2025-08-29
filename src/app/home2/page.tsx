@@ -4,7 +4,10 @@ export default function Home2Page() {
     <main className="min-h-screen bg-[#E7DAD1]">
       <div className="mx-auto max-w-sm px-1 pb-2 pt-7 text-black">
 
-        <h1 className="text-[64px] leading-none font-semibold mt-6">MATET</h1>
+        <div className="flex items-end justify-between mt-2">
+          <h1 className="text-[64px] leading-none font-semibold">MATET</h1>
+          <img src="/logoMatet.png" alt="Logo Matet" className="h-30 w-30 object-contain" />
+        </div>
         <div className="border-t border-[#0C2335] mt-3" />
 
         {/* Meta info flex row (example, not changed) */}
@@ -17,11 +20,16 @@ export default function Home2Page() {
         <div className="mt-6 flex items-end justify-end">
           <span className="text-[64px] leading-none font-semibold">FIESTAS</span>
         </div>
-        <div className="border-t border-[#0C2335] mt-2" />
+        <div className="border-t border-[#0C2335] mt-3" />
+
+        {/* Duplicated Produced by row (modified) */}
+        <div className="mt-6 flex items-center justify-between">
+          <span className="text-[10px] uppercase tracking-[0.2em]">Disfruta de nuestro</span>
+          <span className="text-[10px] uppercase tracking-[0.2em]">mayor tesoro</span>
+        </div>
 
         <div className="mt-0 flex items-start justify-between">
           <div className="text-[84px] leading-none font-semibold mt-2">2026</div>
-          <img src="/logoMatet.png" alt="Logo Matet" className="h-28 w-28 object-contain" />
         </div>
 
         {/* Card */}
