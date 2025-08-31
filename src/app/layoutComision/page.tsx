@@ -4,18 +4,21 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const NAV_LINKS = [
-  { href: "/dashboard", label: "Dashboard" },
-  { href: "/tareas", label: "Tareas" },
-  { href: "/calendario", label: "Calendario" },
-  { href: "/documentos", label: "Documentos" },
-  { href: "/tesoreria", label: "Tesorería" },
-  { href: "/inventario", label: "Inventario" },
-  { href: "/votaciones", label: "Votaciones" },
-  { href: "/miembros", label: "Miembros" },
-  { href: "/notificaciones", label: "Notificaciones" },
-  { href: "/ajustes", label: "Ajustes" },
-  { href: "/actividad", label: "Actividad" },
-  { href: "/ayuda", label: "Ayuda" },
+  { href: "/layoutComision/horarios", label: "Horarios" },
+  { href: "/layoutComision/ideas", label: "Ideas" },
+  { href: "/layoutComision/quehaceres", label: "Quehaceres" },
+  // { href: "/dashboard", label: "Dashboard" },
+  // { href: "/tareas", label: "Tareas" },
+  // { href: "/calendario", label: "Calendario" },
+  // { href: "/documentos", label: "Documentos" },
+  // { href: "/tesoreria", label: "Tesorería" },
+  // { href: "/inventario", label: "Inventario" },
+  // { href: "/votaciones", label: "Votaciones" },
+  // { href: "/miembros", label: "Miembros" },
+  // { href: "/notificaciones", label: "Notificaciones" },
+  // { href: "/ajustes", label: "Ajustes" },
+  // { href: "/actividad", label: "Actividad" },
+  // { href: "/ayuda", label: "Ayuda" },
 ];
 
 export default function LayoutComisionPage() {
