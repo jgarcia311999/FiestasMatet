@@ -40,24 +40,98 @@ export default function LayoutComisionPage() {
   }, [pathname]);
 
   return (
-    <div className="min-h-screen bg-[#F5F3F0] text-[#0C2335]">
+    <div className="min-h-screen bg-[#E7DAD1] text-[#0C2335]">
       {/* Header */}
-      <header className="sticky top-0 z-30 bg-white/80 backdrop-blur border-b border-gray-200">
+      <header className="sticky top-0 z-30 bg-[#E7DAD1] border-b border-black">
         <div className="mx-auto max-w-7xl px-4 py-3 flex items-center justify-between">
           <button
             onClick={() => setOpen(true)}
-            className="inline-flex items-center gap-2 rounded-md border border-gray-300 px-3 py-2 text-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#0C2335]"
+            className="p-2 text-2xl focus:outline-none"
             aria-label="Abrir menú"
             aria-expanded={open}
             aria-controls="sidebar"
           >
-            <span>☰</span>
-            <span>Menú</span>
+            ☰
           </button>
-          <div className="font-semibold">Intranet Comisión</div>
-          <div className="text-sm opacity-70">15 miembros</div>
+          <div className="font-semibold">COMISIÓN</div>
         </div>
       </header>
+
+
+      {/* Cards de accesos (estilo plantilla) */}
+      <div className="mx-auto max-w-md px-4 pb-8 space-y-4">
+        {/* Horarios */}
+        <Link href="/layoutComision/horarios">
+          <div className="mt-2 relative h-[250px] rounded-3xl bg-[#E85D6A] overflow-hidden">
+            <div className="absolute top-3 left-4 text-[10px] uppercase tracking-[0.2em]">Consulta los turnos y actos</div>
+            <div className="absolute bottom-[-6px] left-4 right-4 text-[80px] leading-none font-semibold text-[#0C2335]/90 select-none">
+              Horarios
+            </div>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="h-28 w-28 rounded-full border border-[#0C2335] flex items-center justify-center mb-6 text-[#0C2335]">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <line x1="3" y1="21" x2="21" y2="3" stroke="currentColor" strokeWidth="2"/>
+                  <polyline points="6,3 21,3 21,18" stroke="currentColor" strokeWidth="2" fill="none"/>
+                </svg>
+              </div>
+            </div>
+          </div>
+        </Link>
+
+        {/* Ideas */}
+        <Link href="/layoutComision/ideas">
+          <div className="mt-2 relative h-[250px] rounded-3xl bg-[#083279] overflow-hidden">
+            <div className="absolute top-3 left-4 text-[10px] uppercase tracking-[0.2em] text-[#FFD966]">Propón y comparte mejoras</div>
+            <div className="absolute bottom-[-6px] left-4 right-4 text-[80px] leading-none font-semibold text-[#FFD966]/90 select-none">
+              Ideas
+            </div>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="h-28 w-28 rounded-full border border-[#FFD966] flex items-center justify-center text-[#FFD966] mb-6">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <line x1="3" y1="21" x2="21" y2="3" stroke="currentColor" strokeWidth="2"/>
+                  <polyline points="6,3 21,3 21,18" stroke="currentColor" strokeWidth="2" fill="none"/>
+                </svg>
+              </div>
+            </div>
+          </div>
+        </Link>
+
+        {/* Quehaceres */}
+        <Link href="/layoutComision/quehaceres">
+          <div className="mt-2 relative h-[250px] rounded-3xl bg-[#a3b18a] overflow-hidden">
+            <div className="absolute top-3 left-4 text-[10px] uppercase tracking-[0.2em]">Tareas pendientes y asignadas</div>
+            <div className="absolute bottom-[-6px] left-4 right-4 text-[80px] leading-none font-semibold text-[#0C2335]/90 select-none">
+              Quehaceres
+            </div>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="h-28 w-28 rounded-full border border-[#0C2335] flex items-center justify-center mb-6 text-[#0C2335]">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <line x1="3" y1="21" x2="21" y2="3" stroke="currentColor" strokeWidth="2"/>
+                  <polyline points="6,3 21,3 21,18" stroke="currentColor" strokeWidth="2" fill="none"/>
+                </svg>
+              </div>
+            </div>
+          </div>
+        </Link>
+
+        {/* Próximamente (sin link) */}
+        <div>
+          <div className="mt-2 relative h-[250px] rounded-3xl bg-gray-400/70 overflow-hidden">
+            <div className="absolute top-3 left-4 text-[10px] uppercase tracking-[0.2em]">En construcción</div>
+            <div className="absolute bottom-[-6px] left-4 right-4 text-[80px] leading-none font-semibold text-[#0C2335]/80 select-none">
+              Próximamente...
+            </div>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="h-28 w-28 rounded-full border border-[#0C2335]/70 flex items-center justify-center mb-6 text-[#0C2335]/70">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <line x1="3" y1="21" x2="21" y2="3" stroke="currentColor" strokeWidth="2"/>
+                  <polyline points="6,3 21,3 21,18" stroke="currentColor" strokeWidth="2" fill="none"/>
+                </svg>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* Sidebar overlay */}
       <div
@@ -123,36 +197,6 @@ export default function LayoutComisionPage() {
 
       {/* Main content */}
       <main className="mx-auto max-w-7xl px-4 py-8">
-        <h1 className="text-2xl font-bold mb-4">Hola Mundo</h1>
-        <p className="text-sm text-gray-700">
-          Este es el contenedor del layout de la comisión. Usa el botón Menú para navegar.
-        </p>
-
-        <section className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
-          <div className="rounded-lg border border-gray-200 bg-white p-4">
-            <h2 className="font-semibold mb-2">Accesos rápidos</h2>
-            <div className="flex flex-wrap gap-2">
-              {NAV_LINKS.slice(0, 6).map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className="rounded-md border border-gray-300 px-3 py-1 text-sm hover:bg-gray-50"
-                >
-                  {item.label}
-                </Link>
-              ))}
-            </div>
-          </div>
-
-          <div className="rounded-lg border border-gray-200 bg-white p-4">
-            <h2 className="font-semibold mb-2">Estado rápido</h2>
-            <ul className="text-sm list-disc ml-5 space-y-1 text-gray-700">
-              <li>Próximas tareas: —</li>
-              <li>Próximos eventos: —</li>
-              <li>Últimos documentos: —</li>
-            </ul>
-          </div>
-        </section>
       </main>
     </div>
   );
