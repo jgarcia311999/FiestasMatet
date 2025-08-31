@@ -20,7 +20,7 @@ export default function Footer() {
           </div>
           <div className="flex flex-col items-center justify-center uppercase tracking-[0.2em] text-center">
             <span>Produced by:</span>
-            <a href="/comision" className="no-underline text-inherit cursor-default">
+            <a href="/login" className="no-underline text-inherit cursor-default">
               La comisión
             </a>
           </div>
