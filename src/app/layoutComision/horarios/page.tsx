@@ -1,4 +1,105 @@
 "use client";
+
+import { fiestas } from "@/data/fiestas";
+import { useState } from "react";
+
+export default function HorariosPage() {
+  // Ordenamos por fecha (YYYY-MM-DD) y luego por hora (HH:MM); vacíos al final
+  const eventosOrdenados = [...fiestas].sort((a, b) => {
+    const ad = a.date || "";
+    const bd = b.date || "";
+    if (ad && bd && ad !== bd) return ad.localeCompare(bd);
+    if (!ad && bd) return 1;
+    if (ad && !bd) return -1;
+    const at = a.time || "";
+    const bt = b.time || "";
+    if (at && bt && at !== bt) return at.localeCompare(bt);
+    if (!at && bt) return 1;
+    if (at && !bt) return -1;
+    return (a.title || "").localeCompare(b.title || "");
+  });
+
+  const [openIndex, setOpenIndex] = useState<number | null>(null);
+
+  return (
+    <main className="min-h-screen bg-[#E85D6A] text-[#0C2335]">
+      <div className="max-w-5xl mx-auto px-4 py-12">
+        <h1 className="text-[80px] leading-none font-semibold break-words">Horarios</h1>
+
+        {/* Listado: fecha - hora, nombre */}
+        <ul className="mt-6 divide-y divide-[#0C2335]/10">
+          {eventosOrdenados.map((ev, idx) => {
+            const fechaHora = ev.date && ev.time
+              ? `${ev.date} - ${ev.time}`
+              : ev.date || ev.time || "—";
+            const isOpen = openIndex === idx;
+            const asistentes = (ev as { attendees?: string[] }).attendees ?? [];
+            return (
+              <li key={`${ev.title}-${ev.date}-${ev.time}-${idx}`} className="py-3">
+                <button
+                  type="button"
+                  onClick={() => setOpenIndex(isOpen ? null : idx)}
+                  className="w-full text-left"
+                >
+                  <div className="flex items-baseline justify-between gap-3">
+                    <span className="text-sm whitespace-nowrap">{fechaHora}</span>
+                    <span className="text-base font-medium truncate">{ev.title || "(Sin título)"}</span>
+                  </div>
+                </button>
+                {isOpen && (
+                  <div className="mt-2 pl-2 text-sm space-y-2">
+                    <p className="opacity-90"><span className="font-semibold">Descripción:</span> {ev.description?.trim() || "Sin descripción"}</p>
+                    <p className="opacity-90"><span className="font-semibold">Lugar:</span> {ev.location?.trim() || "Sin lugar"}</p>
+                    <p className="opacity-90">
+                      <span className="font-semibold">Asistirá:</span>{" "}
+                      {asistentes.length > 0 ? (
+                        <span>{asistentes.join(", ")}</span>
+                      ) : (
+                        <span className="italic">de momento nadie...</span>
+                      )}
+                    </p>
+
+                    {/* Action buttons: trash, pencil, check (no functionality yet) */}
+                    <div className="pt-1 flex items-center gap-3 justify-end">
+                      {/* Trash */}
+                      <button type="button" aria-label="Eliminar" className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-[#0C2335]/30 hover:bg-[#0C2335]/5">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M3 6h18" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                          <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                          <path d="M6 6l1 14a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-14" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                          <path d="M10 11v6M14 11v6" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                        </svg>
+                      </button>
+
+                      {/* Pencil */}
+                      <button type="button" aria-label="Editar" className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-[#0C2335]/30 hover:bg-[#0C2335]/5">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25z" stroke="currentColor" strokeWidth="1.5" fill="none"/>
+                          <path d="M20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" stroke="currentColor" strokeWidth="1.5" fill="none"/>
+                        </svg>
+                      </button>
+
+                      {/* Check */}
+                      <button type="button" aria-label="Confirmar" className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-[#0C2335]/30 hover:bg-[#0C2335]/5">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M20 6L9 17l-5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+    </main>
+  );
+}
+
+/*
+--- BEGIN ORIGINAL PAGE (commented out for redesign) ---
+"use client";
 import Link from "next/link";
 import { useMemo, useState, useCallback, useRef } from "react";
 import * as FIESTAS from "@/data/fiestas";
@@ -23,7 +124,7 @@ function isEventoBase(obj: unknown): obj is EventoBase {
   );
 }
 
-export default function HorariosPage() {
+export default function HorariosPageOriginal() {
   const [q, setQ] = useState("");
   const [desde, setDesde] = useState<string>("");
   const [hasta, setHasta] = useState<string>("");
@@ -148,7 +249,6 @@ export default function HorariosPage() {
           </div>
         </div>
 
-        {/* Filtros */}
         <div className="mb-4 flex flex-wrap items-end gap-2 rounded border border-gray-300 bg-white p-3">
           <div className="flex flex-col">
             <label className="text-xs text-black">Buscar</label>
@@ -179,7 +279,6 @@ export default function HorariosPage() {
         <p className="text-xs text-black mb-2">Nota: los cambios se guardan en memoria (se perderán al recargar) hasta que conectemos persistencia.</p>
 
         <div>
-          {/* Listado móvil: solo fecha y título */}
           <ul className="divide-y divide-gray-200 rounded border border-gray-300 bg-white">
             {eventos.map(ev => (
               <li key={ev.id}>
@@ -196,7 +295,6 @@ export default function HorariosPage() {
             ))}
           </ul>
 
-          {/* Modal de edición móvil (full-screen) */}
           {selectedEvento && (
             <div className="fixed inset-0 z-50">
               <div className="absolute inset-0 bg-black/40" onClick={closeEvento} aria-hidden="true" />
@@ -300,3 +398,6 @@ function readEventos(): EventoRow[] {
   }
   return [];
 }
+
+--- END ORIGINAL PAGE ---
+*/
