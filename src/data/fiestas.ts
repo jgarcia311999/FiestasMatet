@@ -12,7 +12,7 @@ export type Fiesta = {
 export const fiestas: Fiesta[
     ] = [
     { title: "Día de los jubilados 2", img: "", description: "Jornada dedicada a nuestros mayores.", date: "2025-08-08", time: "12:00", location: "Jubilados", attendees: ["Jesus","Carla","Juanjo"]},
-/*     { title: "Merienda con Dúo Musical Gonsy", img: "/bannerDisco.png", description: "Merienda de confraternidad amenizada por Gonsy.", date: "2025-08-08", time: "20:30", location: "", attendees: ["Juanjo","Carla"]},
+    /*     { title: "Merienda con Dúo Musical Gonsy", img: "/bannerDisco.png", description: "Merienda de confraternidad amenizada por Gonsy.", date: "2025-08-08", time: "20:30", location: "", attendees: ["Juanjo","Carla"]},
     { title: "Concurso de adornos de balcones", img: "/bannerGenerico.png", description: "Inicio del 5º concurso (hasta el 17 a las 12:00).", date: "2025-08-09", time: "09:00", location: "" },
     { title: "Torneo de fútbol sala", img: "/bannerGenerico.png", description: "Eliminatorias del torneo.", date: "2025-08-09", time: "18:00", location: "" },
     { title: "Disco móvil con animación", img: "/bannerDisco.png", description: "Música y animación para todos.", date: "2025-08-09", time: "23:59", location: "" },
@@ -71,11 +71,11 @@ export const fiestas: Fiesta[
     { title: "3º Día de toros: Trashumancia de \"Mansets\"", img: "/bannerToros.png", description: "Recorrido de reses por las calles.", date: "2025-09-24", time: "12:30", location: "" },
     { title: "Entrada y prueba (La Morada)", img: "/bannerToros.png", description: "Entrada de toros y prueba de ganado.", date: "2025-09-24", time: "14:00", location: "" },
     { title: "Suelta y toro de la merienda (La Morada)", img: "/bannerToros.png", description: "Cierre taurino de tarde.", date: "2025-09-24", time: "18:00", location: "" },
- */ 
+    */ 
     { title: "Concurso de pintura rápida", img: "/bannerGenerico.png", description: "Recorre el pueblo descubriendo cada rincón", date: "2025-10-04", time: "09:00", location: "Todo el pueblo" },
     { title: "Exposición del concurso de pintura rápida", img: "/bannerGenerico.png", description: "Ven al Polifuncional/Plaza de la Iglesia para ver todos los cuadros pintados durante el día.", date: "2025-10-04", time: "18:00", location: "Polifuncional/Plaza de la Iglesia" },
     { title: "Cena de sobaquillo", img: "/bannerGenerico.png", description: "Trae tu bocata para cenar todos juntos en el Polifuncional/Plaza de la Iglesia", date: "2025-10-04", time: "22:00", location: "Polifuncional/Plaza de la Iglesia" },
-    { title: "Discomovil", img: "/bannerDisco.png", description: "¡Disfruta de la discomóvil!", date: "2025-10-04", time: "00:00", location: "Polifuncional/Plaza de la Iglesia" },
+    { title: "Discomovil", img: "/bannerDisco.png", description: "¡Disfruta de la discomóvil!", date: "2025-10-04", time: "00:00", location: "Polifuncional/Plaza de la Iglesia", attendees: ["Jesus"]},
     { title: "Comida popular", img: "/bannerGenerico.png", description: "Ven a comer a la plaza un buen plato de Arròs amb fesols i naps patrocinado por la Cofradía", date: "2025-10-05", time: "14:00", location: "Polifuncional/Plaza de la Iglesia" },
-    { title: "Discomovil", img: "/bannerDisco.png", description: "¡Disfruta de la discomóvil!", date: "2025-11-01", time: "00:00", location: "Polifuncional/Jubilados" },
+    { title: "Discomovil", img: "/bannerDisco.png", description: "¡Disfruta de la discomóvil!", date: "2025-11-01", time: "00:00", location: "Polifuncional/Jubilados" }
 ];
