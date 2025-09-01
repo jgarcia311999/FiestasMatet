@@ -3,6 +3,7 @@
 import { fiestas } from "@/data/fiestas";
 import { useState, useRef } from "react";
 import type { Fiesta } from "@/data/fiestas";
+import { getCookie } from "cookies-next";
 
 export default function HorariosPage() {
   const [items, setItems] = useState<Fiesta[]>(() => [...fiestas]);
@@ -30,6 +31,9 @@ export default function HorariosPage() {
   const toastTimerRef = useRef<number | null>(null);
   const deleteTimerRef = useRef<number | null>(null);
   const pendingRef = useRef<{ key: string; title: string; payload: { title: string; date: string; time: string } } | null>(null);
+  // --- Attendance commit delay ---
+  const attendTimersRef = useRef<Record<string, number>>({});
+  const lastDesiredRef = useRef<Record<string, boolean>>({});
 
   // --- Edit Modal State ---
   const [editOpen, setEditOpen] = useState(false);
@@ -44,6 +48,79 @@ export default function HorariosPage() {
   });
   const [savingEdit, setSavingEdit] = useState(false);
   const prevEditRef = useRef<Fiesta | null>(null);
+
+  // --- Attendance logic ---
+  function getCurrentUser(): string | null {
+    // Cookie principal usada en el login
+    const c = (getCookie("commission_user") ?? getCookie("usuario"));
+    return typeof c === "string" && c.trim() ? (c as string) : null;
+  }
+
+  type LocalFiesta = Fiesta & { attendees?: string[] };
+
+  function toggleAttend(ev: { title?: string; date?: string; time?: string }) {
+    const user = getCurrentUser();
+    if (!user) {
+      alert("No se pudo identificar tu usuario. Inicia sesión.");
+      return { desired: null as null | boolean, key: "" };
+    }
+    const key = makeKey(ev);
+    let desired: boolean = false;
+    setItems(prev => {
+      const idx = prev.findIndex(it => makeKey(it) === key);
+      if (idx === -1) return prev;
+      const curr = prev[idx];
+      const set = new Set(curr.attendees ?? []);
+      const currently = set.has(user);
+      desired = !currently; // estado deseado tras el toggle
+      if (currently) set.delete(user); else set.add(user);
+      const next = [...prev];
+      next[idx] = { ...curr, attendees: Array.from(set) } as LocalFiesta;
+      return next;
+    });
+    return { desired, key };
+  }
+
+  function scheduleAttendPersist(ev: { title?: string; date?: string; time?: string }, desired: boolean) {
+    const key = makeKey(ev);
+    // guarda el último estado deseado
+    lastDesiredRef.current[key] = desired;
+    // limpia temporizador previo
+    const prevTimer = attendTimersRef.current[key];
+    if (prevTimer) { window.clearTimeout(prevTimer); }
+    attendTimersRef.current[key] = window.setTimeout(async () => {
+      // usa el último deseado en el momento de ejecutar
+      const finalDesired = lastDesiredRef.current[key];
+      const payload = { title: ev.title || "", date: ev.date || "", time: ev.time || "" };
+      const action = finalDesired ? "add" : "remove";
+      try {
+        const res = await fetch("/api/events/attend", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ match: payload, action }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          // rollback local (invertimos el último deseado)
+          toggleAttend(ev);
+          alert(data.error || "No se pudo guardar la asistencia");
+        }
+      } catch (e) {
+        toggleAttend(ev); // rollback
+        alert("Error de red al guardar asistencia");
+      } finally {
+        // limpiar timer y estado
+        delete attendTimersRef.current[key];
+        delete lastDesiredRef.current[key];
+      }
+    }, 5000);
+  }
+
+  function handleAttendClick(ev: { title?: string; date?: string; time?: string }) {
+    const result = toggleAttend(ev);
+    if (result.desired === null) return;
+    scheduleAttendPersist(ev, !!result.desired);
+  }
 
   function openEdit(ev: { title?: string; img?: string; description?: string; date?: string; time?: string; location?: string }) {
     const match = { title: ev.title || "", date: ev.date || "", time: ev.time || "" };
@@ -209,6 +286,8 @@ export default function HorariosPage() {
               : ev.date || ev.time || "—";
             const isOpen = openIndex === idx;
             const asistentes = (ev as { attendees?: string[] }).attendees ?? [];
+            const user = getCurrentUser();
+            const isAttending = !!(user && asistentes.includes(user));
             return (
               <li key={`${ev.title}-${ev.date}-${ev.time}-${idx}`} className="py-3">
                 <button
@@ -234,7 +313,7 @@ export default function HorariosPage() {
                       )}
                     </p>
 
-                    {/* Action buttons: trash, pencil, check (no functionality yet) */}
+                    {/* Action buttons: trash, pencil, check */}
                     <div className="pt-1 flex items-center gap-3 justify-end">
                       {/* Trash */}
                       <button
@@ -265,7 +344,12 @@ export default function HorariosPage() {
                       </button>
 
                       {/* Check */}
-                      <button type="button" aria-label="Confirmar" className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-[#0C2335]/30 hover:bg-[#0C2335]/5">
+                      <button
+                        type="button"
+                        aria-label="Confirmar"
+                        onClick={() => handleAttendClick(ev)}
+                        className={`inline-flex h-9 w-9 items-center justify-center rounded-md border ${isAttending ? 'bg-green-500 text-white border-green-600' : 'border-[#0C2335]/30 hover:bg-[#0C2335]/5'}`}
+                      >
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                           <path d="M20 6L9 17l-5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                         </svg>

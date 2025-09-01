@@ -6,6 +6,7 @@ export type Fiesta = {
     date: string;   // YYYY-MM-DD
     time: string;   // HH:mm
     location: string;
+    attendees?: string[];
 };
 
 export const fiestas: Fiesta[
