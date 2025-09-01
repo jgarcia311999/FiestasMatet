@@ -119,7 +119,14 @@ export async function POST(req: Request) {
     if (!updated) return NextResponse.json({ error: "Evento no encontrado" }, { status: 404 });
 
     const newTs = before + newInside + after;
-    const msg = `chore(events): attend "${match.title}" (${user}) [${action}]`;
+    let msg = "";
+    if (action === "add") {
+      msg = `${user} se apuntó a "${match.title}"`;
+    } else if (action === "remove") {
+      msg = `${user} canceló asistencia a "${match.title}"`;
+    } else {
+      msg = `${user} cambió asistencia a "${match.title}"`;
+    }
     await githubPutFile({ newContent: newTs, sha, message: msg, author: { name: "Fiestas Matet Bot", email: "bot@matet.local" } });
 
     return NextResponse.json({ ok: true });

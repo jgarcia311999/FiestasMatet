@@ -3,10 +3,12 @@
 import { fiestas } from "@/data/fiestas";
 import { useState, useRef } from "react";
 import type { Fiesta } from "@/data/fiestas";
+
+type LocalFiesta = Fiesta & { attendees?: string[] };
 import { getCookie } from "cookies-next";
 
 export default function HorariosPage() {
-  const [items, setItems] = useState<Fiesta[]>(() => [...fiestas]);
+  const [items, setItems] = useState<LocalFiesta[]>(() => [...(fiestas as LocalFiesta[])]);
   // Ordenamos por fecha (YYYY-MM-DD) y luego por hora (HH:MM); vacíos al final
   const eventosOrdenados = [...items].sort((a, b) => {
     const ad = a.date || "";
@@ -56,7 +58,6 @@ export default function HorariosPage() {
     return typeof c === "string" && c.trim() ? (c as string) : null;
   }
 
-  type LocalFiesta = Fiesta & { attendees?: string[] };
 
   function toggleAttend(ev: { title?: string; date?: string; time?: string }) {
     const user = getCurrentUser();
@@ -289,7 +290,7 @@ export default function HorariosPage() {
             const user = getCurrentUser();
             const isAttending = !!(user && asistentes.includes(user));
             return (
-              <li key={`${ev.title}-${ev.date}-${ev.time}-${idx}`} className="py-3">
+              <li key={makeKey(ev)} className="py-3">
                 <button
                   type="button"
                   onClick={() => setOpenIndex(isOpen ? null : idx)}
