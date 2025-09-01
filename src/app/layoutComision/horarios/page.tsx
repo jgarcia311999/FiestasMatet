@@ -33,9 +33,6 @@ export default function HorariosPage() {
   const toastTimerRef = useRef<number | null>(null);
   const deleteTimerRef = useRef<number | null>(null);
   const pendingRef = useRef<{ key: string; title: string; payload: { title: string; date: string; time: string } } | null>(null);
-  // --- Attendance commit delay ---
-  const attendTimersRef = useRef<Record<string, number>>({});
-  const lastDesiredRef = useRef<Record<string, boolean>>({});
 
   // --- Edit Modal State ---
   const [editOpen, setEditOpen] = useState(false);
@@ -52,6 +49,7 @@ export default function HorariosPage() {
   const prevEditRef = useRef<Fiesta | null>(null);
 
   // --- Attendance logic ---
+  type AttendResponse = { ok?: boolean; action?: string; error?: string };
   function getCurrentUser(): string | null {
     // Cookie principal usada en el login
     const c = (getCookie("commission_user") ?? getCookie("usuario"));
@@ -82,45 +80,43 @@ export default function HorariosPage() {
     return { desired, key };
   }
 
-  function scheduleAttendPersist(ev: { title?: string; date?: string; time?: string }, desired: boolean) {
-    const key = makeKey(ev);
-    // guarda el último estado deseado
-    lastDesiredRef.current[key] = desired;
-    // limpia temporizador previo
-    const prevTimer = attendTimersRef.current[key];
-    if (prevTimer) { window.clearTimeout(prevTimer); }
-    attendTimersRef.current[key] = window.setTimeout(async () => {
-      // usa el último deseado en el momento de ejecutar
-      const finalDesired = lastDesiredRef.current[key];
-      const payload = { title: ev.title || "", date: ev.date || "", time: ev.time || "" };
-      const action = finalDesired ? "add" : "remove";
-      try {
-        const res = await fetch("/api/events/attend", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ match: payload, action }),
-        });
-        const data = await res.json().catch(() => ({}));
-        if (!res.ok) {
-          // rollback local (invertimos el último deseado)
-          toggleAttend(ev);
-          alert(data.error || "No se pudo guardar la asistencia");
-        }
-      } catch (e) {
-        toggleAttend(ev); // rollback
-        alert("Error de red al guardar asistencia");
-      } finally {
-        // limpiar timer y estado
-        delete attendTimersRef.current[key];
-        delete lastDesiredRef.current[key];
-      }
-    }, 5000);
-  }
 
   function handleAttendClick(ev: { title?: string; date?: string; time?: string }) {
     const result = toggleAttend(ev);
     if (result.desired === null) return;
-    scheduleAttendPersist(ev, !!result.desired);
+    const payload = { title: ev.title || "", date: ev.date || "", time: ev.time || "" };
+    const desired = !!result.desired; // true => queremos quedar apuntados; false => quitarnos
+    (async () => {
+      try {
+        const res = await fetch("/api/events/attend", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ match: payload, action: "toggle" }),
+        });
+        const data: AttendResponse = await res.json().catch((): AttendResponse => ({}));
+        if (!res.ok) {
+          // rollback local si falla
+          toggleAttend(ev);
+          alert(data?.error || "No se pudo guardar la asistencia");
+          return;
+        }
+        // Si el servidor dice que no había nada que cambiar, revertimos y avisamos
+        if (data?.action === "noop") {
+          toggleAttend(ev); // revierte el cambio local
+          alert("No se pudo aplicar la asistencia (evento no encontrado o ya estaba en ese estado).");
+          return;
+        }
+        // Si devolvió una acción efectiva distinta a lo esperado, podemos sincronizar (opcional)
+        if ((desired && data?.action === "remove") || (!desired && data?.action === "add")) {
+          // Estado final no coincide: invertimos para reflejar lo que quedó en el servidor
+          toggleAttend(ev);
+        }
+      } catch (e) {
+        // rollback local por error de red
+        toggleAttend(ev);
+        alert("Error de red al guardar asistencia");
+      }
+    })();
   }
 
   function openEdit(ev: { title?: string; img?: string; description?: string; date?: string; time?: string; location?: string }) {

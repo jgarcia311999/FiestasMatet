@@ -52,6 +52,17 @@ function extractString(objText: string, field: string): string | undefined {
   return m ? m[1] : undefined;
 }
 
+function userInAttendees(objText: string, user: string): boolean {
+  const m = objText.match(/attendees\s*:\s*\[([\s\S]*?)\]/);
+  if (!m) return false;
+  const raw = m[1] ?? "";
+  const current = raw
+    .split(",")
+    .map(s => s.trim().replace(/^"(.*)"$/, "$1").replace(/^'(.*)'$/, "$1"))
+    .filter(Boolean);
+  return current.includes(user);
+}
+
 function upsertAttendees(objText: string, user: string, act: "toggle"|"add"|"remove"): string {
   // busca attendees: ["A","B"] o no presente
   const hasField = /attendees\s*:/.test(objText);
@@ -64,7 +75,7 @@ function upsertAttendees(objText: string, user: string, act: "toggle"|"add"|"rem
   }
 
   // extraer array existente (versión simple)
-  const m = objText.match(/attendees\s*:\s*\[([^\]]*)\]/);
+  const m = objText.match(/attendees\s*:\s*\[([\s\S]*?)\]/);
   const raw = m?.[1] ?? "";
   const current = raw.split(",").map(s => s.trim().replace(/^"(.*)"$/, "$1")).filter(Boolean);
   const set = new Set(current);
@@ -72,27 +83,54 @@ function upsertAttendees(objText: string, user: string, act: "toggle"|"add"|"rem
   if (act === "add") set.add(user);
   if (act === "remove") set.delete(user);
   const arrText = JSON.stringify(Array.from(set));
-  return objText.replace(/attendees\s*:\s*\[[^\]]*\]/, `attendees: ${arrText}`);
+  return objText.replace(/attendees\s*:\s*\[[\s\S]*?\]/, `attendees: ${arrText}`);
 }
 
-function applyAttend(inside: string, match: MatchKey, user: string, action: "toggle"|"add"|"remove") {
+function applyAttend(inside: string, match: MatchKey, user: string, action: "toggle"|"add"|"remove"): { updated: boolean; newInside: string; finalAction: "add"|"remove"|"noop" } {
   const parts = splitTopLevelObjects(inside);
   let updated = false;
+  let effective: "add" | "remove" | "noop" = "noop";
+
   const mapped = parts.map(p => {
-    const t = extractString(p,"title");
-    const d = extractString(p,"date");
-    const ti = extractString(p,"time");
+    const t = extractString(p, "title");
+    const d = extractString(p, "date");
+    const ti = extractString(p, "time");
     const ok =
       (t || "") === (match.title || "") &&
       (match.date ? (d || "") === match.date : true) &&
       (match.time ? (ti || "") === match.time : true);
+
+    if (ok) {
+      const isCommented = /^\s*\/\//.test(p);
+      if (isCommented) return p; // no tocar eventos comentados
+    }
+
     if (!updated && ok) {
+      const wasPresent = userInAttendees(p, user);
+
+      if (action === "toggle") {
+        effective = wasPresent ? "remove" : "add";
+      } else if (action === "add") {
+        effective = wasPresent ? "noop" : "add";
+      } else { // action === "remove"
+        effective = wasPresent ? "remove" : "noop";
+      }
+
+      if (effective === "noop") {
+        return p; // no hay cambios reales
+      }
+
       updated = true;
-      return upsertAttendees(p, user, action);
+      return upsertAttendees(p, user, effective);
     }
     return p;
   });
-  return { updated, newInside: mapped.length ? "\n  " + mapped.map(s => s.replace(/^\s*/,"  ")).join(",\n  ") + "\n" : "" };
+
+  return {
+    updated,
+    newInside: mapped.length ? "\n  " + mapped.map(s => s.replace(/^\s*/, "  ")).join(",\n  ") + "\n" : "",
+    finalAction: effective,
+  };
 }
 
 export async function POST(req: Request) {
@@ -115,21 +153,24 @@ export async function POST(req: Request) {
     const ts = Buffer.from(content, "base64").toString("utf8");
 
     const { before, inside, after } = findArraySegments(ts);
-    const { updated, newInside } = applyAttend(inside, match, user, action);
-    if (!updated) return NextResponse.json({ error: "Evento no encontrado" }, { status: 404 });
+    const { updated, newInside, finalAction } = applyAttend(inside, match, user, action);
+    if (!updated) {
+      // No hay cambios que aplicar (noop o ya estaba en el estado deseado)
+      return NextResponse.json({ ok: true, action: finalAction });
+    }
 
     const newTs = before + newInside + after;
     let msg = "";
-    if (action === "add") {
+    if (finalAction === "add") {
       msg = `${user} se apuntó a "${match.title}"`;
-    } else if (action === "remove") {
+    } else if (finalAction === "remove") {
       msg = `${user} canceló asistencia a "${match.title}"`;
     } else {
       msg = `${user} cambió asistencia a "${match.title}"`;
     }
     await githubPutFile({ newContent: newTs, sha, message: msg, author: { name: "Fiestas Matet Bot", email: "bot@matet.local" } });
 
-    return NextResponse.json({ ok: true });
+    return NextResponse.json({ ok: true, action: finalAction });
   } catch (e) {
     const msg = e instanceof Error ? e.message : "Unknown error";
     return NextResponse.json({ error: msg }, { status: 500 });
