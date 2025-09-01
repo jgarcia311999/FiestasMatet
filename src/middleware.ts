@@ -20,17 +20,8 @@ export async function middleware(req: NextRequest) {
     const url = req.nextUrl.clone();
     const isLogin = url.pathname.startsWith("/login");
 
-    // Rutas privadas (añade aquí las que quieras proteger)
-    const isPrivate =
-        url.pathname === "/" ||
-        url.pathname.startsWith("/layoutComision") ||
-        url.pathname.startsWith("/dashboard") ||
-        url.pathname.startsWith("/tareas") ||
-        url.pathname.startsWith("/calendario") ||
-        url.pathname.startsWith("/documentos") ||
-        url.pathname.startsWith("/tesoreria") ||
-        url.pathname.startsWith("/inventario") ||
-        url.pathname.startsWith("/votaciones");
+    // Solo protegemos layoutComision
+    const isPrivate = url.pathname.startsWith("/layoutComision");
 
     if (!isPrivate) return NextResponse.next();
     if (isLogin) return NextResponse.next();
@@ -45,5 +36,5 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-    matcher: ["/((?!_next/static|_next/image|favicon.ico|api/public).*)"],
+    matcher: ["/layoutComision/:path*"],
 };
