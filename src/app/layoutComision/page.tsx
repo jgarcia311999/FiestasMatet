@@ -182,15 +182,12 @@ export default function LayoutComisionPage() {
           </ul>
 
           <div className="mt-4 border-t border-gray-200 pt-3">
-            <Link
-              href="/login?next=/login"
+            <a
+              href="/api/logout"
               className="block rounded-md px-3 py-2 text-sm text-red-700 hover:bg-red-50 border border-red-200"
             >
               Cerrar sesión
-            </Link>
-            <p className="mt-2 px-3 text-xs text-gray-500">
-              (Para logout completo, añade la acción de servidor que borre la cookie.)
-            </p>
+            </a>
           </div>
         </nav>
       </aside>
