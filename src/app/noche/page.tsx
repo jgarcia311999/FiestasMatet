@@ -64,7 +64,10 @@ function getEventosPorFecha(fiestaLista: Fiesta[], dateKey: string): Fiesta[] {
   const byDate = fiestaLista.filter(f => f.date === dateKey && isNoche(f.time));
   const parseTime = (t: string) => {
     const [hh, mm] = (t || "00:00").split(":").map(Number);
-    return (hh || 0) * 60 + (mm || 0);
+    let minutes = (hh || 0) * 60 + (mm || 0);
+    // Madrugada (00:00–05:59) cuenta como final del día
+    if (!isNaN(hh) && hh >= 0 && hh < 6) minutes += 24 * 60;
+    return minutes;
   };
   return byDate.sort((a, b) => parseTime(a.time) - parseTime(b.time));
 }

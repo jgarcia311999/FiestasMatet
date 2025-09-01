@@ -11,8 +11,8 @@ export type Fiesta = {
 
 export const fiestas: Fiesta[
     ] = [
-    { title: "Día de los jubilados 2", img: "/bannerGenerico.png", description: "Jornada dedicada a nuestros mayores.", date: "2025-08-08", time: "12:00", location: "Jubilados", attendees: ["Jesus","Carla","Juanjo"]},
-    { title: "Merienda con Dúo Musical Gonsy", img: "/bannerDisco.png", description: "Merienda de confraternidad amenizada por Gonsy.", date: "2025-08-08", time: "20:30", location: "", attendees: ["Juanjo","Carla"]},
+    { title: "Día de los jubilados 2", img: "", description: "Jornada dedicada a nuestros mayores.", date: "2025-08-08", time: "12:00", location: "Jubilados", attendees: ["Jesus","Carla","Juanjo"]},
+/*     { title: "Merienda con Dúo Musical Gonsy", img: "/bannerDisco.png", description: "Merienda de confraternidad amenizada por Gonsy.", date: "2025-08-08", time: "20:30", location: "", attendees: ["Juanjo","Carla"]},
     { title: "Concurso de adornos de balcones", img: "/bannerGenerico.png", description: "Inicio del 5º concurso (hasta el 17 a las 12:00).", date: "2025-08-09", time: "09:00", location: "" },
     { title: "Torneo de fútbol sala", img: "/bannerGenerico.png", description: "Eliminatorias del torneo.", date: "2025-08-09", time: "18:00", location: "" },
     { title: "Disco móvil con animación", img: "/bannerDisco.png", description: "Música y animación para todos.", date: "2025-08-09", time: "23:59", location: "" },
@@ -21,7 +21,7 @@ export const fiestas: Fiesta[
     { title: "Tardeo en la plaza", img: "/bannerGenerico.png", description: "Música ambiente y tapas.", date: "2025-08-30", time: "19:00", location: "" },
     { title: "Verbena popular", img: "/bannerDisco.png", description: "Música hasta la madrugada.", date: "2025-08-30", time: "23:00", location: "" },
     { title: "Cine al aire libre", img: "/bannerNinyos.png", description: "Proyección familiar bajo las estrellas.", date: "2025-09-01", time: "22:00", location: "" },
-    // { title: "Taller de astronomía", img: "/bannerGenerico.png", description: "Observación de estrellas con telescopio.", date: "2025-09-01", time: "20:00", location: "" },
+    { title: "Taller de astronomía", img: "/bannerGenerico.png", description: "Observación de estrellas con telescopio.", date: "2025-09-01", time: "20:00", location: "" },
     { title: "Taller infantil de manualidades", img: "/bannerNinyos.png", description: "Actividades creativas para peques.", date: "2025-09-02", time: "18:00", location: "" },
     { title: "Exposición de pintura local", img: "/bannerGenerico.png", description: "Muestra de artistas de Matet.", date: "2025-09-02", time: "19:30", location: "" },
     { title: "Concierto acústico en la fuente 2222", img: "/bannerDisco.png", description: "Repertorio acústico para todos los públicos.", date: "2025-09-04", time: "21:30", location: "" },
@@ -34,7 +34,6 @@ export const fiestas: Fiesta[
     { title: "Noche de karaoke", img: "/bannerDisco.png", description: "Diversión cantando en grupo.", date: "2025-09-09", time: "23:30", location: "" },
     { title: "Mercadillo de artesanía", img: "/bannerGenerico.png", description: "Puestos locales y productos de proximidad.", date: "2025-09-10", time: "11:00", location: "" },
     { title: "Exhibición de danza", img: "/bannerGenerico.png", description: "Actuación de danza folclórica.", date: "2025-09-10", time: "19:00", location: "" },
-    // --- SEPTIEMBRE (resto de eventos pasan a septiembre) ---
     { title: "Parque infantil", img: "/bannerNinyos.png", description: "Atracciones infantiles para los peques.", date: "2025-09-11", time: "18:00", location: "" },
     { title: "Cine Búfalo Kids", img: "/bannerNinyos.png", description: "Sesión de cine para público infantil.", date: "2025-09-11", time: "23:30", location: "" },
     { title: "Teatro: Las aventuras de Elsa y Pato", img: "/bannerGenerico.png", description: "Espectáculo teatral familiar.", date: "2025-09-12", time: "23:00", location: "" },
@@ -72,5 +71,11 @@ export const fiestas: Fiesta[
     { title: "3º Día de toros: Trashumancia de \"Mansets\"", img: "/bannerToros.png", description: "Recorrido de reses por las calles.", date: "2025-09-24", time: "12:30", location: "" },
     { title: "Entrada y prueba (La Morada)", img: "/bannerToros.png", description: "Entrada de toros y prueba de ganado.", date: "2025-09-24", time: "14:00", location: "" },
     { title: "Suelta y toro de la merienda (La Morada)", img: "/bannerToros.png", description: "Cierre taurino de tarde.", date: "2025-09-24", time: "18:00", location: "" },
-    // { title: "eeee", img: "", description: "rrr", date: "2025-09-05", time: "12:01", location: "eee" }
+ */ 
+    { title: "Concurso de pintura rápida", img: "/bannerGenerico.png", description: "Recorre el pueblo descubriendo cada rincón", date: "2025-10-04", time: "09:00", location: "Todo el pueblo" },
+    { title: "Exposición del concurso de pintura rápida", img: "/bannerGenerico.png", description: "Ven al Polifuncional/Plaza de la Iglesia para ver todos los cuadros pintados durante el día.", date: "2025-10-04", time: "18:00", location: "Polifuncional/Plaza de la Iglesia" },
+    { title: "Cena de sobaquillo", img: "/bannerGenerico.png", description: "Trae tu bocata para cenar todos juntos en el Polifuncional/Plaza de la Iglesia", date: "2025-10-04", time: "22:00", location: "Polifuncional/Plaza de la Iglesia" },
+    { title: "Discomovil", img: "/bannerDisco.png", description: "¡Disfruta de la discomóvil!", date: "2025-10-04", time: "00:00", location: "Polifuncional/Plaza de la Iglesia" },
+    { title: "Comida popular", img: "/bannerGenerico.png", description: "Ven a comer a la plaza un buen plato de Arròs amb fesols i naps patrocinado por la Cofradía", date: "2025-10-05", time: "14:00", location: "Polifuncional/Plaza de la Iglesia" },
+    { title: "Discomovil", img: "/bannerDisco.png", description: "¡Disfruta de la discomóvil!", date: "2025-11-01", time: "00:00", location: "Polifuncional/Jubilados" },
 ];

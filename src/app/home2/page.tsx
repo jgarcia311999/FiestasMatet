@@ -1,25 +1,20 @@
 "use client";
-import { useState } from "react";
 import Link from "next/link";
 export default function Home2Page() {
-  const [showAlt, setShowAlt] = useState(false);
-  const [logoAlt, setLogoAlt] = useState(false);
   return (
     <main className="min-h-screen bg-[#E7DAD1]">
       <div className="mx-auto max-w-sm px-1 pb-2 pt-7 text-black">
 
         <div className="flex items-end justify-between mt-2">
           <h1 className="text-[64px] leading-none font-semibold">MATET</h1>
-          <button onClick={() => setLogoAlt(!logoAlt)}>
-            <img src="/logoMatet.png" alt="Logo Matet" className="h-30 w-30 object-contain" />
-          </button>
+          <img src="/logoMatet.png" alt="Logo Matet" className="h-30 w-30 object-contain" />
         </div>
         <div className="border-t border-[#0C2335] mt-3" />
 
         {/* Meta info flex row (example, not changed) */}
         <div className="mt-4 flex items-center justify-between">
-          <span className="text-[10px] uppercase tracking-[0.2em]">{logoAlt ? "Disfruta de nuestro" : "Produced by:"}</span>
-          <span className="text-[10px] uppercase tracking-[0.2em]">{logoAlt ? "mayor tesoro" : "LA COMISIÓN"}</span>
+          <span className="text-[10px] uppercase tracking-[0.2em]">Produced by:</span>
+          <span className="text-[10px] uppercase tracking-[0.2em]">LA COMISIÓN</span>
         </div>
 
         {/* New Production/Video block */}
@@ -30,17 +25,12 @@ export default function Home2Page() {
 
         {/* Duplicated Produced by row (now condition inverted) */}
         <div className="mt-6 flex items-center justify-between">
-          <span className="text-[10px] uppercase tracking-[0.2em]">{logoAlt ? "Produced by:" : "Disfruta de nuestro"}</span>
-          <span className="text-[10px] uppercase tracking-[0.2em]">{logoAlt ? "LA COMISIÓN" : "mayor tesoro"}</span>
+          <span className="text-[10px] uppercase tracking-[0.2em]">Disfruta de nuestro</span>
+          <span className="text-[10px] uppercase tracking-[0.2em]">mayor tesoro</span>
         </div>
 
         <div className="mt-0 flex items-start justify-between">
-          <button
-            onClick={() => setShowAlt(!showAlt)}
-            className="text-[84px] leading-none font-semibold mt-2 focus:outline-none"
-          >
-            {showAlt ? "25/26" : "2026"}
-          </button>
+          <div className="text-[84px] leading-none font-semibold mt-2">2026</div>
         </div>
 
         {/* Card */}

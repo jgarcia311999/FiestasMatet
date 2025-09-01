@@ -25,37 +25,37 @@ function formatSpanishLong(date: Date): string {
 
 function getSecciones(fiestaLista: Fiesta[]): { label: string; date: Date; key: string }[] {
   const today = startOfTodayLocal();
-  const end = new Date(today);
-  end.setDate(end.getDate() + 6); // próximos 7 días (hoy + 6)
 
-  // Futuras (>= hoy), agrupadas por fecha YYYY-MM-DD
+  // Futuras (>= hoy), ordenadas por fecha
   const futuras = fiestaLista
     .map((f) => ({ ...f, dateObj: parseISODateLocal(f.date) }))
     .filter((f) => !isNaN(f.dateObj.getTime()) && f.dateObj >= today)
     .sort((a, b) => a.dateObj.getTime() - b.dateObj.getTime());
 
-  const byDate = new Map<string, Date>();
+  // Tomar las próximas 5 fechas distintas con eventos (sin limitar a 7 días)
+  const seen = new Set<string>();
+  const result: { label: string; date: Date; key: string }[] = [];
+
   for (const f of futuras) {
-    const key = f.date;
-    if (!byDate.has(key)) byDate.set(key, f.dateObj);
+    if (!seen.has(f.date)) {
+      seen.add(f.date);
+      result.push({ key: f.date, date: f.dateObj, label: formatSpanishLong(f.dateObj) });
+      if (result.length >= 5) break;
+    }
   }
 
-  const allDates = Array.from(byDate.entries())
-    .map(([key, date]) => ({ key, date, label: formatSpanishLong(date) }))
-    .sort((a, b) => a.date.getTime() - b.date.getTime());
-
-  const en7dias = allDates.filter((d) => d.date <= end);
-  if (en7dias.length > 0) return en7dias;
-
-  // Si no hay nada en 7 días, devolver solo la primera futura (si existe)
-  return allDates.length > 0 ? [allDates[0]] : [];
+  return result;
 }
 
 function getEventosPorFecha(fiestaLista: Fiesta[], dateKey: string): Fiesta[] {
   const byDate = fiestaLista.filter(f => f.date === dateKey);
+  // Madrugada (00:00–05:59) cuenta como final del día
   const parseTime = (t: string) => {
     const [hh, mm] = (t || "00:00").split(":").map(Number);
-    return (hh || 0) * 60 + (mm || 0);
+    let minutes = (hh || 0) * 60 + (mm || 0);
+    // Si es madrugada (00:00–05:59), lo empujamos al final del día
+    if (!isNaN(hh) && hh >= 0 && hh < 6) minutes += 24 * 60;
+    return minutes;
   };
   return byDate.sort((a, b) => parseTime(a.time) - parseTime(b.time));
 }
@@ -85,41 +85,52 @@ export default function ProximasPage() {
         {secciones.length === 0 ? (
           <div className="py-2 text-[12px] italic">Sin próximas fiestas</div>
         ) : (
-          secciones.map((sec, idx) => (
-            <div key={sec.key}>
-              <div
-                className="text-lg uppercase tracking-[0.18em] py-2 cursor-pointer"
-              >
-                <span className="border-b border-transparent">{sec.label}</span>
-              </div>
-              <>
-                <div className="p-2 text-base">
-                  {getEventosPorFecha(fiestasData, sec.key).length === 0 ? (
-                    <div className="italic">Sin eventos para este día</div>
-                  ) : (
-                    <ul className="space-y-1">
-                      {getEventosPorFecha(fiestasData, sec.key).map((ev, i) => (
-                        <li key={i} className="text-lg">A las {ev.time} {getFranjaHorariaLabel(ev.time)} - {ev.title}</li>
-                      ))}
-                    </ul>
-                  )}
+          <>
+            {secciones.map((sec, idx) => (
+              <div key={sec.key}>
+                <div
+                  className="text-lg uppercase tracking-[0.18em] py-2 cursor-pointer"
+                >
+                  <span className="border-b border-transparent">{sec.label}</span>
                 </div>
-                {/*
-                <div className="mt-5 mb-5 relative h-[180px] rounded-3xl bg-[#083279] overflow-hidden">
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="h-24 w-24 rounded-full border border-[#0C2335] flex items-center justify-center">
-                      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <line x1="12" y1="4" x2="12" y2="18" stroke="#0C2335" strokeWidth="2"/>
-                        <polyline points="6,12 12,18 18,12" stroke="#0C2335" strokeWidth="2" fill="none"/>
-                      </svg>
+                <>
+                  <div className="p-2 text-base">
+                    {getEventosPorFecha(fiestasData, sec.key).length === 0 ? (
+                      <div className="italic">Sin eventos para este día</div>
+                    ) : (
+                      <ul className="space-y-1">
+                        {getEventosPorFecha(fiestasData, sec.key).map((ev, i) => (
+                          <li key={i} className="text-lg">A las {ev.time} {getFranjaHorariaLabel(ev.time)} - {ev.title}</li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                  {/*
+                  <div className="mt-5 mb-5 relative h-[180px] rounded-3xl bg-[#083279] overflow-hidden">
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="h-24 w-24 rounded-full border border-[#0C2335] flex items-center justify-center">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <line x1="12" y1="4" x2="12" y2="18" stroke="#0C2335" strokeWidth="2"/>
+                          <polyline points="6,12 12,18 18,12" stroke="#0C2335" strokeWidth="2" fill="none"/>
+                        </svg>
+                      </div>
                     </div>
                   </div>
+                  */}
+                </>
+                <div className="border-t border-[#0C2335]" />
+              </div>
+            ))}
+            {secciones.length > 0 && secciones.length < 5 && (
+              <>
+                <div className="border-t border-[#0C2335]" />
+                <div className="text-lg uppercase tracking-[0.18em] py-2">
+                  <span className="border-b border-transparent">¡Próximamente más! 🚀</span>
                 </div>
-                */}
+                <div className="border-t border-[#0C2335]" />
               </>
-              <div className="border-t border-[#0C2335]" />
-            </div>
-          ))
+            )}
+          </>
         )}
 
         {/* Call to action serif */}
