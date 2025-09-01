@@ -49,7 +49,6 @@ export default function HorariosPage() {
   const prevEditRef = useRef<Fiesta | null>(null);
 
   // --- Attendance logic ---
-  type AttendResponse = { ok?: boolean; action?: string; error?: string };
   function getCurrentUser(): string | null {
     // Cookie principal usada en el login
     const c = (getCookie("commission_user") ?? getCookie("usuario"));
@@ -85,7 +84,6 @@ export default function HorariosPage() {
     const result = toggleAttend(ev);
     if (result.desired === null) return;
     const payload = { title: ev.title || "", date: ev.date || "", time: ev.time || "" };
-    const desired = !!result.desired; // true => queremos quedar apuntados; false => quitarnos
     (async () => {
       try {
         const res = await fetch("/api/events/attend", {
@@ -93,6 +91,7 @@ export default function HorariosPage() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ match: payload, action: "toggle" }),
         });
+        type AttendResponse = { ok?: boolean; action?: string; error?: string };
         const data: AttendResponse = await res.json().catch((): AttendResponse => ({}));
         if (!res.ok) {
           // rollback local si falla
@@ -100,16 +99,24 @@ export default function HorariosPage() {
           alert(data?.error || "No se pudo guardar la asistencia");
           return;
         }
-        // Si el servidor dice que no había nada que cambiar, revertimos y avisamos
-        if (data?.action === "noop") {
-          toggleAttend(ev); // revierte el cambio local
-          alert("No se pudo aplicar la asistencia (evento no encontrado o ya estaba en ese estado).");
-          return;
-        }
-        // Si devolvió una acción efectiva distinta a lo esperado, podemos sincronizar (opcional)
-        if ((desired && data?.action === "remove") || (!desired && data?.action === "add")) {
-          // Estado final no coincide: invertimos para reflejar lo que quedó en el servidor
+
+        const userNow = getCurrentUser();
+        // Sincronizamos la UI con la acción efectiva aplicada por el servidor
+        if (data?.action === "add" && userNow) {
+          setItems(prev => prev.map(it => {
+            if (makeKey(it) !== makeKey(ev)) return it;
+            const set = new Set([...(it.attendees ?? []), userNow]);
+            return { ...it, attendees: Array.from(set) } as LocalFiesta;
+          }));
+        } else if (data?.action === "remove" && userNow) {
+          setItems(prev => prev.map(it => {
+            if (makeKey(it) !== makeKey(ev)) return it;
+            return { ...it, attendees: (it.attendees ?? []).filter(u => u !== userNow) } as LocalFiesta;
+          }));
+        } else if (data?.action === "noop") {
+          // El servidor no aplicó cambios: revertimos el optimista
           toggleAttend(ev);
+          // (opcional) alert("No se aplicó ningún cambio");
         }
       } catch (e) {
         // rollback local por error de red
