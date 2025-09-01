@@ -1,11 +1,13 @@
 "use client";
 
 import { fiestas } from "@/data/fiestas";
-import { useState } from "react";
+import { useState, useRef } from "react";
+import type { Fiesta } from "@/data/fiestas";
 
 export default function HorariosPage() {
+  const [items, setItems] = useState<Fiesta[]>(() => [...fiestas]);
   // Ordenamos por fecha (YYYY-MM-DD) y luego por hora (HH:MM); vacíos al final
-  const eventosOrdenados = [...fiestas].sort((a, b) => {
+  const eventosOrdenados = [...items].sort((a, b) => {
     const ad = a.date || "";
     const bd = b.date || "";
     if (ad && bd && ad !== bd) return ad.localeCompare(bd);
@@ -23,24 +25,175 @@ export default function HorariosPage() {
   const [removed, setRemoved] = useState<Record<string, true>>({});
   const makeKey = (e: { title?: string; date?: string; time?: string }) => `${e.title || ""}|${e.date || ""}|${e.time || ""}`;
 
-  async function handleDelete(ev: { title?: string; date?: string; time?: string }) {
-    if (!confirm("¿Seguro que quieres borrar este evento?")) return;
+  // Toast de borrado y deshacer
+  const [toast, setToast] = useState<{ show: boolean; text: string; key: string | null }>({ show: false, text: "", key: null });
+  const toastTimerRef = useRef<number | null>(null);
+  const deleteTimerRef = useRef<number | null>(null);
+  const pendingRef = useRef<{ key: string; title: string; payload: { title: string; date: string; time: string } } | null>(null);
+
+  // --- Edit Modal State ---
+  const [editOpen, setEditOpen] = useState(false);
+  const [editMatch, setEditMatch] = useState<{ title: string; date: string; time: string } | null>(null);
+  const [editForm, setEditForm] = useState<{ title: string; img: string; description: string; date: string; time: string; location: string }>({
+    title: "",
+    img: "",
+    description: "",
+    date: "",
+    time: "",
+    location: "",
+  });
+  const [savingEdit, setSavingEdit] = useState(false);
+  const prevEditRef = useRef<Fiesta | null>(null);
+
+  function openEdit(ev: { title?: string; img?: string; description?: string; date?: string; time?: string; location?: string }) {
+    const match = { title: ev.title || "", date: ev.date || "", time: ev.time || "" };
+    setEditMatch(match);
+    setEditForm({
+      title: ev.title || "",
+      img: ev.img || "",
+      description: ev.description || "",
+      date: ev.date || "",
+      time: ev.time || "",
+      location: ev.location || "",
+    });
+    // snapshot previo para revertir si falla
+    const found = items.find(it => (it.title||"")===match.title && (it.date||"")===match.date && (it.time||"")===match.time) || null;
+    prevEditRef.current = found ? { ...found } as Fiesta : null;
+    setEditOpen(true);
+  }
+
+  function closeEdit() { setEditOpen(false); }
+
+  async function saveEdit() {
+    if (!editMatch) return;
+    setSavingEdit(true);
+    // Optimistic update: aplicar cambios en local inmediatamente
+    setItems(prev => {
+      const idx = prev.findIndex(it => (it.title||"")===editMatch.title && (it.date||"")===editMatch.date && (it.time||"")===editMatch.time);
+      if (idx === -1) return prev;
+      const next = [...prev];
+      next[idx] = { ...next[idx], ...editForm } as Fiesta;
+      return next;
+    });
     try {
-      const res = await fetch("/api/events/delete", {
+      const res = await fetch("/api/events/update", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title: ev.title || "", date: ev.date || "", time: ev.time || "" }),
+        body: JSON.stringify({ match: editMatch, patch: editForm }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        alert(data.error || "No se pudo borrar");
+        // rollback
+        if (prevEditRef.current) {
+          setItems(prev => {
+            const idx = prev.findIndex(it => (it.title||"")===editMatch.title && (it.date||"")===editMatch.date && (it.time||"")===editMatch.time);
+            if (idx === -1) return prev;
+            const next = [...prev];
+            next[idx] = { ...prevEditRef.current! } as Fiesta;
+            return next;
+          });
+        }
+        alert(data.error || "No se pudo guardar");
+        setSavingEdit(false);
         return;
       }
-      setRemoved(prev => ({ ...prev, [makeKey(ev)]: true }));
-      setOpenIndex(null);
+      setSavingEdit(false);
+      setEditOpen(false);
     } catch (err) {
-      alert("Error inesperado al borrar");
+      // rollback
+      if (prevEditRef.current) {
+        setItems(prev => {
+          const idx = prev.findIndex(it => (it.title||"")===editMatch.title && (it.date||"")===editMatch.date && (it.time||"")===editMatch.time);
+          if (idx === -1) return prev;
+          const next = [...prev];
+          next[idx] = { ...prevEditRef.current! } as Fiesta;
+          return next;
+        });
+      }
+      alert("Error inesperado al guardar");
+      setSavingEdit(false);
     }
+  }
+
+  function showDeleteToast(title: string, key: string) {
+    // Clear previous timer if any
+    if (toastTimerRef.current) {
+      window.clearTimeout(toastTimerRef.current);
+      toastTimerRef.current = null;
+    }
+    setToast({ show: true, text: `${title || "(Sin título)"} ha sido borrado`, key });
+    // Auto-hide after 5s
+    toastTimerRef.current = window.setTimeout(() => {
+      setToast(t => ({ ...t, show: false }));
+      toastTimerRef.current = null;
+    }, 5000);
+  }
+
+  // Solo revierte el borrado localmente, no revierte el comentario de GitHub.
+  function undoDelete() {
+    if (!toast.key) return;
+    // Cancelar borrado pendiente
+    if (deleteTimerRef.current) { window.clearTimeout(deleteTimerRef.current); deleteTimerRef.current = null; }
+    pendingRef.current = null;
+
+    setRemoved(prev => {
+      const copy = { ...prev };
+      delete copy[toast.key as string];
+      return copy;
+    });
+    if (toastTimerRef.current) { window.clearTimeout(toastTimerRef.current); toastTimerRef.current = null; }
+    setToast({ show: false, text: "", key: null });
+  }
+
+  async function handleDelete(ev: { title?: string; date?: string; time?: string }) {
+    if (!confirm("¿Seguro que quieres borrar este evento?")) return;
+
+    // Limpiar timers previos si los hubiera
+    if (toastTimerRef.current) { window.clearTimeout(toastTimerRef.current); toastTimerRef.current = null; }
+    if (deleteTimerRef.current) { window.clearTimeout(deleteTimerRef.current); deleteTimerRef.current = null; }
+
+    const payload = { title: ev.title || "", date: ev.date || "", time: ev.time || "" };
+    const key = makeKey(payload);
+
+    // Ocultamos inmediatamente en UI y mostramos toast
+    setRemoved(prev => ({ ...prev, [key]: true }));
+    showDeleteToast(payload.title, key);
+    setOpenIndex(null);
+
+    // Guardamos como borrado pendiente (para poder deshacer)
+    pendingRef.current = { key, title: payload.title, payload };
+
+    // Programamos el borrado real para dentro de 5s
+    deleteTimerRef.current = window.setTimeout(async () => {
+      // Si ya no hay pendiente (se deshizo), no hacemos nada
+      if (!pendingRef.current || pendingRef.current.key !== key) return;
+      try {
+        const res = await fetch("/api/events/delete", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          alert(data.error || "No se pudo borrar");
+          // Revertimos en UI si falló el commit
+          setRemoved(prev => { const copy = { ...prev }; delete copy[key]; return copy; });
+        }
+      } catch (err) {
+        alert("Error inesperado al borrar");
+        setRemoved(prev => { const copy = { ...prev }; delete copy[key]; return copy; });
+      } finally {
+        // Limpieza
+        pendingRef.current = null;
+        if (deleteTimerRef.current) { window.clearTimeout(deleteTimerRef.current); deleteTimerRef.current = null; }
+      }
+    }, 5000);
+
+    // También programamos el auto-hide del toast a 5s (si no se deshace)
+    toastTimerRef.current = window.setTimeout(() => {
+      setToast(t => ({ ...t, show: false }));
+      toastTimerRef.current = null;
+    }, 5000);
   }
 
   return (
@@ -99,7 +252,12 @@ export default function HorariosPage() {
                       </button>
 
                       {/* Pencil */}
-                      <button type="button" aria-label="Editar" className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-[#0C2335]/30 hover:bg-[#0C2335]/5">
+                      <button
+                        type="button"
+                        aria-label="Editar"
+                        onClick={() => openEdit(ev)}
+                        className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-[#0C2335]/30 hover:bg-[#0C2335]/5"
+                      >
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                           <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25z" stroke="currentColor" strokeWidth="1.5" fill="none"/>
                           <path d="M20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" stroke="currentColor" strokeWidth="1.5" fill="none"/>
@@ -120,6 +278,72 @@ export default function HorariosPage() {
           })}
         </ul>
       </div>
+      {/* Edit Modal */}
+      {editOpen && (
+        <div className="fixed inset-0 z-50">
+          <div className="absolute inset-0 bg-black/40" onClick={closeEdit} aria-hidden="true" />
+          <div className="absolute inset-0 bg-[#E85D6A] text-[#0C2335] md:rounded-t-xl md:top-12 md:h-[calc(100%-3rem)] overflow-auto">
+            <div className="sticky top-0 flex items-center justify-between border-b border-[#0C2335]/20 bg-[#E85D6A] px-4 py-3">
+              <h3 className="font-semibold text-lg">Editar evento</h3>
+              <button onClick={closeEdit} className="rounded border border-[#0C2335]/30 px-2 py-1 text-sm hover:bg-[#0C2335]/5">Cerrar</button>
+            </div>
+
+            <div className="p-4">
+              <form className="grid grid-cols-1 gap-3 max-w-2xl">
+                <label className="text-sm">Título
+                  <input
+                    value={editForm.title}
+                    onChange={(e)=>setEditForm({...editForm, title: e.target.value})}
+                    className="mt-1 w-full rounded border border-[#0C2335]/30 bg-[#E85D6A] px-3 py-2 text-sm text-[#0C2335]"
+                  />
+                </label>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <label className="text-sm">Fecha
+                    <input type="date" value={editForm.date} onChange={e=>setEditForm({...editForm, date: e.target.value})} className="mt-1 w-full rounded border border-[#0C2335]/30 bg-[#E85D6A] px-3 py-2 text-sm text-[#0C2335]" />
+                  </label>
+                  <label className="text-sm">Hora
+                    <input type="time" value={editForm.time} onChange={e=>setEditForm({...editForm, time: e.target.value})} className="mt-1 w-full rounded border border-[#0C2335]/30 bg-[#E85D6A] px-3 py-2 text-sm text-[#0C2335]" />
+                  </label>
+                </div>
+
+                <label className="text-sm">Lugar
+                  <input value={editForm.location} onChange={e=>setEditForm({...editForm, location: e.target.value})} className="mt-1 w-full rounded border border-[#0C2335]/30 bg-[#E85D6A] px-3 py-2 text-sm text-[#0C2335]" />
+                </label>
+
+                <label className="text-sm">Descripción
+                  <textarea value={editForm.description} onChange={e=>setEditForm({...editForm, description: e.target.value})} rows={4} className="mt-1 w-full rounded border border-[#0C2335]/30 bg-[#E85D6A] px-3 py-2 text-sm text-[#0C2335]" />
+                </label>
+
+                <label className="text-sm">Imagen (URL)
+                  <input value={editForm.img} onChange={e=>setEditForm({...editForm, img: e.target.value})} className="mt-1 w-full rounded border border-[#0C2335]/30 bg-[#E85D6A] px-3 py-2 text-sm text-[#0C2335]" placeholder="/bannerGenerico.png" />
+                </label>
+
+                <div className="flex justify-end items-center gap-3 pt-2">
+                  {savingEdit && <span className="text-xs opacity-80">Guardando…</span>}
+                  <button type="button" onClick={closeEdit} disabled={savingEdit} className="rounded border border-[#0C2335]/30 px-3 py-2 text-sm hover:bg-[#0C2335]/5 disabled:opacity-60">Cancelar</button>
+                  <button type="button" onClick={saveEdit} disabled={savingEdit} className="rounded bg-[#0C2335] text-white px-4 py-2 text-sm hover:opacity-90 disabled:opacity-60">Guardar</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Toast de borrado con deshacer */}
+      {toast.show && (
+        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50">
+          <div className="flex items-center gap-3 rounded-full bg-[#0C2335] text-white px-4 py-2 shadow-lg">
+            <span className="text-sm">{toast.text}</span>
+            <button
+              type="button"
+              onClick={undoDelete}
+              className="rounded-full bg-white/10 px-3 py-1 text-sm hover:bg-white/20"
+            >
+              Deshacer
+            </button>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
