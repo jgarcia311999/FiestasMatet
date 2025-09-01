@@ -1,5 +1,6 @@
 "use client";
-import { useMemo, useState } from "react";
+import Link from "next/link";
+import { useMemo, useState, useCallback, useRef } from "react";
 import * as FIESTAS from "@/data/fiestas";
 
 
@@ -34,8 +35,17 @@ export default function HorariosPage() {
 
   // Modal editor móvil para eventos
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const originalRef = useRef<{ title?: string; date?: string; time?: string } | null>(null);
   const selectedEvento = eventosState.find(e => e.id === selectedId) || null;
-  function openEvento(id: string) { setSelectedId(id); }
+  function openEvento(id: string) {
+    const ev = eventosState.find(e => e.id === id);
+    if (ev) {
+      originalRef.current = { title: ev.title, date: ev.date, time: ev.time };
+    } else {
+      originalRef.current = null;
+    }
+    setSelectedId(id);
+  }
   function closeEvento() { setSelectedId(null); }
   function addAndOpen() {
     const id = `ev-${eventosState.length + 1}`;
@@ -43,15 +53,82 @@ export default function HorariosPage() {
     setSelectedId(id);
   }
 
+  const deleteEvento = useCallback(async (ev: EventoRow) => {
+    if (!confirm("¿Seguro que quieres borrar este evento?")) return;
+    try {
+      const res = await fetch("/api/events/delete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title: ev.title, date: ev.date, time: ev.time }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        alert(data.error || "Error al borrar");
+        return;
+      }
+      setEventosState(prev => prev.filter(e => e.id !== ev.id));
+      closeEvento();
+    } catch (err) {
+      alert("Error inesperado al borrar");
+    }
+  }, []);
+
+  const saveEvento = useCallback(async () => {
+    if (!selectedEvento) return;
+    try {
+      const match = originalRef.current ?? { title: selectedEvento.title, date: selectedEvento.date, time: selectedEvento.time };
+      const patch = {
+        title: selectedEvento.title,
+        img: selectedEvento.img,
+        description: selectedEvento.description,
+        date: selectedEvento.date,
+        time: selectedEvento.time,
+        location: selectedEvento.location,
+      };
+      const res = await fetch("/api/events/update", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ match, patch }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        alert(data.error || "Error al guardar");
+        return;
+      }
+      // Actualizamos el original a los nuevos valores y cerramos modal
+      originalRef.current = { title: selectedEvento.title, date: selectedEvento.date, time: selectedEvento.time };
+      closeEvento();
+    } catch (err) {
+      alert("Error inesperado al guardar");
+    }
+  }, [selectedEvento]);
+
   const matchesFilter = (text: string) => !q || text.toLowerCase().includes(q.toLowerCase());
 
-  const eventos = useMemo(() => eventosState.filter(ev => {
-    const inText = matchesFilter(`${ev.title} ${ev.location ?? ""} ${ev.description ?? ""}`);
-    const date = (ev.date ?? "");
-    const inDesde = !desde || (date && date >= desde);
-    const inHasta = !hasta || (date && date <= hasta);
-    return inText && inDesde && inHasta;
-  }), [q, desde, hasta, eventosState]);
+  const eventos = useMemo(() => {
+    const filtered = eventosState.filter(ev => {
+      const inText = matchesFilter(`${ev.title} ${ev.location ?? ""} ${ev.description ?? ""}`);
+      const date = ev.date ?? "";
+      const inDesde = !desde || (date && date >= desde);
+      const inHasta = !hasta || (date && date <= hasta);
+      return inText && inDesde && inHasta;
+    });
+
+    // Orden: por fecha ascendente (YYYY-MM-DD), luego por hora ascendente (HH:MM). Vacíos al final.
+    return [...filtered].sort((a, b) => {
+      const ad = a.date ?? "";
+      const bd = b.date ?? "";
+      if (ad && bd && ad !== bd) return ad.localeCompare(bd);
+      if (!ad && bd) return 1;   // a sin fecha va después
+      if (ad && !bd) return -1;  // b sin fecha va después
+      const at = a.time ?? "";
+      const bt = b.time ?? "";
+      if (at && bt && at !== bt) return at.localeCompare(bt);
+      if (!at && bt) return 1;   // a sin hora va después
+      if (at && !bt) return -1;  // b sin hora va después
+      return (a.title || "").localeCompare(b.title || "");
+    });
+  }, [q, desde, hasta, eventosState]);
 
   function addEmptyRow() {
     setEventosState(prev => [...prev, { id: `ev-${prev.length+1}`, title: "", img: "", description: "", date: "", time: "", location: "" }]);
@@ -91,7 +168,12 @@ export default function HorariosPage() {
             <input type="date" value={hasta} onChange={e=>setHasta(e.target.value)} className="rounded border border-gray-300 px-3 py-2 text-sm text-black" />
           </div>
           <div className="ml-auto">
-            <button onClick={addAndOpen} className="rounded border border-gray-300 bg-white px-3 py-2 text-sm hover:bg-gray-50">Añadir</button>
+            <Link
+              href="/layoutComision/horarios/nuevo"
+              className="rounded border border-gray-300 bg-white px-3 py-2 text-sm hover:bg-gray-50"
+            >
+              ➕ Nuevo
+            </Link>
           </div>
         </div>
         <p className="text-xs text-black mb-2">Nota: los cambios se guardan en memoria (se perderán al recargar) hasta que conectemos persistencia.</p>
@@ -180,8 +262,19 @@ export default function HorariosPage() {
                     </label>
                   </div>
 
-                  <div className="flex justify-end gap-2 pt-2">
-                    <button onClick={closeEvento} className="rounded border border-gray-300 px-3 py-2 text-sm hover:bg-gray-50">Guardar</button>
+                  <div className="flex justify-between gap-2 pt-2">
+                    <button
+                      onClick={() => deleteEvento(selectedEvento)}
+                      className="rounded border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-700 hover:bg-red-100"
+                    >
+                      Eliminar
+                    </button>
+                    <button
+                      onClick={saveEvento}
+                      className="rounded border border-gray-300 px-3 py-2 text-sm hover:bg-gray-50"
+                    >
+                      Guardar
+                    </button>
                   </div>
                 </div>
               </div>
