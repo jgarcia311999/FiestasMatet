@@ -20,6 +20,28 @@ export default function HorariosPage() {
   });
 
   const [openIndex, setOpenIndex] = useState<number | null>(null);
+  const [removed, setRemoved] = useState<Record<string, true>>({});
+  const makeKey = (e: { title?: string; date?: string; time?: string }) => `${e.title || ""}|${e.date || ""}|${e.time || ""}`;
+
+  async function handleDelete(ev: { title?: string; date?: string; time?: string }) {
+    if (!confirm("¿Seguro que quieres borrar este evento?")) return;
+    try {
+      const res = await fetch("/api/events/delete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title: ev.title || "", date: ev.date || "", time: ev.time || "" }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        alert(data.error || "No se pudo borrar");
+        return;
+      }
+      setRemoved(prev => ({ ...prev, [makeKey(ev)]: true }));
+      setOpenIndex(null);
+    } catch (err) {
+      alert("Error inesperado al borrar");
+    }
+  }
 
   return (
     <main className="min-h-screen bg-[#E85D6A] text-[#0C2335]">
@@ -28,7 +50,7 @@ export default function HorariosPage() {
 
         {/* Listado: fecha - hora, nombre */}
         <ul className="mt-6 divide-y divide-[#0C2335]/10">
-          {eventosOrdenados.map((ev, idx) => {
+          {eventosOrdenados.filter(ev => !removed[makeKey(ev)]).map((ev, idx) => {
             const fechaHora = ev.date && ev.time
               ? `${ev.date} - ${ev.time}`
               : ev.date || ev.time || "—";
@@ -62,7 +84,12 @@ export default function HorariosPage() {
                     {/* Action buttons: trash, pencil, check (no functionality yet) */}
                     <div className="pt-1 flex items-center gap-3 justify-end">
                       {/* Trash */}
-                      <button type="button" aria-label="Eliminar" className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-[#0C2335]/30 hover:bg-[#0C2335]/5">
+                      <button
+                        type="button"
+                        aria-label="Eliminar"
+                        onClick={() => handleDelete(ev)}
+                        className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-[#0C2335]/30 hover:bg-[#0C2335]/5"
+                      >
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                           <path d="M3 6h18" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
                           <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
