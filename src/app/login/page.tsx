@@ -1,3 +1,4 @@
+import { USERS } from "@/data/users";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import crypto from "crypto";
@@ -10,8 +11,15 @@ function expectedCookieValue() {
 
 async function loginAction(formData: FormData) {
   "use server";
+  const username = ((formData.get("username") as string) || "").trim();
   const input = (formData.get("password") as string) || "";
   const next = (formData.get("next") as string) || "/layoutComision";
+
+  // Check if username exists in USERS array
+  const userExists = USERS && Array.isArray(USERS) && USERS.includes(username);
+  if (!userExists) {
+    redirect(`/login?error=1&next=${encodeURIComponent(next)}`);
+  }
 
   const expected = process.env.INTRANET_PASS || "";
 
@@ -25,8 +33,16 @@ async function loginAction(formData: FormData) {
   }
 
   const value = expectedCookieValue();
-  (await cookies()).set("commission_auth", value, {
+  const cookieStore = await cookies();
+  cookieStore.set("commission_auth", value, {
     httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+    maxAge: 60 * 60 * 24 * 30,
+  });
+  cookieStore.set("commission_user", username, {
+    httpOnly: false, 
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
     path: "/",
@@ -50,6 +66,18 @@ export default function LoginPage({
         <h1 className="text-xl font-bold mb-6 text-center text-[#0C2335]">Login</h1>
         <form className="space-y-4" action={loginAction}>
           <input type="hidden" name="next" value={next} />
+          <div>
+            <label htmlFor="username" className="block text-sm font-medium text-[#0C2335]">
+              Nombre de usuario
+            </label>
+            <input
+              type="text"
+              id="username"
+              name="username"
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#0C2335] focus:border-[#0C2335] text-black"
+              required
+            />
+          </div>
           <div>
             <label htmlFor="password" className="block text-sm font-medium text-[#0C2335]">
               Contraseña de la comisión

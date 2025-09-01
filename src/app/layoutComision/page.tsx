@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import { getCookie } from "cookies-next";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -24,6 +25,7 @@ const NAV_LINKS = [
 export default function LayoutComisionPage() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const [username, setUsername] = useState<string | null>(null);
 
   // Cierra el menú con ESC
   useEffect(() => {
@@ -38,6 +40,13 @@ export default function LayoutComisionPage() {
   useEffect(() => {
     setOpen(false);
   }, [pathname]);
+
+  useEffect(() => {
+    const user = getCookie("commission_user");
+    if (user && typeof user === "string") {
+      setUsername(user);
+    }
+  }, []);
 
   return (
     <div className="min-h-screen bg-[#E7DAD1] text-[#0C2335]">
@@ -60,7 +69,7 @@ export default function LayoutComisionPage() {
 
       <div className="mx-auto max-w-7xl px-4 py-4">
         <h1 className="text-[80px] leading-none font-semibold break-words">
-          Panel de gestión
+          {username}, gestiona
         </h1>
       </div>
 
