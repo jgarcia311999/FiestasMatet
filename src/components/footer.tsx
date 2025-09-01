@@ -8,6 +8,8 @@ export default function Footer() {
     bgColor = "#E85D6A";
   } else if (hasSeg("ideas")) {
     bgColor = "#FFD966";
+  } else if (hasSeg("todas")) {
+    bgColor = "#FFF5BA";
   } else if (hasSeg("noche")) {
     bgColor = "#083279";
   } else if (hasSeg("quehaceres")) {

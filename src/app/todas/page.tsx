@@ -1,4 +1,5 @@
 "use client";
+import { useState } from "react";
 import { fiestas as fiestasData, type Fiesta } from "../../data/fiestas";
 
 
@@ -23,28 +24,20 @@ function formatSpanishLong(date: Date): string {
   return noComma.charAt(0).toUpperCase() + noComma.slice(1);
 }
 
-function getSecciones(fiestaLista: Fiesta[]): { label: string; date: Date; key: string }[] {
+function getSecciones(fiestaLista: Fiesta[], includePast: boolean): { label: string; date: Date; key: string }[] {
   const today = startOfTodayLocal();
+  const enriched = fiestaLista
+    .map(f => ({ ...f, dateObj: parseISODateLocal(f.date) }))
+    .filter(f => !isNaN(f.dateObj.getTime()) && (includePast ? true : f.dateObj >= today));
 
-  // Futuras (>= hoy), ordenadas por fecha
-  const futuras = fiestaLista
-    .map((f) => ({ ...f, dateObj: parseISODateLocal(f.date) }))
-    .filter((f) => !isNaN(f.dateObj.getTime()) && f.dateObj >= today)
-    .sort((a, b) => a.dateObj.getTime() - b.dateObj.getTime());
-
-  // Tomar las próximas 5 fechas distintas con eventos (sin limitar a 7 días)
-  const seen = new Set<string>();
-  const result: { label: string; date: Date; key: string }[] = [];
-
-  for (const f of futuras) {
-    if (!seen.has(f.date)) {
-      seen.add(f.date);
-      result.push({ key: f.date, date: f.dateObj, label: formatSpanishLong(f.dateObj) });
-      if (result.length >= 5) break;
-    }
+  const byDate = new Map<string, Date>();
+  for (const f of enriched) {
+    if (!byDate.has(f.date)) byDate.set(f.date, f.dateObj);
   }
 
-  return result;
+  return Array.from(byDate.entries())
+    .sort((a, b) => a[1].getTime() - b[1].getTime())
+    .map(([key, d]) => ({ key, date: d, label: formatSpanishLong(d) }));
 }
 
 function getEventosPorFecha(fiestaLista: Fiesta[], dateKey: string): Fiesta[] {
@@ -69,21 +62,31 @@ function getFranjaHorariaLabel(time: string): string {
   return "de la noche";
 }
 
-export default function ProximasPage() {
-  const secciones = getSecciones(fiestasData);
+export default function TodasPage() {
+  const [showAll, setShowAll] = useState(false);
+  const secciones = getSecciones(fiestasData, showAll);
 
   return (
-    <main className="min-h-screen bg-[#FFF5BA] text-[#0C2335]">
+    <main className="min-h-screen bg-[#E85D6A] text-[#0C2335]">
       <div className="mx-auto max-w-sm px-1 pt-10 pb-24">
         {/* Headline */}
         <h1 className="font-serif text-[36px] leading-[1.05] tracking-tight">
-          Enterate de todas las proximas fiestas de <strong className="block mt-2">MATET</strong>
+          Entérate de <strong>todas</strong> las fiestas de <strong className="block mt-2">MATET</strong>
         </h1>
+        {!showAll && (
+          <button
+            type="button"
+            onClick={() => setShowAll(true)}
+            className="mt-2 text-[12px] underline underline-offset-2"
+          >
+            ← Ver anteriores
+          </button>
+        )}
 
         {/* Divider rows of chips */}
         <div className="mt-5 border-t border-[#0C2335]" />
         {secciones.length === 0 ? (
-          <div className="py-2 text-[12px] italic">Sin próximas fiestas</div>
+          <div className="py-2 text-[12px] italic">Sin fiestas</div>
         ) : (
           <>
             {secciones.map((sec, idx) => (
@@ -121,15 +124,6 @@ export default function ProximasPage() {
                 <div className="border-t border-[#0C2335]" />
               </div>
             ))}
-            {secciones.length > 0 && secciones.length < 5 && (
-              <>
-                <div className="border-t border-[#0C2335]" />
-                <div className="text-lg uppercase tracking-[0.18em] py-2">
-                  <span className="border-b border-transparent">¡Próximamente más! 🚀</span>
-                </div>
-                <div className="border-t border-[#0C2335]" />
-              </>
-            )}
           </>
         )}
 
