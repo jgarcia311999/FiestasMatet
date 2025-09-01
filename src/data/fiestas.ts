@@ -10,7 +10,7 @@ export type Fiesta = {
 
 export const fiestas: Fiesta[
     ] = [
-    { title: "Día de los jubilados", img: "/bannerGenerico.png", description: "Jornada dedicada a nuestros mayores.", date: "2025-08-08", time: "12:00", location: "" },
+    { title: "Día de los jubilados 2", img: "/bannerGenerico.png", description: "Jornada dedicada a nuestros mayores.", date: "2025-08-08", time: "12:00", location: "Jubilados" },
     { title: "Merienda con Dúo Musical Gonsy", img: "/bannerDisco.png", description: "Merienda de confraternidad amenizada por Gonsy.", date: "2025-08-08", time: "20:30", location: "" },
     { title: "Concurso de adornos de balcones", img: "/bannerGenerico.png", description: "Inicio del 5º concurso (hasta el 17 a las 12:00).", date: "2025-08-09", time: "09:00", location: "" },
     { title: "Torneo de fútbol sala", img: "/bannerGenerico.png", description: "Eliminatorias del torneo.", date: "2025-08-09", time: "18:00", location: "" },
@@ -20,7 +20,7 @@ export const fiestas: Fiesta[
     { title: "Tardeo en la plaza", img: "/bannerGenerico.png", description: "Música ambiente y tapas.", date: "2025-08-30", time: "19:00", location: "" },
     { title: "Verbena popular", img: "/bannerDisco.png", description: "Música hasta la madrugada.", date: "2025-08-30", time: "23:00", location: "" },
     { title: "Cine al aire libre", img: "/bannerNinyos.png", description: "Proyección familiar bajo las estrellas.", date: "2025-09-01", time: "22:00", location: "" },
-    { title: "Taller de astronomía", img: "/bannerGenerico.png", description: "Observación de estrellas con telescopio.", date: "2025-09-01", time: "20:00", location: "" },
+    // { title: "Taller de astronomía", img: "/bannerGenerico.png", description: "Observación de estrellas con telescopio.", date: "2025-09-01", time: "20:00", location: "" },
     { title: "Taller infantil de manualidades", img: "/bannerNinyos.png", description: "Actividades creativas para peques.", date: "2025-09-02", time: "18:00", location: "" },
     { title: "Exposición de pintura local", img: "/bannerGenerico.png", description: "Muestra de artistas de Matet.", date: "2025-09-02", time: "19:30", location: "" },
     { title: "Concierto acústico en la fuente 2222", img: "/bannerDisco.png", description: "Repertorio acústico para todos los públicos.", date: "2025-09-04", time: "21:30", location: "" },
