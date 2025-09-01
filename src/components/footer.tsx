@@ -5,11 +5,11 @@ export default function Footer() {
   const hasSeg = (seg: string) => pathname.includes(`/` + seg);
   let bgColor = "#E7DAD1";
   if (hasSeg("proximas") || hasSeg("horarios")) {
-    bgColor = "#E85D6A";
+    bgColor = "#FFF5BA";
   } else if (hasSeg("ideas")) {
     bgColor = "#FFD966";
   } else if (hasSeg("todas")) {
-    bgColor = "#FFF5BA";
+    bgColor = "#E85D6A";
   } else if (hasSeg("noche")) {
     bgColor = "#083279";
   } else if (hasSeg("quehaceres")) {
