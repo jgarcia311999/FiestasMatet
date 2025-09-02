@@ -1,0 +1,22 @@
+
+
+{
+  "name": "Matet y sus fiestas",
+  "short_name": "Fiestas Matet",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#E7DAD1",
+  "theme_color": "#0C2335",
+  "icons": [
+    {
+      "src": "/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
