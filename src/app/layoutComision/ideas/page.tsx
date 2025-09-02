@@ -227,9 +227,9 @@ export default function IdeasPage() {
                       ) : null}
 
                       {/* Lista de ideas */}
-                      <ul className="space-y-2">
+                      <ul className="divide-y divide-[#0C2335]/10">
                         {sec.items.map((it) => (
-                          <li key={it.id} className="flex items-start gap-2">
+                          <li key={it.id} className="flex items-start gap-2 py-2">
                             {isEditing(sec.key) ? (
                               <>
                                 <textarea
