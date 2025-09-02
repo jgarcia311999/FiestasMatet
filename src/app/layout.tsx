@@ -16,6 +16,22 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Matet y sus fiestas",
   description: "Enterate de todas las fiestas que se hagan en MATET",
+  icons: {
+    // Favicon / fallback icons
+    icon: [
+      { url: "/favicon.ico" },
+      { url: "/logoMatet.png", type: "image/png" },
+    ],
+    // iOS Home Screen icon
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180" }],
+    // optional shortcut icon
+    shortcut: ["/favicon.ico"],
+  },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Matet y sus fiestas",
+  },
 };
 
 export default function RootLayout({
