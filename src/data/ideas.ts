@@ -13,8 +13,17 @@ export const ideasData: IdeasData = [
   },
   {
     "key": "sec-edbbfkq4",
-    "title": "Nuevo apartado",
-    "items": []
+    "title": "Segunda idea",
+    "items": [
+      {
+        "id": "q17j7huq",
+        "text": "Tengo muchas"
+      },
+      {
+        "id": "jbdio1hh",
+        "text": "Pero muchas muchas eh"
+      }
+    ]
   }
 ] as const;
 
