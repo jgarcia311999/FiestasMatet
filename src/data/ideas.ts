@@ -8,6 +8,10 @@ export const ideasData: IdeasData = [
       {
         "id": "krxoxbce",
         "text": "Idea de prueba"
+      },
+      {
+        "id": "2si7vjil",
+        "text": "Aqui va otra idea "
       }
     ]
   },
