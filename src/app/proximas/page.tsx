@@ -100,7 +100,9 @@ export default function ProximasPage() {
                     ) : (
                       <ul className="space-y-1">
                         {getEventosPorFecha(fiestasData, sec.key).map((ev, i) => (
-                          <li key={i} className="text-lg">A las {ev.time} {getFranjaHorariaLabel(ev.time)} - {ev.title}</li>
+                          <li key={i} className="text-lg">
+                            A las {ev.time} {getFranjaHorariaLabel(ev.time)}{ev.provisional && " *"} - {ev.title}
+                          </li>
                         ))}
                       </ul>
                     )}
@@ -129,6 +131,11 @@ export default function ProximasPage() {
                 </div>
                 <div className="border-t border-[#0C2335]" />
               </>
+            )}
+            {fiestasData.some(f => f.provisional) && (
+              <p className="mt-4 text-sm italic">
+                *La hora es provisional y puede variar.
+              </p>
             )}
           </>
         )}

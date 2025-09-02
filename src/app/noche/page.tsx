@@ -102,7 +102,9 @@ export default function Noche() {
                   ) : (
                     <ul className="space-y-1">
                       {getEventosPorFecha(fiestasData, sec.key).map((ev, i) => (
-                        <li key={i} className="text-lg text-[#FFD966]">A las {ev.time} {getFranjaHorariaLabel(ev.time)} - {ev.title}</li>
+                        <li key={i} className="text-lg text-[#FFD966]">
+                          A las {ev.time} {getFranjaHorariaLabel(ev.time)}{ev.provisional && " *"} - {ev.title}
+                        </li>
                       ))}
                     </ul>
                   )}
@@ -123,6 +125,12 @@ export default function Noche() {
               <div className="border-t border-[#0C2335]" />
             </div>
           ))
+        )}
+
+        {fiestasData.some(f => f.provisional) && (
+          <p className="mt-4 text-sm italic text-[#FFD966]">
+            *La hora es provisional y puede variar.
+          </p>
         )}
 
         {/* Call to action serif */}
