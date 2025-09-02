@@ -9,20 +9,39 @@ import { getCookie } from "cookies-next";
 
 export default function HorariosPage() {
   const [items, setItems] = useState<LocalFiesta[]>(() => [...(fiestas as LocalFiesta[])]);
-  // Ordenamos por fecha (YYYY-MM-DD) y luego por hora (HH:MM); vacíos al final
-  const eventosOrdenados = [...items].sort((a, b) => {
-    const ad = a.date || "";
-    const bd = b.date || "";
-    if (ad && bd && ad !== bd) return ad.localeCompare(bd);
-    if (!ad && bd) return 1;
-    if (ad && !bd) return -1;
-    const at = a.time || "";
-    const bt = b.time || "";
-    if (at && bt && at !== bt) return at.localeCompare(bt);
-    if (!at && bt) return 1;
-    if (at && !bt) return -1;
-    return (a.title || "").localeCompare(b.title || "");
-  });
+  // Fecha de corte: mostrar desde hace 2 días (calendario) en zona Europe/Madrid
+  const TZ = "Europe/Madrid";
+  function ymdInTZ(d: Date, tz: string) {
+    // 'en-CA' => YYYY-MM-DD
+    return new Intl.DateTimeFormat("en-CA", {
+      timeZone: tz,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).format(d);
+  }
+  const twoDaysAgoYMD = ymdInTZ(new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), TZ);
+  // Filtramos: mostrar eventos futuros y los de hace hasta 2 días (no 48h, días naturales)
+  // Luego ordenamos por fecha (YYYY-MM-DD) y hora (HH:MM), vacíos al final
+  const eventosOrdenados = items
+    .filter((ev) => {
+      // Exigimos fecha para poder comparar; si no hay fecha, no se muestra
+      if (!ev.date) return false;
+      return ev.date >= twoDaysAgoYMD; // incluye hoy y futuros, y los de los últimos 2 días naturales
+    })
+    .sort((a, b) => {
+      const ad = a.date || "";
+      const bd = b.date || "";
+      if (ad && bd && ad !== bd) return ad.localeCompare(bd);
+      if (!ad && bd) return 1;
+      if (ad && !bd) return -1;
+      const at = a.time || "";
+      const bt = b.time || "";
+      if (at && bt && at !== bt) return at.localeCompare(bt);
+      if (!at && bt) return 1;
+      if (at && !bt) return -1;
+      return (a.title || "").localeCompare(b.title || "");
+    });
 
   const [openIndex, setOpenIndex] = useState<number | null>(null);
   const [removed, setRemoved] = useState<Record<string, true>>({});
