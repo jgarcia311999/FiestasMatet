@@ -16,9 +16,6 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Matet y sus fiestas",
   description: "Enterate de todas las fiestas que se hagan en MATET",
-  icons: {
-    icon: "/logoMatet.png",
-  },
 };
 
 export default function RootLayout({
