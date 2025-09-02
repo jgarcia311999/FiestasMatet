@@ -125,10 +125,9 @@ export default function IdeasPage() {
     }
   }
 
-  const pageBg = "#FFD966"; // color Ideas
 
   return (
-    <main className="min-h-screen" style={{ backgroundColor: pageBg }}>
+    <main className="min-h-screen bg-[#FFF5BA] text-[#0C2335]">
       <div className="max-w-5xl mx-auto px-4 py-12 text-[#0C2335]">
         <h1 className="text-[80px] leading-none font-semibold break-words">Ideas</h1>
 

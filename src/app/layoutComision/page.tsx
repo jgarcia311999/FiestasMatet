@@ -87,9 +87,9 @@ export default function LayoutComisionPage() {
 
         {/* Ideas */}
         <Link href="/layoutComision/ideas">
-          <div className="mt-2 relative h-[180px] rounded-3xl bg-[#083279] overflow-hidden">
-            <div className="absolute top-3 left-4 text-[10px] uppercase tracking-[0.2em] text-[#FFD966]">Propón y comparte mejoras</div>
-            <div className="absolute bottom-[-6px] left-4 right-4 text-[80px] leading-none font-semibold text-[#FFD966]/90 select-none">
+          <div className="mt-2 relative h-[180px] rounded-3xl bg-[#FFF5BA] overflow-hidden">
+            <div className="absolute top-3 left-4 text-[10px] uppercase tracking-[0.2em] text-[#0C2335]">Propón y comparte mejoras</div>
+            <div className="absolute bottom-[-6px] left-4 right-4 text-[80px] leading-none font-semibold text-[#0C2335]/90 select-none">
               Ideas
             </div>
           </div>
@@ -97,9 +97,9 @@ export default function LayoutComisionPage() {
 
         {/* Quehaceres */}
         <Link href="/layoutComision/quehaceres">
-          <div className="mt-2 relative h-[180px] rounded-3xl bg-[#a3b18a] overflow-hidden">
-            <div className="absolute top-3 left-4 text-[10px] uppercase tracking-[0.2em]">Tareas pendientes y asignadas</div>
-            <div className="absolute bottom-[-6px] left-4 right-4 text-[80px] leading-none font-semibold text-[#0C2335]/90 select-none">
+          <div className="mt-2 relative h-[180px] rounded-3xl bg-[#083279] overflow-hidden">
+            <div className="absolute top-3 left-4 text-[10px] uppercase tracking-[0.2em] text-[#FFD966]">Tareas pendientes y asignadas</div>
+            <div className="absolute bottom-[-6px] left-4 right-4 text-[80px] leading-none font-semibold text-[#FFD966]/90 select-none">
               Quehaceres
             </div>
           </div>

@@ -4,11 +4,9 @@ export default function Footer() {
   const pathname = usePathname() || "/";
   const hasSeg = (seg: string) => pathname.includes(`/` + seg);
   let bgColor = "#E7DAD1";
-  if (hasSeg("proximas") || hasSeg("horarios")) {
+  if (hasSeg("proximas") || hasSeg("ideas")) {
     bgColor = "#FFF5BA";
-  } else if (hasSeg("ideas")) {
-    bgColor = "#FFD966";
-  } else if (hasSeg("todas")) {
+  } else if (hasSeg("todas") || hasSeg("horarios")) {
     bgColor = "#E85D6A";
   } else if (hasSeg("noche")) {
     bgColor = "#083279";
