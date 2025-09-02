@@ -10,6 +10,11 @@ export const ideasData: IdeasData = [
         "text": "Idea de prueba"
       }
     ]
+  },
+  {
+    "key": "sec-edbbfkq4",
+    "title": "Nuevo apartado",
+    "items": []
   }
 ] as const;
 
