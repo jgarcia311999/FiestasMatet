@@ -92,6 +92,11 @@ export const ideasData: IdeasData = [
         "text": "Al acabar el cine/jotas/mago/espectaculo, todo el mundo a la era a ver las perseidas (lagrimas de San Lorenzo)"
       }
     ]
+  },
+  {
+    "key": "sec-spd0i3yd",
+    "title": "Nuevo apartado",
+    "items": []
   }
 ] as const;
 
