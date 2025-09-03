@@ -449,6 +449,14 @@ export const fiestas: Fiesta[
     provisional: false,
   },
     // { title: "Prueva de evento", img: "", description: "Ven a vivir una prueba", date: "2025-09-05", time: "12:25", location: "Plaza del ayuntamiento" },
-    { title: "fffff", img: "", description: "sss", date: "2025-09-05", time: "10:27", location: "fff" }
+    { title: "fffff", img: "", description: "sss", date: "2025-09-05", time: "10:27", location: "fff" },
+  {
+    title: "s",
+    img: "",
+    description: "szz",
+    date: "2025-09-12",
+    time: "13:37",
+    location: "ddd"
+  }
 ];
 
