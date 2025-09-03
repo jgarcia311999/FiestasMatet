@@ -460,5 +460,6 @@ export const fiestas: Fiesta[] = [
     location: "Plaza de la iglesia",
     provisional: false,
   },
+  { title: "Prueva de evento", img: "", description: "Ven a vivir una prueba", date: "2025-09-05", time: "12:25", location: "Plaza del ayuntamiento" },
 ];
 
