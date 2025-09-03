@@ -100,15 +100,13 @@ export default function Home2Page() {
         </Link>
 
         {/* New Card */}
-        <div className="mt-8 relative h-[250px] rounded-3xl bg-[#a3b18a] overflow-hidden">
+        {/* <div className="mt-8 relative h-[250px] rounded-3xl bg-[#a3b18a] overflow-hidden">
           <div className="absolute top-3 left-4 text-[10px] uppercase tracking-[0.2em]">Para que disfrute toda la familia</div>
 
-          {/* Giant word behind */}
           <div className="absolute bottom-[-6px] left-4 right-4 text-[80px] leading-none font-semibold text-[#0C2335]/90 select-none">
             Peques
           </div>
 
-          {/* Center circle with arrow */}
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="h-28 w-28 rounded-full border border-[#0C2335] flex items-center justify-center mb-6 text-[#0C2335]">
               <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -117,7 +115,7 @@ export default function Home2Page() {
               </svg>
             </div>
           </div>
-        </div>
+        </div> */}
 
         <Link href="/calendar">
           <div className="mt-8 mb-8 text-right text-[12px] uppercase tracking-[0.2em] text-[#0C2335] cursor-pointer hover:underline">
