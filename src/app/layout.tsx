@@ -29,7 +29,7 @@ export const metadata: Metadata = {
   },
   appleWebApp: {
     capable: true,
-    statusBarStyle: "default",
+    statusBarStyle: "default", 
     title: "Matet y sus fiestas",
   },
 };
