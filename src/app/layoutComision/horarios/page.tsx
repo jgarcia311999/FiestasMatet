@@ -63,6 +63,80 @@ export default function HorariosPage() {
   const [removed, setRemoved] = useState<Record<string, true>>({});
   const makeKey = (e: { title?: string; date?: string; time?: string }) => `${e.title || ""}|${e.date || ""}|${e.time || ""}`;
 
+  // --- Selección múltiple para borrar ---
+  const [selectMode, setSelectMode] = useState(false);
+  const [selected, setSelected] = useState<Record<string, boolean>>({});
+  const selectedCount = Object.values(selected).filter(Boolean).length;
+  const [bulkDeleting, setBulkDeleting] = useState(false);
+
+  function toggleSelect(key: string) {
+    setSelected(prev => ({ ...prev, [key]: !prev[key] }));
+  }
+  function clearSelection() {
+    setSelected({});
+  }
+
+  // --- Borrado múltiple (secuencial para evitar conflictos de escritura) ---
+  async function handleBulkDelete() {
+    if (selectedCount === 0 || bulkDeleting) return;
+    if (!confirm(`¿Borrar ${selectedCount} evento(s)?`)) return;
+
+    setBulkDeleting(true);
+
+    const keys = Object.entries(selected).filter(([, v]) => v).map(([k]) => k);
+
+    // Optimista: ocultar todos en UI
+    setRemoved(prev => {
+      const copy = { ...prev };
+      for (const k of keys) copy[k] = true;
+      return copy;
+    });
+
+    // Construimos payloads con los items actuales (clave basada en title|date|time)
+    const payloads = items
+      .map(it => ({ title: it.title || "", date: it.date || "", time: it.time || "" }))
+      .filter(p => keys.includes(`${p.title}|${p.date}|${p.time}`));
+
+    const failed: { key: string; title: string }[] = [];
+
+    // Ejecutar en serie para evitar colisiones en la edición del fichero remoto/DB
+    for (const p of payloads) {
+      const key = `${p.title}|${p.date}|${p.time}`;
+      try {
+        const res = await fetch("/api/events/delete", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(p),
+        });
+        if (!res.ok) {
+          failed.push({ key, title: p.title });
+        }
+      } catch {
+        failed.push({ key, title: p.title });
+      }
+    }
+
+    if (failed.length) {
+      // Revertimos los que no se pudieron borrar
+      setRemoved(prev => {
+        const copy = { ...prev };
+        for (const f of failed) delete copy[f.key];
+        return copy;
+      });
+      const okCount = selectedCount - failed.length;
+      const names = failed.map(f => f.title || "(Sin título)").slice(0, 3).join(", ");
+      const extra = failed.length > 3 ? ` y ${failed.length - 3} más` : "";
+      setToast({ show: true, text: `Se borraron ${okCount} y fallaron ${failed.length}${names ? `: ${names}` : ""}${extra}`, key: null });
+    } else {
+      setToast({ show: true, text: `Se borraron ${selectedCount} evento(s)`, key: null });
+    }
+
+    // Salir de modo selección y limpiar
+    setSelectMode(false);
+    clearSelection();
+    setBulkDeleting(false);
+  }
+
   // Toast de borrado y deshacer
   const [toast, setToast] = useState<{ show: boolean; text: string; key: string | null }>({ show: false, text: "", key: null });
   const toastTimerRef = useRef<number | null>(null);
@@ -322,6 +396,42 @@ export default function HorariosPage() {
         )}
         <h1 className="text-[80px] leading-none font-semibold break-words">Horarios</h1>
 
+        <div className="mt-2 flex items-center justify-end gap-2">
+          {!selectMode ? (
+            <button
+              type="button"
+              onClick={() => setSelectMode(true)}
+              className="rounded border border-[#0C2335]/30 px-3 py-1.5 text-sm hover:bg-[#0C2335]/5"
+            >
+              Seleccionar
+            </button>
+          ) : (
+            <>
+              <button
+                type="button"
+                onClick={() => { setSelectMode(false); clearSelection(); }}
+                className="rounded border border-[#0C2335]/30 px-3 py-1.5 text-sm hover:bg-[#0C2335]/5"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                disabled={selectedCount === 0 || bulkDeleting}
+                onClick={handleBulkDelete}
+                className="inline-flex items-center gap-2 rounded bg-[#0C2335] text-white px-3 py-1.5 text-sm disabled:opacity-50"
+              >
+                {bulkDeleting && (
+                  <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" opacity="0.25"/>
+                    <path d="M22 12a10 10 0 0 1-10 10" stroke="currentColor" strokeWidth="4"/>
+                  </svg>
+                )}
+                Eliminar seleccionados ({selectedCount})
+              </button>
+            </>
+          )}
+        </div>
+
         {/* Listado: fecha - hora, nombre */}
         <ul className="mt-6 divide-y divide-[#0C2335]/10">
           {eventosOrdenados.filter(ev => !removed[makeKey(ev)]).map((ev, idx) => {
@@ -334,16 +444,27 @@ export default function HorariosPage() {
             const isAttending = !!(user && asistentes.includes(user));
             return (
               <li key={makeKey(ev)} className="py-3">
-                <button
-                  type="button"
-                  onClick={() => setOpenIndex(isOpen ? null : idx)}
-                  className="w-full text-left"
-                >
-                  <div className="flex items-baseline justify-between gap-3">
-                    <span className="text-sm whitespace-nowrap">{fechaHora}</span>
-                    <span className="text-base font-medium truncate">{ev.title || "(Sin título)"}</span>
-                  </div>
-                </button>
+                <div className="flex items-start gap-2">
+                  {selectMode && (
+                    <input
+                      type="checkbox"
+                      checked={!!selected[makeKey(ev)]}
+                      onChange={() => toggleSelect(makeKey(ev))}
+                      className="mt-1 h-4 w-4 accent-[#0C2335]"
+                      aria-label="Seleccionar evento"
+                    />
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => setOpenIndex(isOpen ? null : idx)}
+                    className="flex-1 text-left"
+                  >
+                    <div className="flex items-baseline justify-between gap-3">
+                      <span className="text-sm whitespace-nowrap">{fechaHora}</span>
+                      <span className="text-base font-medium truncate">{ev.title || "(Sin título)"}</span>
+                    </div>
+                  </button>
+                </div>
                 {isOpen && (
                   <div className="mt-2 pl-2 text-sm space-y-2">
                     <p className="opacity-90"><span className="font-semibold">Descripción:</span> {ev.description?.trim() || "Sin descripción"}</p>
@@ -358,6 +479,7 @@ export default function HorariosPage() {
                     </p>
 
                     {/* Action buttons: trash, pencil, check */}
+                    {!selectMode && (
                     <div className="pt-1 flex items-center gap-3 justify-end">
                       {/* Trash */}
                       <button
@@ -399,6 +521,7 @@ export default function HorariosPage() {
                         </svg>
                       </button>
                     </div>
+                    )}
                   </div>
                 )}
               </li>

@@ -10,9 +10,7 @@ export type Fiesta = {
   provisional?: boolean;
 };
 
-export const fiestas: Fiesta[
-    ] = [
-
+export const fiestas: Fiesta[] = [
   {
     title: "Concurso de pintura rápida",
     description: "Recorre el pueblo descubriendo cada rincón",
@@ -21,7 +19,7 @@ export const fiestas: Fiesta[
     location: "Todo el pueblo",
     provisional: true,
   },
-    {
+  {
     title: "Exposición del concurso de pintura rápida",
     description:
       "Ven al Polifuncional/Plaza de la Iglesia para ver todos los cuadros pintados durante el día.",
@@ -30,7 +28,7 @@ export const fiestas: Fiesta[
     location: "Polifuncional/Plaza de la Iglesia",
     provisional: true,
   },
-    {
+  {
     title: "Cena de sobaquillo",
     description:
       "Trae tu bocata para cenar todos juntos en el Polifuncional/Plaza de la Iglesia",
@@ -39,7 +37,7 @@ export const fiestas: Fiesta[
     location: "Polifuncional/Plaza de la Iglesia",
     provisional: false,
   },
-    {
+  {
     title: "Discomovil",
     description: "¡Disfruta de la discomóvil!",
     date: "2025-10-04",
@@ -47,7 +45,7 @@ export const fiestas: Fiesta[
     location: "Polifuncional/Plaza de la Iglesia",
     provisional: false,
   },
-    {
+  {
     title: "Comida popular",
     description:
       "Ven a comer a la plaza un buen plato de Arròs amb fesols i naps patrocinado por la Cofradía",
@@ -56,7 +54,7 @@ export const fiestas: Fiesta[
     location: "Polifuncional/Plaza de la Iglesia",
     provisional: true,
   },
-    {
+  {
     title: "Discomovil",
     description: "¡Disfruta de la discomóvil!",
     date: "2025-11-01",
@@ -64,7 +62,7 @@ export const fiestas: Fiesta[
     location: "Polifuncional/Jubilados",
     provisional: false,
   },
-    {
+  {
     title: "Merienda de confraternidad con el DÚO MUSICAL GONSY",
     description: "",
     date: "2025-08-08",
@@ -72,15 +70,16 @@ export const fiestas: Fiesta[
     location: "Plaza de la iglesia",
     provisional: false,
   },
-    {
-    title: "5º Concurso de adornos de balcones (hasta el domingo 17 a las 12:00 h)",
+  {
+    title:
+      "5º Concurso de adornos de balcones (hasta el domingo 17 a las 12:00 h)",
     description: "",
     date: "2025-08-09",
     time: "09:00",
     location: "Todo el pueblo",
     provisional: false,
   },
-    {
+  {
     title: "Torneo de fútbol sala",
     description: "",
     date: "2025-08-09",
@@ -88,7 +87,7 @@ export const fiestas: Fiesta[
     location: "Piscina",
     provisional: false,
   },
-    {
+  {
     title: "Cena de sobaquillo",
     description: "",
     date: "2025-08-09",
@@ -96,7 +95,7 @@ export const fiestas: Fiesta[
     location: "Plaza de la iglesia",
     provisional: false,
   },
-    {
+  {
     title: "Disco móvil con animación",
     description: "",
     date: "2025-08-09",
@@ -104,7 +103,7 @@ export const fiestas: Fiesta[
     location: "Plaza de la iglesia",
     provisional: false,
   },
-    {
+  {
     title: "Torneo de fútbol sala",
     description: "",
     date: "2025-08-10",
@@ -112,7 +111,7 @@ export const fiestas: Fiesta[
     location: "Piscina",
     provisional: false,
   },
-    {
+  {
     title: "Cena de sobaquillo",
     description: "",
     date: "2025-08-10",
@@ -120,7 +119,7 @@ export const fiestas: Fiesta[
     location: "Plaza de la iglesia",
     provisional: false,
   },
-    {
+  {
     title: "Disco móvil",
     description: "",
     date: "2025-08-10",
@@ -128,7 +127,7 @@ export const fiestas: Fiesta[
     location: "Plaza de la iglesia",
     provisional: false,
   },
-    {
+  {
     title: "Parque infantil",
     description: "",
     date: "2025-08-11",
@@ -136,7 +135,7 @@ export const fiestas: Fiesta[
     location: "Plaza de la iglesia",
     provisional: false,
   },
-    {
+  {
     title: "Cena de sobaquillo",
     description: "",
     date: "2025-08-11",
@@ -144,7 +143,7 @@ export const fiestas: Fiesta[
     location: "Plaza de la iglesia",
     provisional: false,
   },
-    {
+  {
     title: "Cine BÚFALO KIDS",
     description: "",
     date: "2025-08-11",
@@ -152,7 +151,7 @@ export const fiestas: Fiesta[
     location: "Plaza de la iglesia",
     provisional: false,
   },
-    {
+  {
     title: "Cena de sobaquillo",
     description: "",
     date: "2025-08-12",
@@ -160,7 +159,7 @@ export const fiestas: Fiesta[
     location: "Plaza de la iglesia",
     provisional: false,
   },
-    {
+  {
     title: "Teatro “LAS AVENTURAS DE ELSA Y PATO”",
     description: "",
     date: "2025-08-12",
@@ -168,7 +167,7 @@ export const fiestas: Fiesta[
     location: "Plaza de la iglesia",
     provisional: false,
   },
-    {
+  {
     title: "Concurso de paellas",
     description: "",
     date: "2025-08-13",
@@ -176,7 +175,7 @@ export const fiestas: Fiesta[
     location: "Plaza de la iglesia",
     provisional: false,
   },
-    {
+  {
     title: "Noche de Playbacks",
     description: "",
     date: "2025-08-13",
@@ -184,7 +183,7 @@ export const fiestas: Fiesta[
     location: "Plaza de la iglesia",
     provisional: false,
   },
-    {
+  {
     title: "Volteo de campanas y cohetes (inicio de fiestas)",
     description: "",
     date: "2025-08-14",
@@ -192,7 +191,7 @@ export const fiestas: Fiesta[
     location: "Matet",
     provisional: false,
   },
-    {
+  {
     title: "Cabalgata de disfraces y reparto de fartons con horchata",
     description: "",
     date: "2025-08-14",
@@ -200,7 +199,7 @@ export const fiestas: Fiesta[
     location: "Todo el pueblo",
     provisional: false,
   },
-    {
+  {
     title: "Cena de sobaquillo",
     description: "",
     date: "2025-08-14",
@@ -208,7 +207,7 @@ export const fiestas: Fiesta[
     location: "Plaza de la iglesia",
     provisional: false,
   },
-    {
+  {
     title: "Orquesta LEGADO",
     description: "",
     date: "2025-08-14",
@@ -216,7 +215,7 @@ export const fiestas: Fiesta[
     location: "Plaza de la iglesia",
     provisional: false,
   },
-    {
+  {
     title: "Pasacalles",
     description: "Celebración de Nuestra Señora La Virgen de la Asunción",
     date: "2025-08-15",
@@ -224,7 +223,7 @@ export const fiestas: Fiesta[
     location: "Todo el pueblo",
     provisional: false,
   },
-    {
+  {
     title: "Eucaristía solemne",
     description: "Celebración de Nuestra Señora La Virgen de la Asunción",
     date: "2025-08-15",
@@ -232,7 +231,7 @@ export const fiestas: Fiesta[
     location: "Plaza de la iglesia",
     provisional: false,
   },
-    {
+  {
     title: "Procesión",
     description: "Celebración de Nuestra Señora La Virgen de la Asunción",
     date: "2025-08-15",
@@ -240,7 +239,7 @@ export const fiestas: Fiesta[
     location: "Todo el pueblo",
     provisional: false,
   },
-    {
+  {
     title: "Cena de sobaquillo",
     description: "Celebración de Nuestra Señora La Virgen de la Asunción",
     date: "2025-08-15",
@@ -248,7 +247,7 @@ export const fiestas: Fiesta[
     location: "Plaza de la iglesia",
     provisional: false,
   },
-    {
+  {
     title: "Orquesta CONTRABANDA",
     description: "Celebración de Nuestra Señora La Virgen de la Asunción",
     date: "2025-08-15",
@@ -256,7 +255,7 @@ export const fiestas: Fiesta[
     location: "Plaza de la iglesia",
     provisional: false,
   },
-    {
+  {
     title: "Volteo de campanas y cohetes (inicio fiestas Virgen del Rosario)",
     description: "",
     date: "2025-08-16",
@@ -264,7 +263,7 @@ export const fiestas: Fiesta[
     location: "Matet",
     provisional: false,
   },
-    {
+  {
     title: "Ofrenda de flores",
     description: "",
     date: "2025-08-16",
@@ -272,7 +271,7 @@ export const fiestas: Fiesta[
     location: "Todo el pueblo",
     provisional: false,
   },
-    {
+  {
     title: "Cena de sobaquillo",
     description: "",
     date: "2025-08-16",
@@ -280,7 +279,7 @@ export const fiestas: Fiesta[
     location: "Plaza de la iglesia",
     provisional: false,
   },
-    {
+  {
     title: "Rock en Matet: MENUDA G-TA + EL SALMÓN + Disco Móvil",
     description: "",
     date: "2025-08-16",
@@ -288,7 +287,7 @@ export const fiestas: Fiesta[
     location: "Plaza de la iglesia",
     provisional: false,
   },
-    {
+  {
     title: "Pasacalles y recogida de Clavarias",
     description: "Fiesta en Honor a Nuestra Señora la Virgen del Rosario",
     date: "2025-08-17",
@@ -296,7 +295,7 @@ export const fiestas: Fiesta[
     location: "Plaza de la iglesia",
     provisional: false,
   },
-    {
+  {
     title: "Eucaristía solemne",
     description: "Fiesta en Honor a Nuestra Señora la Virgen del Rosario",
     date: "2025-08-17",
@@ -304,7 +303,7 @@ export const fiestas: Fiesta[
     location: "Plaza de la iglesia",
     provisional: false,
   },
-    {
+  {
     title: "Procesión y Traca final",
     description: "Fiesta en Honor a Nuestra Señora la Virgen del Rosario",
     date: "2025-08-17",
@@ -312,7 +311,7 @@ export const fiestas: Fiesta[
     location: "Todo el pueblo",
     provisional: false,
   },
-    {
+  {
     title: "Cena de sobaquillo",
     description: "Fiesta en Honor a Nuestra Señora la Virgen del Rosario",
     date: "2025-08-17",
@@ -320,7 +319,7 @@ export const fiestas: Fiesta[
     location: "Plaza de la iglesia",
     provisional: false,
   },
-    {
+  {
     title: "Orquesta VENUS",
     description: "Fiesta en Honor a Nuestra Señora la Virgen del Rosario",
     date: "2025-08-17",
@@ -328,7 +327,7 @@ export const fiestas: Fiesta[
     location: "Plaza de la iglesia",
     provisional: false,
   },
-    {
+  {
     title: "Eucaristía en la Ermita Santa Bárbara (Día de Almas)",
     description: "",
     date: "2025-08-18",
@@ -336,7 +335,7 @@ export const fiestas: Fiesta[
     location: "Ermita Santa Bárbara",
     provisional: false,
   },
-    {
+  {
     title: "Montaje de barreras para los toros",
     description: "",
     date: "2025-08-18",
@@ -344,7 +343,7 @@ export const fiestas: Fiesta[
     location: "Plaza de la iglesia",
     provisional: false,
   },
-    {
+  {
     title: "Toro embolado (Ganadería LA MORADA)",
     description: "",
     date: "2025-08-21",
@@ -352,7 +351,7 @@ export const fiestas: Fiesta[
     location: "Plaza de la iglesia",
     provisional: false,
   },
-    {
+  {
     title: "Entrada de toros infantil",
     description: "1º Día de toros",
     date: "2025-08-22",
@@ -360,7 +359,7 @@ export const fiestas: Fiesta[
     location: "Plaza de la iglesia",
     provisional: false,
   },
-    {
+  {
     title: "Entrada de toros y prueba de ganado CAPOTA",
     description: "1º Día de toros",
     date: "2025-08-22",
@@ -368,7 +367,7 @@ export const fiestas: Fiesta[
     location: "Plaza de la iglesia",
     provisional: false,
   },
-    {
+  {
     title: "Suelta de vaquillas y toro de la merienda (Ganadería CAPOTA)",
     description: "1º Día de toros",
     date: "2025-08-22",
@@ -376,7 +375,7 @@ export const fiestas: Fiesta[
     location: "Plaza de la iglesia",
     provisional: false,
   },
-    {
+  {
     title: "Toro embolado (Ganadería CAPOTA)",
     description: "1º Día de toros",
     date: "2025-08-22",
@@ -384,7 +383,7 @@ export const fiestas: Fiesta[
     location: "Plaza de la iglesia",
     provisional: false,
   },
-    {
+  {
     title: "Entrada de toros infantil",
     description: "2º Día de toros",
     date: "2025-08-23",
@@ -392,7 +391,7 @@ export const fiestas: Fiesta[
     location: "Plaza de la iglesia",
     provisional: false,
   },
-    {
+  {
     title: "Pasacalle (Agrupación Musical Xaranga XARANÇAINA)",
     description: "2º Día de toros",
     date: "2025-08-23",
@@ -400,7 +399,7 @@ export const fiestas: Fiesta[
     location: "Plaza de la iglesia",
     provisional: false,
   },
-    {
+  {
     title: "Entrada de toros y prueba de ganado EL CID",
     description: "2º Día de toros",
     date: "2025-08-23",
@@ -408,7 +407,7 @@ export const fiestas: Fiesta[
     location: "Plaza de la iglesia",
     provisional: false,
   },
-    {
+  {
     title: "Suelta de vaquillas y toro de la merienda (Ganadería EL CID)",
     description: "2º Día de toros",
     date: "2025-08-23",
@@ -416,7 +415,7 @@ export const fiestas: Fiesta[
     location: "Plaza de la iglesia",
     provisional: false,
   },
-    {
+  {
     title: "Toro embolado (Ganadería EL CID)",
     description: "2º Día de toros",
     date: "2025-08-23",
@@ -424,7 +423,7 @@ export const fiestas: Fiesta[
     location: "Plaza de la iglesia",
     provisional: false,
   },
-    {
+  {
     title: "Trashumancia de “MANSETS”",
     description: "3º Día de toros",
     date: "2025-08-24",
@@ -432,7 +431,7 @@ export const fiestas: Fiesta[
     location: "Plaza de la iglesia",
     provisional: false,
   },
-    {
+  {
     title: "Entrada de toros y prueba de ganado LA MORADA",
     description: "3º Día de toros",
     date: "2025-08-24",
@@ -440,7 +439,7 @@ export const fiestas: Fiesta[
     location: "Plaza de la iglesia",
     provisional: false,
   },
-    {
+  {
     title: "Suelta de vaquillas y toro de la merienda (Ganadería LA MORADA)",
     description: "3º Día de toros",
     date: "2025-08-24",
@@ -448,23 +447,36 @@ export const fiestas: Fiesta[
     location: "Plaza de la iglesia",
     provisional: false,
   },
-    // { title: "Prueva de evento", img: "", description: "Ven a vivir una prueba", date: "2025-09-05", time: "12:25", location: "Plaza del ayuntamiento" },
-    { title: "fffff", img: "", description: "sss", date: "2025-09-05", time: "10:27", location: "fff" },
-    // {
-//     title: "s",
-//     img: "",
-//     description: "szz",
-//     date: "2025-09-12",
-//     time: "13:37",
-//     location: "ddd"
-//   },
-    // {
-//     title: "wwwww",
-//     img: "",
-//     description: "www",
-//     date: "2025-09-12",
-//     time: "14:14",
-//     location: "www"
-//   }
+  {
+    title: "Prueva de evento",
+    img: "",
+    description: "Ven a vivir una prueba",
+    date: "2025-09-05",
+    time: "12:25",
+    location: "Plaza del ayuntamiento",
+  },
+  {
+    title: "fffff",
+    img: "",
+    description: "sss",
+    date: "2025-09-05",
+    time: "10:27",
+    location: "fff",
+  },
+  {
+    title: "s",
+    img: "",
+    description: "szz",
+    date: "2025-09-12",
+    time: "13:37",
+    location: "ddd",
+  },
+  {
+    title: "wwwww",
+    img: "",
+    description: "www",
+    date: "2025-09-12",
+    time: "14:14",
+    location: "www",
+  },
 ];
-
