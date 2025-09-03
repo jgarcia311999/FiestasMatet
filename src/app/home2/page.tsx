@@ -33,9 +33,14 @@ export default function Home2Page() {
           <div className="text-[84px] leading-none font-semibold mt-2">2026</div>
         </div>
 
+        <Link href="/calendar">
+          <div className="mt-10 mb-0 mr-2 text-right text-[12px] uppercase tracking-[0.2em] text-[#0C2335] cursor-pointer hover:underline">
+            Busca por fecha →
+          </div>
+        </Link>
         {/* New Card: Todas */}
         <Link href="/todas">
-          <div className="mt-8 relative h-[250px] rounded-3xl bg-[#E85D6A] overflow-hidden">
+          <div className="mt-3 relative h-[250px] rounded-3xl bg-[#E85D6A] overflow-hidden">
             <div className="absolute top-3 left-4 text-[10px] uppercase tracking-[0.2em]">Enterate de todo!</div>
 
             {/* Giant word behind */}
@@ -117,11 +122,6 @@ export default function Home2Page() {
           </div>
         </div> */}
 
-        <Link href="/calendar">
-          <div className="mt-8 mb-8 text-right text-[12px] uppercase tracking-[0.2em] text-[#0C2335] cursor-pointer hover:underline">
-            Busca por fecha →
-          </div>
-        </Link>
       </div>
     </main>
   );
