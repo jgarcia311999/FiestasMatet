@@ -129,8 +129,8 @@ export default function CalendarPage() {
     <main className="min-h-screen bg-[#d9e3f0] text-[#0C2335]">
       <div className="mx-auto max-w-sm px-1 pt-10 pb-24">
         {/* Headline */}
-        <h1 className="font-serif text-[36px] leading-[1.05] tracking-tight">
-          Entérate de <strong>todas</strong> las fiestas de <strong>MATET</strong>
+        <h1 className="font-serif text-[36px] leading-snug tracking-tight mb-4">
+          Busca <strong>todas</strong> las fiestas de <strong>MATET</strong>
         </h1>
 
         {/* ===================== */}
