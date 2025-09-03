@@ -1,14 +1,29 @@
-import { db } from "@/db/client";
-import { events } from "@/db/schema";
+"use client";
+import { useState, useEffect } from "react";
+
 import { InferModel } from "drizzle-orm";
 
 // Tipado derivado de la tabla events
-type Event = InferModel<typeof events>;
+type Event = {
+  id: number;
+  startsAt: string;
+  title: string;
+  provisional?: boolean;
+  location?: string;
+};
 
-// Utilidades de fecha
-function toDateKey(d: Date) {
-  return d.toISOString().slice(0, 10); // YYYY-MM-DD
+const TZ = "Europe/Madrid";
+
+function toDateKeyTZ(d: Date, tz: string) {
+  // YYYY-MM-DD en la zona indicada
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: tz,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(d);
 }
+
 function toTimeHHMM(d: Date) {
   return d.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit", hour12: false });
 }
@@ -21,8 +36,9 @@ function sortNightLast(items: { time: string }[]) {
 }
 
 // Agrega formato largo "Lunes 12 de agosto"
-function formatSpanishLong(date: Date): string {
+function formatSpanishLong(date: Date, tz: string): string {
   const s = new Intl.DateTimeFormat("es-ES", {
+    timeZone: tz,
     weekday: "long",
     day: "numeric",
     month: "long",
@@ -31,23 +47,44 @@ function formatSpanishLong(date: Date): string {
   return noComma.charAt(0).toUpperCase() + noComma.slice(1);
 }
 
-export default async function CalendarPage() {
-  // 1) Leer todos los eventos de la BD
-  const rows: Event[] = await db.select().from(events);
+export default function CalendarPage() {
+  const [rows, setRows] = useState<Event[]>([]);
+  const [showPast, setShowPast] = useState(false);
+
+  useEffect(() => {
+    async function fetchEvents() {
+      const res = await fetch("/api/events");
+      if (res.ok) {
+        const json = await res.json();
+        const list: Event[] = Array.isArray(json?.events) ? json.events : Array.isArray(json) ? json : [];
+        setRows(list);
+      } else {
+        setRows([]);
+      }
+    }
+    fetchEvents();
+  }, []);
+
+  // Clave de hoy en Europe/Madrid (mostramos hoy aunque la hora haya pasado)
+  const todayKey = toDateKeyTZ(new Date(), TZ);
 
   // 2) Agrupar por fecha "YYYY-MM-DD" con la estructura que espera el calendario
-  const byDate = new Map<string, { label: string; items: { id: number; time: string; title: string; provisional: boolean; location: string }[] }>();
+  const byDate = new Map<
+    string,
+    { label: string; items: { id: number; time: string; title: string; provisional: boolean; location: string }[] }
+  >();
 
   for (const ev of rows) {
     const d = new Date(ev.startsAt);
-    const key = toDateKey(d);
-    const label = formatSpanishLong(d);
+    const key = toDateKeyTZ(d, TZ);
+    if (!showPast && key < todayKey) continue;
+    const label = formatSpanishLong(d, TZ);
     const item = {
       id: ev.id,
       time: toTimeHHMM(d),
       title: ev.title,
       provisional: !!ev.provisional,
-      location: ev.location,
+      location: ev.location || "",
     };
     if (!byDate.has(key)) byDate.set(key, { label, items: [] });
     byDate.get(key)!.items.push(item);
@@ -67,6 +104,15 @@ export default async function CalendarPage() {
         <h1 className="font-serif text-[36px] leading-[1.05] tracking-tight">
           Calendario de <strong>fiestas</strong> de <strong className="block mt-2">MATET</strong>
         </h1>
+        <div className="mt-2">
+          <button
+            type="button"
+            onClick={() => setShowPast((v) => !v)}
+            className="text-sm underline hover:no-underline"
+          >
+            {showPast ? "<- Ocultar anteriores" : "<- Ver anteriores"}
+          </button>
+        </div>
 
         <div className="mt-5 border-t border-[#0C2335]" />
 
@@ -87,7 +133,8 @@ export default async function CalendarPage() {
                     <ul className="space-y-1">
                       {day.items.map((ev) => (
                         <li key={ev.id} className="text-lg">
-                          A las {ev.time} {getFranjaHorariaLabel(ev.time)}{ev.provisional && "*"} - {ev.title}
+                          A las {ev.time} {getFranjaHorariaLabel(ev.time)}
+                          {ev.provisional && "*"} - {ev.title}
                           {ev.location ? <span className="ml-1">({ev.location})</span> : null}
                         </li>
                       ))}

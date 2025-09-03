@@ -1,6 +1,61 @@
 "use client";
-import { useMemo, useRef, useState } from "react";
-import { fiestas as fiestasData, type Fiesta } from "@/data/fiestas";
+import { useMemo, useRef, useState, useEffect } from "react";
+
+const TZ = "Europe/Madrid";
+
+type Fiesta = {
+  title: string;
+  date: string; // YYYY-MM-DD (Europe/Madrid)
+  time: string; // HH:MM (Europe/Madrid)
+  provisional?: boolean;
+};
+
+function toYMD(date: Date, tz: string) {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: tz,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(date);
+}
+
+function toHM(date: Date, tz: string) {
+  return new Intl.DateTimeFormat("en-GB", {
+    timeZone: tz,
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  })
+    .format(date)
+    .replace(/^([0-9]{2}):([0-9]{2}).*$/, "$1:$2");
+}
+
+function isRecord(v: unknown): v is Record<string, unknown> {
+  return typeof v === "object" && v !== null;
+}
+
+function fromApi(ev: unknown): Fiesta {
+  if (!isRecord(ev)) return { title: "", provisional: false, date: "", time: "" };
+
+  const title = typeof ev.title === "string" ? ev.title : String((ev as Record<string, unknown>).title ?? "");
+  const provisional = typeof ev.provisional === "boolean" ? ev.provisional : Boolean((ev as Record<string, unknown>).provisional);
+
+  let date = typeof ev.date === "string" ? (ev.date as string) : undefined;
+  let time = typeof ev.time === "string" ? (ev.time as string) : undefined;
+
+  const startsAtVal = (ev as Record<string, unknown>).startsAt;
+  const startsAtStr = typeof startsAtVal === "string" ? startsAtVal : startsAtVal instanceof Date ? startsAtVal.toISOString() : undefined;
+
+  if ((!date || !time) && startsAtStr) {
+    const d = new Date(startsAtStr);
+    if (!isNaN(d.getTime())) {
+      if (!date) date = toYMD(d, TZ);
+      if (!time) time = toHM(d, TZ);
+    }
+  }
+
+  return { title, provisional, date: date ?? "", time: time ?? "" };
+}
 
 // =====================
 // Utilidades de fechas
@@ -89,6 +144,8 @@ export default function CalendarPage() {
   const [month, setMonth] = useState(today.getMonth()); // 0-11
   const [selected, setSelected] = useState<string | null>(ymd(today));
 
+  const [fiestasData, setFiestasData] = useState<Fiesta[]>([]);
+
   const secciones = getSecciones(fiestasData, showAll);
   const grid = useMonthGrid(year, month);
   const eventsByDate = useMemo(() => {
@@ -99,6 +156,21 @@ export default function CalendarPage() {
       map.set(f.date, arr);
     }
     return map;
+  }, [fiestasData]);
+
+  // Cargar desde la API
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await fetch("/api/events", { cache: "no-store" });
+        const json = await res.json().catch(() => ({}));
+        const listRaw = Array.isArray(json?.events) ? json.events : Array.isArray(json) ? json : [];
+        const normalized: Fiesta[] = (listRaw as unknown[]).map(fromApi);
+        setFiestasData(normalized.filter((f: Fiesta) => !!f.date && !!f.time && !!f.title));
+      } catch (e) {
+        setFiestasData([]);
+      }
+    })();
   }, []);
 
   const selectedEvents = selected ? getEventosPorFecha(fiestasData, selected) : [];
