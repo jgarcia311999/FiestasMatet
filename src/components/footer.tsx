@@ -10,7 +10,7 @@ export default function Footer() {
     bgColor = "#E85D6A";
   } else if (hasSeg("noche")) {
     bgColor = "#083279";
-  } else if (hasSeg("quehaceres")) {
+  } else if (hasSeg("quehaceres") || hasSeg("calendar")) {
     bgColor = "#D9E3F0";
   } else if (pathname.startsWith("/layoutComision")) {
     bgColor = "#E7DAD1";

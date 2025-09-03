@@ -126,21 +126,12 @@ export default function CalendarPage() {
   const weekDays = ["L", "M", "X", "J", "V", "S", "D"]; // encabezado breve
 
   return (
-    <main className="min-h-screen bg-[#E85D6A] text-[#0C2335]">
+    <main className="min-h-screen bg-[#d9e3f0] text-[#0C2335]">
       <div className="mx-auto max-w-sm px-1 pt-10 pb-24">
         {/* Headline */}
         <h1 className="font-serif text-[36px] leading-[1.05] tracking-tight">
-          Entérate de <strong>todas</strong> las fiestas de <strong className="block mt-2">MATET</strong>
+          Entérate de <strong>todas</strong> las fiestas de <strong>MATET</strong>
         </h1>
-        {!showAll && (
-          <button
-            type="button"
-            onClick={() => setShowAll(true)}
-            className="mt-2 text-[12px] underline underline-offset-2"
-          >
-            ← Ver anteriores
-          </button>
-        )}
 
         {/* ===================== */}
         {/* Calendario interactivo */}
