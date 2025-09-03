@@ -457,6 +457,14 @@ export const fiestas: Fiesta[
 //     date: "2025-09-12",
 //     time: "13:37",
 //     location: "ddd"
-//   }
+//   },
+  {
+    title: "wwwww",
+    img: "",
+    description: "www",
+    date: "2025-09-12",
+    time: "14:14",
+    location: "www"
+  }
 ];
 
