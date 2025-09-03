@@ -95,8 +95,17 @@ export const ideasData: IdeasData = [
   },
   {
     "key": "sec-spd0i3yd",
-    "title": "Nuevo apartado",
-    "items": []
+    "title": "Bonos",
+    "items": [
+      {
+        "id": "z65nuxfn",
+        "text": "Bonobufa "
+      },
+      {
+        "id": "boqut0oz",
+        "text": "BonoCerveza"
+      }
+    ]
   }
 ] as const;
 
