@@ -32,6 +32,10 @@ export const ideasData: IdeasData = [
       {
         "id": "libro-firmas",
         "text": "Libro de firmas / recuerdos de la fiesta"
+      },
+      {
+        "id": "4p1ffjl0",
+        "text": "mas ideas"
       }
     ]
   },
