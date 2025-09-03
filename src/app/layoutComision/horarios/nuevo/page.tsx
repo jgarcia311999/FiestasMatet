@@ -27,7 +27,7 @@ export default function NuevoEventoPage() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Error guardando evento");
-      router.push("/layoutComision/horarios"); // redirige a la lista
+      router.push("/layoutComision/horarios?justSaved=1");
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message);
@@ -43,10 +43,10 @@ export default function NuevoEventoPage() {
   }
 
   return (
-    <div className="min-h-[calc(100vh-56px)] bg-[#E85D6A] px-4 py-6">
+    <div className="min-h-[calc(100vh-56px)] bg-[#E85D6A] px-4 py-6 text-[#0C2335]">
       <form
         onSubmit={onSubmit}
-        className="mx-auto max-w-md space-y-3 rounded-xl border border-gray-200 bg-white p-4 shadow-sm"
+        className="mx-auto max-w-md space-y-3 rounded-xl border border-gray-200 bg-[#E85D6A] p-4 shadow-sm text-[#0C2335]"
       >
         <h1 className="text-xl font-bold">Nuevo evento</h1>
 
@@ -55,7 +55,7 @@ export default function NuevoEventoPage() {
           <input
             value={form.title}
             onChange={(e) => set("title", e.target.value)}
-            className="w-full rounded-md border px-3 py-2 text-sm"
+            className="w-full rounded-md border px-3 py-2 text-sm bg-[#E85D6A] text-[#0C2335]"
             required
           />
         </div>
@@ -67,7 +67,7 @@ export default function NuevoEventoPage() {
               type="date"
               value={form.date}
               onChange={(e) => set("date", e.target.value)}
-              className="w-full rounded-md border px-3 py-2 text-sm"
+              className="w-full rounded-md border px-3 py-2 text-sm bg-[#E85D6A] text-[#0C2335]"
             />
           </div>
           <div>
@@ -76,7 +76,7 @@ export default function NuevoEventoPage() {
               type="time"
               value={form.time}
               onChange={(e) => set("time", e.target.value)}
-              className="w-full rounded-md border px-3 py-2 text-sm"
+              className="w-full rounded-md border px-3 py-2 text-sm bg-[#E85D6A] text-[#0C2335]"
             />
           </div>
         </div>
@@ -86,7 +86,7 @@ export default function NuevoEventoPage() {
           <input
             value={form.location}
             onChange={(e) => set("location", e.target.value)}
-            className="w-full rounded-md border px-3 py-2 text-sm"
+            className="w-full rounded-md border px-3 py-2 text-sm bg-[#E85D6A] text-[#0C2335]"
           />
         </div>
 
@@ -96,7 +96,7 @@ export default function NuevoEventoPage() {
             value={form.description}
             onChange={(e) => set("description", e.target.value)}
             rows={3}
-            className="w-full rounded-md border px-3 py-2 text-sm"
+            className="w-full rounded-md border px-3 py-2 text-sm bg-[#E85D6A] text-[#0C2335]"
           />
         </div>
 
@@ -105,7 +105,7 @@ export default function NuevoEventoPage() {
           <input
             value={form.img}
             onChange={(e) => set("img", e.target.value)}
-            className="w-full rounded-md border px-3 py-2 text-sm"
+            className="w-full rounded-md border px-3 py-2 text-sm bg-[#E85D6A] text-[#0C2335]"
             placeholder="/bannerGenerico.png"
           />
         </div>

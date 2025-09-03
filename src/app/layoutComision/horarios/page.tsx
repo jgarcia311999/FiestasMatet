@@ -1,13 +1,29 @@
 "use client";
 
 import { fiestas } from "@/data/fiestas";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import type { Fiesta } from "@/data/fiestas";
 
 type LocalFiesta = Fiesta & { attendees?: string[] };
 import { getCookie } from "cookies-next";
+import Link from "next/link";
+import { useSearchParams, useRouter } from "next/navigation";
 
 export default function HorariosPage() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const [savingNotice, setSavingNotice] = useState(false);
+
+  useEffect(() => {
+    const justSaved = searchParams.get("justSaved");
+    if (justSaved) {
+      setSavingNotice(true);
+      const t = window.setTimeout(() => setSavingNotice(false), 3000);
+      // Limpia el query param de la URL sin recargar
+      router.replace("/layoutComision/horarios");
+      return () => window.clearTimeout(t);
+    }
+  }, [searchParams, router]);
   const [items, setItems] = useState<LocalFiesta[]>(() => [...(fiestas as LocalFiesta[])]);
   // Fecha de corte: mostrar desde hace 2 días (calendario) en zona Europe/Madrid
   const TZ = "Europe/Madrid";
@@ -299,6 +315,11 @@ export default function HorariosPage() {
   return (
     <main className="min-h-screen bg-[#E85D6A] text-[#0C2335]">
       <div className="max-w-5xl mx-auto px-4 py-12">
+        {savingNotice && (
+          <div className="mb-4 rounded-lg border border-[#0C2335]/20 bg-white/80 px-4 py-2 text-sm text-[#0C2335]">
+            Tu evento se esta guardando, tardara un momento.
+          </div>
+        )}
         <h1 className="text-[80px] leading-none font-semibold break-words">Horarios</h1>
 
         {/* Listado: fecha - hora, nombre */}
@@ -451,6 +472,16 @@ export default function HorariosPage() {
           </div>
         </div>
       )}
+    {/* Floating add button */}
+    <Link
+      href="/layoutComision/horarios/nuevo"
+      aria-label="Añadir nuevo horario"
+      className="fixed bottom-6 right-6 h-14 w-14 rounded-full bg-[#0C2335] text-white shadow-lg flex items-center justify-center hover:opacity-90"
+    >
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      </svg>
+    </Link>
     </main>
   );
 }
