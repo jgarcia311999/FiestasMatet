@@ -29,7 +29,7 @@ export default function Home2Page() {
           <span className="text-[10px] uppercase tracking-[0.2em]">mayor tesoro</span>
         </div>
 
-        <div className="mt-0 flex items-start justify-between">
+        <div className="mt-6 flex items-start justify-between">
           <div className="text-[84px] leading-none font-semibold mt-2">2026</div>
         </div>
 
