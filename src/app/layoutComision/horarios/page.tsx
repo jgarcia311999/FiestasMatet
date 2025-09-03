@@ -1,7 +1,7 @@
 "use client";
 
 import { fiestas } from "@/data/fiestas";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import type { Fiesta } from "@/data/fiestas";
 
 type LocalFiesta = Fiesta & { attendees?: string[] };
@@ -10,6 +10,21 @@ import Link from "next/link";
 
 export default function HorariosPage() {
   const [items, setItems] = useState<LocalFiesta[]>(() => [...(fiestas as LocalFiesta[])]);
+  // Aviso post-guardado: lectura ligera de query param sin hooks de Next
+  const [savingNotice, setSavingNotice] = useState(false);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const sp = new URLSearchParams(window.location.search);
+    if (sp.has("justSaved")) {
+      setSavingNotice(true);
+      // Limpia la query de la URL sin recargar la página
+      const url = window.location.pathname + window.location.hash;
+      window.history.replaceState({}, "", url);
+      // Oculta el aviso tras 3s
+      const t = window.setTimeout(() => setSavingNotice(false), 3000);
+      return () => window.clearTimeout(t);
+    }
+  }, []);
   // Fecha de corte: mostrar desde hace 2 días (calendario) en zona Europe/Madrid
   const TZ = "Europe/Madrid";
   function ymdInTZ(d: Date, tz: string) {
@@ -300,6 +315,11 @@ export default function HorariosPage() {
   return (
     <main className="min-h-screen bg-[#E85D6A] text-[#0C2335]">
       <div className="max-w-5xl mx-auto px-4 py-12">
+        {savingNotice && (
+          <div className="mb-4 rounded-lg border border-[#0C2335]/20 bg-white/80 px-4 py-2 text-sm text-[#0C2335]">
+            Tu evento se esta guardando, tardara un momento.
+          </div>
+        )}
         <h1 className="text-[80px] leading-none font-semibold break-words">Horarios</h1>
 
         {/* Listado: fecha - hora, nombre */}
