@@ -189,7 +189,7 @@ export default function CalendarPage() {
                       ? isToday
                         ? "bg-[#1E90FF]/20"
                         : hasEvents
-                        ? "bg-[#6B8E23]/20"
+                        ? "bg-[#A5B7D3]"
                         : "bg-white"
                       : "bg-white/60 text-[#2D4659] opacity-70",
                     isSelected
@@ -197,7 +197,7 @@ export default function CalendarPage() {
                       : isToday
                       ? "border-[#1E90FF]"
                       : hasEvents
-                      ? "border-[#6B8E23]"
+                      ? "border-[#A5B7D3]"
                       : "border-[#0C2335]/10",
                     "hover:shadow hover:translate-y-[-1px] transition"
                   ].join(" ")}
