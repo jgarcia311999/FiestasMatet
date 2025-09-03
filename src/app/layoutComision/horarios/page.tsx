@@ -8,6 +8,7 @@ type LocalFiesta = Fiesta & { attendees?: string[] };
 import { getCookie } from "cookies-next";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
+import { Suspense } from "react";
 
 export default function HorariosPage() {
   const searchParams = useSearchParams();
@@ -313,175 +314,177 @@ export default function HorariosPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#E85D6A] text-[#0C2335]">
-      <div className="max-w-5xl mx-auto px-4 py-12">
-        {savingNotice && (
-          <div className="mb-4 rounded-lg border border-[#0C2335]/20 bg-white/80 px-4 py-2 text-sm text-[#0C2335]">
-            Tu evento se esta guardando, tardara un momento.
+    <Suspense fallback={<div className="px-4 py-2 text-sm">Cargando…</div>}>
+      <main className="min-h-screen bg-[#E85D6A] text-[#0C2335]">
+        <div className="max-w-5xl mx-auto px-4 py-12">
+          {savingNotice && (
+            <div className="mb-4 rounded-lg border border-[#0C2335]/20 bg-white/80 px-4 py-2 text-sm text-[#0C2335]">
+              Tu evento se esta guardando, tardara un momento.
+            </div>
+          )}
+          <h1 className="text-[80px] leading-none font-semibold break-words">Horarios</h1>
+
+          {/* Listado: fecha - hora, nombre */}
+          <ul className="mt-6 divide-y divide-[#0C2335]/10">
+            {eventosOrdenados.filter(ev => !removed[makeKey(ev)]).map((ev, idx) => { 
+              const fechaHora = ev.date && ev.time
+                ? `${ev.date} - ${ev.time}`
+                : ev.date || ev.time || "—";
+              const isOpen = openIndex === idx;
+              const asistentes = (ev as { attendees?: string[] }).attendees ?? [];
+              const user = getCurrentUser();
+              const isAttending = !!(user && asistentes.includes(user));
+              return (
+                <li key={makeKey(ev)} className="py-3">
+                  <button
+                    type="button"
+                    onClick={() => setOpenIndex(isOpen ? null : idx)}
+                    className="w-full text-left"
+                  >
+                    <div className="flex items-baseline justify-between gap-3">
+                      <span className="text-sm whitespace-nowrap">{fechaHora}</span>
+                      <span className="text-base font-medium truncate">{ev.title || "(Sin título)"}</span>
+                    </div>
+                  </button>
+                  {isOpen && (
+                    <div className="mt-2 pl-2 text-sm space-y-2">
+                      <p className="opacity-90"><span className="font-semibold">Descripción:</span> {ev.description?.trim() || "Sin descripción"}</p>
+                      <p className="opacity-90"><span className="font-semibold">Lugar:</span> {ev.location?.trim() || "Sin lugar"}</p>
+                      <p className="opacity-90">
+                        <span className="font-semibold">Asistirá:</span>{" "}
+                        {asistentes.length > 0 ? (
+                          <span>{asistentes.join(", ")}</span>
+                        ) : (
+                          <span className="italic">de momento nadie...</span>
+                        )}
+                      </p>
+
+                      {/* Action buttons: trash, pencil, check */}
+                      <div className="pt-1 flex items-center gap-3 justify-end">
+                        {/* Trash */}
+                        <button
+                          type="button"
+                          aria-label="Eliminar"
+                          onClick={() => handleDelete(ev)}
+                          className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-[#0C2335]/30 hover:bg-[#0C2335]/5"
+                        >
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M3 6h18" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                            <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                            <path d="M6 6l1 14a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-14" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                            <path d="M10 11v6M14 11v6" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                          </svg>
+                        </button>
+
+                        {/* Pencil */}
+                        <button
+                          type="button"
+                          aria-label="Editar"
+                          onClick={() => openEdit(ev)}
+                          className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-[#0C2335]/30 hover:bg-[#0C2335]/5"
+                        >
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25z" stroke="currentColor" strokeWidth="1.5" fill="none"/>
+                            <path d="M20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" stroke="currentColor" strokeWidth="1.5" fill="none"/>
+                          </svg>
+                        </button>
+
+                        {/* Check */}
+                        <button
+                          type="button"
+                          aria-label="Confirmar"
+                          onClick={() => handleAttendClick(ev)}
+                          className={`inline-flex h-9 w-9 items-center justify-center rounded-md border ${isAttending ? 'bg-green-500 text-white border-green-600' : 'border-[#0C2335]/30 hover:bg-[#0C2335]/5'}`}
+                        >
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M20 6L9 17l-5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+        {/* Edit Modal */}
+        {editOpen && (
+          <div className="fixed inset-0 z-50">
+            <div className="absolute inset-0 bg-black/40" onClick={closeEdit} aria-hidden="true" />
+            <div className="absolute inset-0 bg-[#E85D6A] text-[#0C2335] md:rounded-t-xl md:top-12 md:h-[calc(100%-3rem)] overflow-auto">
+              <div className="sticky top-0 flex items-center justify-between border-b border-[#0C2335]/20 bg-[#E85D6A] px-4 py-3">
+                <h3 className="font-semibold text-lg">Editar evento</h3>
+                <button onClick={closeEdit} className="rounded border border-[#0C2335]/30 px-2 py-1 text-sm hover:bg-[#0C2335]/5">Cerrar</button>
+              </div>
+
+              <div className="p-4">
+                <form className="grid grid-cols-1 gap-3 max-w-2xl">
+                  <label className="text-sm">Título
+                    <input
+                      value={editForm.title}
+                      onChange={(e)=>setEditForm({...editForm, title: e.target.value})}
+                      className="mt-1 w-full rounded border border-[#0C2335]/30 bg-[#E85D6A] px-3 py-2 text-sm text-[#0C2335]"
+                    />
+                  </label>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <label className="text-sm">Fecha
+                      <input type="date" value={editForm.date} onChange={e=>setEditForm({...editForm, date: e.target.value})} className="mt-1 w-full rounded border border-[#0C2335]/30 bg-[#E85D6A] px-3 py-2 text-sm text-[#0C2335]" />
+                    </label>
+                    <label className="text-sm">Hora
+                      <input type="time" value={editForm.time} onChange={e=>setEditForm({...editForm, time: e.target.value})} className="mt-1 w-full rounded border border-[#0C2335]/30 bg-[#E85D6A] px-3 py-2 text-sm text-[#0C2335]" />
+                    </label>
+                  </div>
+
+                  <label className="text-sm">Lugar
+                    <input value={editForm.location} onChange={e=>setEditForm({...editForm, location: e.target.value})} className="mt-1 w-full rounded border border-[#0C2335]/30 bg-[#E85D6A] px-3 py-2 text-sm text-[#0C2335]" />
+                  </label>
+
+                  <label className="text-sm">Descripción
+                    <textarea value={editForm.description} onChange={e=>setEditForm({...editForm, description: e.target.value})} rows={4} className="mt-1 w-full rounded border border-[#0C2335]/30 bg-[#E85D6A] px-3 py-2 text-sm text-[#0C2335]" />
+                  </label>
+
+                  <label className="text-sm">Imagen (URL)
+                    <input value={editForm.img} onChange={e=>setEditForm({...editForm, img: e.target.value})} className="mt-1 w-full rounded border border-[#0C2335]/30 bg-[#E85D6A] px-3 py-2 text-sm text-[#0C2335]" placeholder="/bannerGenerico.png" />
+                  </label>
+
+                  <div className="flex justify-end items-center gap-3 pt-2">
+                    {savingEdit && <span className="text-xs opacity-80">Guardando…</span>}
+                    <button type="button" onClick={closeEdit} disabled={savingEdit} className="rounded border border-[#0C2335]/30 px-3 py-2 text-sm hover:bg-[#0C2335]/5 disabled:opacity-60">Cancelar</button>
+                    <button type="button" onClick={saveEdit} disabled={savingEdit} className="rounded bg-[#0C2335] text-white px-4 py-2 text-sm hover:opacity-90 disabled:opacity-60">Guardar</button>
+                  </div>
+                </form>
+              </div>
+            </div>
           </div>
         )}
-        <h1 className="text-[80px] leading-none font-semibold break-words">Horarios</h1>
-
-        {/* Listado: fecha - hora, nombre */}
-        <ul className="mt-6 divide-y divide-[#0C2335]/10">
-          {eventosOrdenados.filter(ev => !removed[makeKey(ev)]).map((ev, idx) => { 
-            const fechaHora = ev.date && ev.time
-              ? `${ev.date} - ${ev.time}`
-              : ev.date || ev.time || "—";
-            const isOpen = openIndex === idx;
-            const asistentes = (ev as { attendees?: string[] }).attendees ?? [];
-            const user = getCurrentUser();
-            const isAttending = !!(user && asistentes.includes(user));
-            return (
-              <li key={makeKey(ev)} className="py-3">
-                <button
-                  type="button"
-                  onClick={() => setOpenIndex(isOpen ? null : idx)}
-                  className="w-full text-left"
-                >
-                  <div className="flex items-baseline justify-between gap-3">
-                    <span className="text-sm whitespace-nowrap">{fechaHora}</span>
-                    <span className="text-base font-medium truncate">{ev.title || "(Sin título)"}</span>
-                  </div>
-                </button>
-                {isOpen && (
-                  <div className="mt-2 pl-2 text-sm space-y-2">
-                    <p className="opacity-90"><span className="font-semibold">Descripción:</span> {ev.description?.trim() || "Sin descripción"}</p>
-                    <p className="opacity-90"><span className="font-semibold">Lugar:</span> {ev.location?.trim() || "Sin lugar"}</p>
-                    <p className="opacity-90">
-                      <span className="font-semibold">Asistirá:</span>{" "}
-                      {asistentes.length > 0 ? (
-                        <span>{asistentes.join(", ")}</span>
-                      ) : (
-                        <span className="italic">de momento nadie...</span>
-                      )}
-                    </p>
-
-                    {/* Action buttons: trash, pencil, check */}
-                    <div className="pt-1 flex items-center gap-3 justify-end">
-                      {/* Trash */}
-                      <button
-                        type="button"
-                        aria-label="Eliminar"
-                        onClick={() => handleDelete(ev)}
-                        className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-[#0C2335]/30 hover:bg-[#0C2335]/5"
-                      >
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M3 6h18" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                          <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                          <path d="M6 6l1 14a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-14" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                          <path d="M10 11v6M14 11v6" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                        </svg>
-                      </button>
-
-                      {/* Pencil */}
-                      <button
-                        type="button"
-                        aria-label="Editar"
-                        onClick={() => openEdit(ev)}
-                        className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-[#0C2335]/30 hover:bg-[#0C2335]/5"
-                      >
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25z" stroke="currentColor" strokeWidth="1.5" fill="none"/>
-                          <path d="M20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" stroke="currentColor" strokeWidth="1.5" fill="none"/>
-                        </svg>
-                      </button>
-
-                      {/* Check */}
-                      <button
-                        type="button"
-                        aria-label="Confirmar"
-                        onClick={() => handleAttendClick(ev)}
-                        className={`inline-flex h-9 w-9 items-center justify-center rounded-md border ${isAttending ? 'bg-green-500 text-white border-green-600' : 'border-[#0C2335]/30 hover:bg-[#0C2335]/5'}`}
-                      >
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M20 6L9 17l-5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </li>
-            );
-          })}
-        </ul>
-      </div>
-      {/* Edit Modal */}
-      {editOpen && (
-        <div className="fixed inset-0 z-50">
-          <div className="absolute inset-0 bg-black/40" onClick={closeEdit} aria-hidden="true" />
-          <div className="absolute inset-0 bg-[#E85D6A] text-[#0C2335] md:rounded-t-xl md:top-12 md:h-[calc(100%-3rem)] overflow-auto">
-            <div className="sticky top-0 flex items-center justify-between border-b border-[#0C2335]/20 bg-[#E85D6A] px-4 py-3">
-              <h3 className="font-semibold text-lg">Editar evento</h3>
-              <button onClick={closeEdit} className="rounded border border-[#0C2335]/30 px-2 py-1 text-sm hover:bg-[#0C2335]/5">Cerrar</button>
-            </div>
-
-            <div className="p-4">
-              <form className="grid grid-cols-1 gap-3 max-w-2xl">
-                <label className="text-sm">Título
-                  <input
-                    value={editForm.title}
-                    onChange={(e)=>setEditForm({...editForm, title: e.target.value})}
-                    className="mt-1 w-full rounded border border-[#0C2335]/30 bg-[#E85D6A] px-3 py-2 text-sm text-[#0C2335]"
-                  />
-                </label>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <label className="text-sm">Fecha
-                    <input type="date" value={editForm.date} onChange={e=>setEditForm({...editForm, date: e.target.value})} className="mt-1 w-full rounded border border-[#0C2335]/30 bg-[#E85D6A] px-3 py-2 text-sm text-[#0C2335]" />
-                  </label>
-                  <label className="text-sm">Hora
-                    <input type="time" value={editForm.time} onChange={e=>setEditForm({...editForm, time: e.target.value})} className="mt-1 w-full rounded border border-[#0C2335]/30 bg-[#E85D6A] px-3 py-2 text-sm text-[#0C2335]" />
-                  </label>
-                </div>
-
-                <label className="text-sm">Lugar
-                  <input value={editForm.location} onChange={e=>setEditForm({...editForm, location: e.target.value})} className="mt-1 w-full rounded border border-[#0C2335]/30 bg-[#E85D6A] px-3 py-2 text-sm text-[#0C2335]" />
-                </label>
-
-                <label className="text-sm">Descripción
-                  <textarea value={editForm.description} onChange={e=>setEditForm({...editForm, description: e.target.value})} rows={4} className="mt-1 w-full rounded border border-[#0C2335]/30 bg-[#E85D6A] px-3 py-2 text-sm text-[#0C2335]" />
-                </label>
-
-                <label className="text-sm">Imagen (URL)
-                  <input value={editForm.img} onChange={e=>setEditForm({...editForm, img: e.target.value})} className="mt-1 w-full rounded border border-[#0C2335]/30 bg-[#E85D6A] px-3 py-2 text-sm text-[#0C2335]" placeholder="/bannerGenerico.png" />
-                </label>
-
-                <div className="flex justify-end items-center gap-3 pt-2">
-                  {savingEdit && <span className="text-xs opacity-80">Guardando…</span>}
-                  <button type="button" onClick={closeEdit} disabled={savingEdit} className="rounded border border-[#0C2335]/30 px-3 py-2 text-sm hover:bg-[#0C2335]/5 disabled:opacity-60">Cancelar</button>
-                  <button type="button" onClick={saveEdit} disabled={savingEdit} className="rounded bg-[#0C2335] text-white px-4 py-2 text-sm hover:opacity-90 disabled:opacity-60">Guardar</button>
-                </div>
-              </form>
+        {/* Toast de borrado con deshacer */}
+        {toast.show && (
+          <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50">
+            <div className="flex items-center gap-3 rounded-full bg-[#0C2335] text-white px-4 py-2 shadow-lg">
+              <span className="text-sm">{toast.text}</span>
+              <button
+                type="button"
+                onClick={undoDelete}
+                className="rounded-full bg-white/10 px-3 py-1 text-sm hover:bg-white/20"
+              >
+                Deshacer
+              </button>
             </div>
           </div>
-        </div>
-      )}
-      {/* Toast de borrado con deshacer */}
-      {toast.show && (
-        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50">
-          <div className="flex items-center gap-3 rounded-full bg-[#0C2335] text-white px-4 py-2 shadow-lg">
-            <span className="text-sm">{toast.text}</span>
-            <button
-              type="button"
-              onClick={undoDelete}
-              className="rounded-full bg-white/10 px-3 py-1 text-sm hover:bg-white/20"
-            >
-              Deshacer
-            </button>
-          </div>
-        </div>
-      )}
-    {/* Floating add button */}
-    <Link
-      href="/layoutComision/horarios/nuevo"
-      aria-label="Añadir nuevo horario"
-      className="fixed bottom-6 right-6 h-14 w-14 rounded-full bg-[#0C2335] text-white shadow-lg flex items-center justify-center hover:opacity-90"
-    >
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-      </svg>
-    </Link>
-    </main>
+        )}
+      {/* Floating add button */}
+      <Link
+        href="/layoutComision/horarios/nuevo"
+        aria-label="Añadir nuevo horario"
+        className="fixed bottom-6 right-6 h-14 w-14 rounded-full bg-[#0C2335] text-white shadow-lg flex items-center justify-center hover:opacity-90"
+      >
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+        </svg>
+      </Link>
+      </main>
+    </Suspense>
   );
 }
