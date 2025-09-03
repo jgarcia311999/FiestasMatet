@@ -3,13 +3,23 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 export default function NuevoEventoPage() {
-  const [form, setForm] = useState({
+  type FormState = {
+    title: string;
+    img: string;
+    description: string;
+    date: string; // YYYY-MM-DD
+    time: string; // HH:MM
+    location: string;
+    provisional: boolean;
+  };
+  const [form, setForm] = useState<FormState>({
     title: "",
     img: "",
     description: "",
     date: "",
     time: "",
     location: "",
+    provisional: false,
   });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -17,13 +27,33 @@ export default function NuevoEventoPage() {
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setSaving(true);
     setError(null);
+
+    // Validaciones mínimas
+    const title = form.title.trim();
+    if (!title) {
+      setError("El título es obligatorio");
+      return;
+    }
+    if (!form.date || !form.time) {
+      setError("Indica fecha y hora");
+      return;
+    }
+
+    setSaving(true);
     try {
       const res = await fetch("/api/events/new", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify({
+          title: title,
+          img: form.img.trim(),
+          description: form.description.trim(),
+          date: form.date,
+          time: form.time,
+          location: form.location.trim(),
+          provisional: form.provisional,
+        }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Error guardando evento");
@@ -38,7 +68,7 @@ export default function NuevoEventoPage() {
     }
   }
 
-  function set<K extends keyof typeof form>(key: K, value: string) {
+  function set<K extends keyof FormState>(key: K, value: FormState[K]) {
     setForm((prev) => ({ ...prev, [key]: value }));
   }
 
@@ -68,6 +98,7 @@ export default function NuevoEventoPage() {
               value={form.date}
               onChange={(e) => set("date", e.target.value)}
               className="w-full rounded-md border px-3 py-2 text-sm bg-[#E85D6A] text-[#0C2335]"
+              required
             />
           </div>
           <div>
@@ -77,6 +108,7 @@ export default function NuevoEventoPage() {
               value={form.time}
               onChange={(e) => set("time", e.target.value)}
               className="w-full rounded-md border px-3 py-2 text-sm bg-[#E85D6A] text-[#0C2335]"
+              required
             />
           </div>
         </div>
@@ -88,6 +120,17 @@ export default function NuevoEventoPage() {
             onChange={(e) => set("location", e.target.value)}
             className="w-full rounded-md border px-3 py-2 text-sm bg-[#E85D6A] text-[#0C2335]"
           />
+        </div>
+
+        <div className="flex items-center gap-2">
+          <input
+            id="provisional"
+            type="checkbox"
+            checked={form.provisional}
+            onChange={(e) => set("provisional", e.target.checked)}
+            className="h-4 w-4 border"
+          />
+          <label htmlFor="provisional" className="text-sm font-semibold">Provisional</label>
         </div>
 
         <div>
@@ -114,8 +157,8 @@ export default function NuevoEventoPage() {
 
         <div className="flex gap-2">
           <button
-            disabled={saving}
-            className="rounded-md bg-black px-4 py-2 text-sm font-semibold text-white"
+            disabled={saving || !form.title.trim() || !form.date || !form.time}
+            className="rounded-md bg-black px-4 py-2 text-sm font-semibold text-white disabled:opacity-60"
           >
             {saving ? "Guardando..." : "Guardar"}
           </button>

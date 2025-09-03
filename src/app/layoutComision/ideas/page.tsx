@@ -1,19 +1,23 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ideasData as initialIdeas } from "@/data/ideas";
-import type { IdeaSection, IdeasData } from "@/data/ideas.types";
+
+// Tipos locales para trabajar con la API/BD
+export type IdeaItem = { id: string; text: string };
+export type IdeaSection = { key: string; title: string; items: IdeaItem[] };
+export type IdeasData = IdeaSection[];
 
 function uid() {
   return Math.random().toString(36).slice(2, 10);
 }
 
 export default function IdeasPage() {
-  const [data, setData] = useState<IdeasData>(initialIdeas);
+  const [data, setData] = useState<IdeasData>([]);
   const [openKey, setOpenKey] = useState<string | null>(null); // acordeón por sección
   const [editingKey, setEditingKey] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
   // Toast (opcional) para feedback de borrado de sección
   const [toast, setToast] = useState<{ show: boolean; text: string }>({ show: false, text: "" });
@@ -26,6 +30,25 @@ export default function IdeasPage() {
     }
   }, [error]);
 
+  // Cargar desde la API (BD)
+  useEffect(() => {
+    (async () => {
+      try {
+        setLoading(true);
+        const res = await fetch("/api/ideas", { cache: "no-store" });
+        if (!res.ok) throw new Error((await res.text()) || `Error ${res.status}`);
+        const json = await res.json();
+        const rows: IdeasData = Array.isArray(json?.data) ? json.data : Array.isArray(json) ? json : [];
+        setData(rows);
+      } catch (e) {
+        console.error(e);
+        setError("No se pudieron cargar las ideas");
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, []);
+
   function showToast(text: string) {
     if (toastTimerRef.current) window.clearTimeout(toastTimerRef.current);
     setToast({ show: true, text });
@@ -34,7 +57,7 @@ export default function IdeasPage() {
 
   const isEditing = (key: string) => editingKey === key;
 
-  async function saveToGitHub(next: IdeasData, message: string): Promise<boolean> {
+  async function saveToDB(next: IdeasData, message: string): Promise<boolean> {
     setPending(true);
     const prev = data;
     setData(next); // Optimistic UI
@@ -66,7 +89,7 @@ export default function IdeasPage() {
     const updated = [...data, next];
     setOpenKey(key);
     setEditingKey(key);
-    const ok = await saveToGitHub(updated, `chore(ideas): add section "${next.title}"`);
+    const ok = await saveToDB(updated, `chore(ideas): add section "${next.title}"`);
     if (!ok) setEditingKey(key);
   }
 
@@ -109,7 +132,7 @@ export default function IdeasPage() {
   async function saveSection(sectionKey: string) {
     const section = data.find((s) => s.key === sectionKey);
     const msg = section ? `chore(ideas): update "${section.title}"` : "chore(ideas): update ideas";
-    const ok = await saveToGitHub(data, msg);
+    const ok = await saveToDB(data, msg);
     if (ok) setEditingKey(null);
   }
 
@@ -117,7 +140,7 @@ export default function IdeasPage() {
     if (!confirm("¿Seguro que quieres borrar este apartado y todas sus ideas?")) return;
     const section = data.find((s) => s.key === sectionKey);
     const updated = data.filter((s) => s.key !== sectionKey);
-    const ok = await saveToGitHub(updated, `chore(ideas): delete section "${section?.title ?? sectionKey}"`);
+    const ok = await saveToDB(updated, `chore(ideas): delete section "${section?.title ?? sectionKey}"`);
     if (ok) {
       if (openKey === sectionKey) setOpenKey(null);
       if (editingKey === sectionKey) setEditingKey(null);
@@ -139,7 +162,7 @@ export default function IdeasPage() {
           >
             + Añadir apartado
           </button>
-          {pending && <span className="text-sm">Guardando…</span>}
+          {(pending || loading) && <span className="text-sm">{loading ? "Cargando…" : "Guardando…"}</span>}
           {error && <span className="text-sm text-red-700">{error}</span>}
         </div>
 
@@ -178,6 +201,19 @@ export default function IdeasPage() {
                           <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
                           <path d="M6 6l1 14a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-14" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
                           <path d="M10 11v6M14 11v6" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                        </svg>
+                      </button>
+
+                      {/* Botón lápiz para editar sección (atajo) */}
+                      <button
+                        type="button"
+                        aria-label="Editar sección (lápiz)"
+                        onClick={() => startEdit(sec.key)}
+                        className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-[#0C2335]/30 hover:bg-[#0C2335]/5"
+                      >
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M12 20h9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                          <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                         </svg>
                       </button>
 

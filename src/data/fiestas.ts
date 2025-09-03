@@ -11,7 +11,7 @@ export type Fiesta = {
 };
 
 export const fiestas: Fiesta[] = [
-  {
+  /* {
     title: "Concurso de pintura rápida",
     description: "Recorre el pueblo descubriendo cada rincón",
     date: "2025-10-04",
@@ -446,7 +446,7 @@ export const fiestas: Fiesta[] = [
     time: "18:00",
     location: "Plaza de la iglesia",
     provisional: false,
-  },
+  }, */
     // // { title: "Prueva de evento", img: "", description: "Ven a vivir una prueba", date: "2025-09-05", time: "12:25", location: "Plaza del ayuntamiento" },
     // { title: "fffff", img: "", description: "sss", date: "2025-09-05", time: "10:27", location: "fff" },
     // {

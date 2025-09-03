@@ -1,106 +1,89 @@
-// src/app/api/events/new/route.ts
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
-import crypto from "node:crypto";
-import { githubGetFile, githubPutFile } from "@/lib/github";
+import { db } from "@/db/client";
+import { events } from "@/db/schema";
+import { sql } from "drizzle-orm";
+import type { SQL } from "drizzle-orm";
+import { z } from "zod";
 
-export const runtime = "nodejs"; // usamos Node runtime
+export const dynamic = "force-dynamic";
+// export const runtime = "edge"; // opcional si usas Edge
 
-type Evento = {
-  title: string;
-  img?: string;
-  description?: string;
-  date?: string;   // "YYYY-MM-DD"
-  time?: string;   // "HH:MM"
-  location?: string;
-};
+const TZ = "Europe/Madrid";
 
-// Recalculamos el hash esperado (como en middleware)
-function expectedCookieValue() {
-  const pass = (process.env.INTRANET_PASS || "").trim();
-  const secret = (process.env.SESSION_SECRET || "").trim();
-  return crypto.createHash("sha256").update(pass + secret).digest("hex");
-}
+// Permite strings vacíos y los convierte a undefined
+const EmptyToUndef = <T extends z.ZodTypeAny>(schema: T) =>
+  z.union([schema, z.literal("")]).transform((v) => (v === "" ? undefined : v));
 
-// Inserta el nuevo evento en el array export const fiestas[ : Fiesta[] ] = [ ... ];
-function appendEventToFile(tsSource: string, newEvent: Evento): string {
-  // Regex robusta: permite espacios, salto de línea, y tipo opcional `: Fiesta[]`
-  const re = /export\s+const\s+fiestas\s*(?::\s*Fiesta\s*\[\s*\]\s*)?=\s*\[([\s\S]*?)\]\s*;?/m;
-  const match = tsSource.match(re);
-  if (!match) {
-    throw new Error(
-      "No se pudo localizar el array exportado 'fiestas'. Asegúrate de que exista `export const fiestas: Fiesta[] = [ ... ];` o `export const fiestas = [ ... ];`"
-    );
-  }
-
-  const inside = match[1]; // contenido actual del array sin corchetes
-
-  // Serializamos el nuevo objeto manteniendo claves explícitas (evita undefined)
-  const e = newEvent;
-  const objLine = `  {\n`+
-    `    title: ${JSON.stringify(e.title ?? "")},\n`+
-    `    img: ${JSON.stringify(e.img ?? "")},\n`+
-    `    description: ${JSON.stringify(e.description ?? "")},\n`+
-    `    date: ${JSON.stringify(e.date ?? "")},\n`+
-    `    time: ${JSON.stringify(e.time ?? "")},\n`+
-    `    location: ${JSON.stringify(e.location ?? "")}\n`+
-    `  }`;
-
-  let newInside: string;
-  const trimmed = inside.trim();
-  if (trimmed === "") {
-    // Array vacío
-    newInside = `\n${objLine}\n`;
-  } else {
-    // Asegura coma final en el último elemento existente
-    const hasTrailingComma = /,\s*$/.test(trimmed);
-    const insideWithComma = hasTrailingComma ? inside : inside.replace(/\s*$/, ",\n");
-    newInside = insideWithComma + objLine + "\n";
-  }
-
-  // Sustituimos el bloque completo preservando el resto del fichero
-  return tsSource.replace(re, (full) => full.replace(match[1], newInside));
-}
+const CreateSchema = z
+  .object({
+    title: z.string().trim().min(1, "Título requerido"),
+    img: EmptyToUndef(z.string().trim().min(1)).optional(),
+    description: EmptyToUndef(z.string()).optional(),
+    // O bien nos mandan startsAt directamente, o bien date+time
+    startsAt: z.union([z.string(), z.date()]).optional(),
+    date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+    time: z.string().regex(/^\d{2}:\d{2}$/).optional(),
+    location: EmptyToUndef(z.string()).optional(),
+    provisional: z.boolean().optional(),
+    attendees: z.array(z.string()).optional(),
+  })
+  .refine(
+    (v) => !!v.startsAt || (!!v.date && !!v.time),
+    {
+      message: "Debes enviar startsAt o (date y time)",
+      path: ["startsAt"],
+    }
+  );
 
 export async function POST(req: Request) {
   try {
-    // 1) Verificar cookie de login
-    const cookie = (await cookies()).get("commission_auth")?.value || "";
-    if (cookie !== expectedCookieValue()) {
-      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+    const json = await req.json().catch(() => ({}));
+    const body = CreateSchema.parse(json);
+
+    // Componer startsAt en SQL si llega date+time; si llega startsAt, lo usamos tal cual
+    let startsAtValue: SQL | Date;
+    if (body.date && body.time) {
+      startsAtValue = sql`(to_timestamp(${body.date} || ' ' || ${body.time}, 'YYYY-MM-DD HH24:MI') AT TIME ZONE ${sql.raw(`'${TZ}'`)})`;
+    } else if (body.startsAt) {
+      // Aceptamos string o Date; Drizzle soporta Date para timestamptz
+      const dt = typeof body.startsAt === "string" ? new Date(body.startsAt) : body.startsAt;
+      // Si dt no es válida, lanzamos error explícito
+      if (isNaN(dt.getTime())) throw new Error("startsAt inválido");
+      startsAtValue = dt;
+    } else {
+      // TS no puede inferir la garantía del refine de Zod: añadimos else explícito
+      throw new Error("Debes enviar startsAt o (date y time)");
     }
 
-    // 2) Obtener datos del body
-    const payload = (await req.json()) as Evento;
-    if (!payload.title?.trim()) {
-      return NextResponse.json({ error: "title requerido" }, { status: 400 });
-    }
+    const [inserted] = await db
+      .insert(events)
+      .values({
+        title: body.title,
+        img: body.img ?? "",
+        description: body.description ?? "",
+        startsAt: startsAtValue,
+        location: body.location ?? "",
+        provisional: body.provisional ?? false,
+        attendees: body.attendees ?? [],
+      })
+      .returning({
+        id: events.id,
+        title: events.title,
+        img: events.img,
+        description: events.description,
+        startsAt: events.startsAt,
+        location: events.location,
+        provisional: events.provisional,
+        attendees: events.attendees,
+        date: sql<string>`to_char(${events.startsAt} AT TIME ZONE ${sql.raw(`'${TZ}'`)}, 'YYYY-MM-DD')`,
+        time: sql<string>`to_char(${events.startsAt} AT TIME ZONE ${sql.raw(`'${TZ}'`)}, 'HH24:MI')`,
+      });
 
-    // 3) Leer archivo actual desde GitHub
-    const { content, sha, encoding } = await githubGetFile();
-    if (encoding !== "base64") throw new Error("Encoding inesperado en GitHub.");
-    const tsSource = Buffer.from(content, "base64").toString("utf8");
-    // Debug ligero (solo en desarrollo)
-    if (process.env.NODE_ENV !== "production") {
-      console.log("[events/new] tsSource length:", tsSource.length);
-    }
-
-    // 4) Insertar nuevo evento
-    const newTs = appendEventToFile(tsSource, payload);
-
-    // 5) Subir commit a GitHub
-    const msg = `chore(events): add "${payload.title}"`;
-    await githubPutFile({
-      newContent: newTs,
-      sha,
-      message: msg,
-      author: { name: "Fiestas Matet Bot", email: "bot@matet.local" },
-    });
-
-    return NextResponse.json({ ok: true });
-  } catch (err) {
-    const msg = err instanceof Error ? err.message : "Unknown error";
-    console.error("/api/events/new error:", err);
-    return NextResponse.json({ error: msg, code: "EVENTS_NEW_ERROR" }, { status: 500 });
+    return NextResponse.json({ ok: true, event: inserted });
+  } catch (err: unknown) {
+    return NextResponse.json(
+      { error: err instanceof Error ? err.message : "Error inesperado" },
+      { status: 400 }
+    );
   }
 }

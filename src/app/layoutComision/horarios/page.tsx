@@ -1,15 +1,84 @@
 "use client";
 
-import { fiestas } from "@/data/fiestas";
 import { useState, useRef, useEffect } from "react";
-import type { Fiesta } from "@/data/fiestas";
-
-type LocalFiesta = Fiesta & { attendees?: string[] };
 import { getCookie } from "cookies-next";
 import Link from "next/link";
 
+// Tipos y helpers para leer desde la API/BD
+export type EventApi = {
+  id?: number | string;
+  title?: string;
+  img?: string;
+  description?: string;
+  location?: string;
+  provisional?: boolean;
+  attendees?: string[] | null;
+  // algunos GET pueden devolver startsAt; otros, date/time ya formateados
+  startsAt?: string | null;
+  date?: string | null;
+  time?: string | null;
+};
+
+type LocalFiesta = {
+  id?: number | string;
+  title?: string;
+  img?: string;
+  description?: string;
+  location?: string;
+  provisional?: boolean;
+  attendees?: string[];
+  date?: string; // YYYY-MM-DD
+  time?: string; // HH:MM
+};
+
+const TZ = "Europe/Madrid";
+
+function toYMD(date: Date, tz: string) {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: tz,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(date);
+}
+
+function toHM(date: Date, tz: string) {
+  return new Intl.DateTimeFormat("en-GB", {
+    timeZone: tz,
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  })
+    .format(date)
+    .replace(/^([0-9]{2}):([0-9]{2}).*$/, "$1:$2");
+}
+
+function fromApi(ev: EventApi): LocalFiesta {
+  // Si ya vienen date/time, las usamos; si no, derivamos de startsAt en TZ local
+  let date = ev.date ?? undefined;
+  let time = ev.time ?? undefined;
+  if ((!date || !time) && ev.startsAt) {
+    const d = new Date(ev.startsAt);
+    date = date ?? toYMD(d, TZ);
+    time = time ?? toHM(d, TZ);
+  }
+  return {
+    id: ev.id,
+    title: ev.title ?? "",
+    img: ev.img ?? "",
+    description: ev.description ?? "",
+    location: ev.location ?? "",
+    provisional: ev.provisional ?? false,
+    attendees: Array.isArray(ev.attendees) ? (ev.attendees as string[]) : [],
+    date,
+    time,
+  };
+}
+
 export default function HorariosPage() {
-  const [items, setItems] = useState<LocalFiesta[]>(() => [...(fiestas as LocalFiesta[])]);
+  const [items, setItems] = useState<LocalFiesta[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   // Aviso post-guardado: lectura ligera de query param sin hooks de Next
   const [savingNotice, setSavingNotice] = useState(false);
   useEffect(() => {
@@ -26,17 +95,30 @@ export default function HorariosPage() {
     }
   }, []);
   // Fecha de corte: mostrar desde hace 2 días (calendario) en zona Europe/Madrid
-  const TZ = "Europe/Madrid";
-  function ymdInTZ(d: Date, tz: string) {
-    // 'en-CA' => YYYY-MM-DD
-    return new Intl.DateTimeFormat("en-CA", {
-      timeZone: tz,
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-    }).format(d);
-  }
+  function ymdInTZ(d: Date, tz: string) { return toYMD(d, tz); }
   const twoDaysAgoYMD = ymdInTZ(new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), TZ);
+  // --- Cargar datos desde la API ---
+  async function fetchEvents() {
+    try {
+      setError(null);
+      const res = await fetch("/api/events", { cache: "no-store" });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data?.error || "No se pudieron cargar los eventos");
+      }
+      const data = await res.json();
+      const list: EventApi[] = Array.isArray(data?.events) ? data.events : Array.isArray(data) ? data : [];
+      setItems(list.map(fromApi));
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : "Error inesperado");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    fetchEvents();
+  }, []);
   // Filtramos: mostrar eventos futuros y los de hace hasta 2 días (no 48h, días naturales)
   // Luego ordenamos por fecha (YYYY-MM-DD) y hora (HH:MM), vacíos al final
   const eventosOrdenados = items
@@ -135,6 +217,7 @@ export default function HorariosPage() {
     setSelectMode(false);
     clearSelection();
     setBulkDeleting(false);
+    await fetchEvents();
   }
 
   // Toast de borrado y deshacer
@@ -146,16 +229,17 @@ export default function HorariosPage() {
   // --- Edit Modal State ---
   const [editOpen, setEditOpen] = useState(false);
   const [editMatch, setEditMatch] = useState<{ title: string; date: string; time: string } | null>(null);
-  const [editForm, setEditForm] = useState<{ title: string; img: string; description: string; date: string; time: string; location: string }>({
-    title: "",
-    img: "",
-    description: "",
-    date: "",
-    time: "",
-    location: "",
-  });
+  const [editForm, setEditForm] = useState<{ title: string; img: string; description: string; date: string; time: string; location: string; provisional: boolean }>({
+  title: "",
+  img: "",
+  description: "",
+  date: "",
+  time: "",
+  location: "",
+  provisional: false,
+});
   const [savingEdit, setSavingEdit] = useState(false);
-  const prevEditRef = useRef<Fiesta | null>(null);
+  const prevEditRef = useRef<LocalFiesta | null>(null);
 
   // --- Attendance logic ---
   function getCurrentUser(): string | null {
@@ -227,6 +311,8 @@ export default function HorariosPage() {
           toggleAttend(ev);
           // (opcional) alert("No se aplicó ningún cambio");
         }
+        // Asegura estado fuente de verdad tras toggle de asistencia
+        await fetchEvents();
       } catch (e) {
         // rollback local por error de red
         toggleAttend(ev);
@@ -235,20 +321,21 @@ export default function HorariosPage() {
     })();
   }
 
-  function openEdit(ev: { title?: string; img?: string; description?: string; date?: string; time?: string; location?: string }) {
+  function openEdit(ev: { title?: string; img?: string; description?: string; date?: string; time?: string; location?: string; provisional?: boolean }) {
     const match = { title: ev.title || "", date: ev.date || "", time: ev.time || "" };
     setEditMatch(match);
     setEditForm({
-      title: ev.title || "",
-      img: ev.img || "",
-      description: ev.description || "",
-      date: ev.date || "",
-      time: ev.time || "",
-      location: ev.location || "",
-    });
+  title: ev.title || "",
+  img: ev.img || "",
+  description: ev.description || "",
+  date: ev.date || "",
+  time: ev.time || "",
+  location: ev.location || "",
+  provisional: ev.provisional ?? false,
+});
     // snapshot previo para revertir si falla
     const found = items.find(it => (it.title||"")===match.title && (it.date||"")===match.date && (it.time||"")===match.time) || null;
-    prevEditRef.current = found ? { ...found } as Fiesta : null;
+    prevEditRef.current = found ? { ...found } as LocalFiesta : null;
     setEditOpen(true);
   }
 
@@ -262,7 +349,7 @@ export default function HorariosPage() {
       const idx = prev.findIndex(it => (it.title||"")===editMatch.title && (it.date||"")===editMatch.date && (it.time||"")===editMatch.time);
       if (idx === -1) return prev;
       const next = [...prev];
-      next[idx] = { ...next[idx], ...editForm } as Fiesta;
+      next[idx] = { ...next[idx], ...editForm } as LocalFiesta;
       return next;
     });
     try {
@@ -279,7 +366,7 @@ export default function HorariosPage() {
             const idx = prev.findIndex(it => (it.title||"")===editMatch.title && (it.date||"")===editMatch.date && (it.time||"")===editMatch.time);
             if (idx === -1) return prev;
             const next = [...prev];
-            next[idx] = { ...prevEditRef.current! } as Fiesta;
+            next[idx] = { ...prevEditRef.current! } as LocalFiesta;
             return next;
           });
         }
@@ -287,16 +374,20 @@ export default function HorariosPage() {
         setSavingEdit(false);
         return;
       }
-      setSavingEdit(false);
-      setEditOpen(false);
-    } catch (err) {
+// Sincroniza desde la BD para evitar estados viejos y claves desfasadas
+await fetchEvents();
+setSavingEdit(false);
+setEditOpen(false);
+setEditMatch(null);
+prevEditRef.current = null;    
+} catch (err) {
       // rollback
       if (prevEditRef.current) {
         setItems(prev => {
           const idx = prev.findIndex(it => (it.title||"")===editMatch.title && (it.date||"")===editMatch.date && (it.time||"")===editMatch.time);
           if (idx === -1) return prev;
           const next = [...prev];
-          next[idx] = { ...prevEditRef.current! } as Fiesta;
+          next[idx] = { ...prevEditRef.current! } as LocalFiesta;
           return next;
         });
       }
@@ -365,10 +456,13 @@ export default function HorariosPage() {
         });
         const data = await res.json().catch(() => ({}));
         if (!res.ok) {
-          alert(data.error || "No se pudo borrar");
-          // Revertimos en UI si falló el commit
-          setRemoved(prev => { const copy = { ...prev }; delete copy[key]; return copy; });
-        }
+  alert(data.error || "No se pudo borrar");
+  // Revertimos en UI si falló el commit
+  setRemoved(prev => { const copy = { ...prev }; delete copy[key]; return copy; });
+} else {
+  // Refrescar lista tras borrar en servidor
+  await fetchEvents();
+}
       } catch (err) {
         alert("Error inesperado al borrar");
         setRemoved(prev => { const copy = { ...prev }; delete copy[key]; return copy; });
@@ -391,10 +485,17 @@ export default function HorariosPage() {
       <div className="max-w-5xl mx-auto px-4 py-12">
         {savingNotice && (
           <div className="mb-4 rounded-lg border border-[#0C2335]/20 bg-white/80 px-4 py-2 text-sm text-[#0C2335]">
-            Tu evento se esta guardando, tardara un momento.
+            Evento creado
           </div>
         )}
         <h1 className="text-[80px] leading-none font-semibold break-words">Horarios</h1>
+
+        {loading && (
+          <div className="mt-4 rounded-lg border border-[#0C2335]/20 bg-white/80 px-4 py-2 text-sm text-[#0C2335]">Cargando eventos…</div>
+        )}
+        {!loading && error && (
+          <div className="mt-4 rounded-lg border border-red-500/30 bg-white/80 px-4 py-2 text-sm text-red-700">{error}</div>
+        )}
 
         <div className="mt-2 flex items-center justify-end gap-2">
           {!selectMode ? (
@@ -570,6 +671,17 @@ export default function HorariosPage() {
                   <input value={editForm.img} onChange={e=>setEditForm({...editForm, img: e.target.value})} className="mt-1 w-full rounded border border-[#0C2335]/30 bg-[#E85D6A] px-3 py-2 text-sm text-[#0C2335]" placeholder="/bannerGenerico.png" />
                 </label>
 
+                <div className="flex items-center gap-2">
+  <input
+    id="edit-provisional"
+    type="checkbox"
+    checked={!!editForm.provisional}
+    onChange={(e)=>setEditForm({...editForm, provisional: e.target.checked})}
+    className="h-4 w-4 border"
+  />
+  <label htmlFor="edit-provisional" className="text-sm font-semibold">Provisional</label>
+</div>
+
                 <div className="flex justify-end items-center gap-3 pt-2">
                   {savingEdit && <span className="text-xs opacity-80">Guardando…</span>}
                   <button type="button" onClick={closeEdit} disabled={savingEdit} className="rounded border border-[#0C2335]/30 px-3 py-2 text-sm hover:bg-[#0C2335]/5 disabled:opacity-60">Cancelar</button>
@@ -580,21 +692,7 @@ export default function HorariosPage() {
           </div>
         </div>
       )}
-      {/* Toast de borrado con deshacer */}
-      {toast.show && (
-        <div className="fixed bottom-4 left-4 right-4 z-50">
-          <div className="w-full flex items-center justify-between gap-3 rounded-xl bg-[#0C2335] text-white px-4 py-3 shadow-lg">
-            <span className="text-sm">{toast.text}</span>
-            <button
-              type="button"
-              onClick={undoDelete}
-              className="rounded-full bg-white/10 px-4 py-2 text-sm hover:bg-white/20"
-            >
-              Deshacer
-            </button>
-          </div>
-        </div>
-      )}
+      
     {/* Floating add button */}
     <Link
       href="/layoutComision/horarios/nuevo"

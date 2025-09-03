@@ -1,163 +1,105 @@
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
-import crypto from "node:crypto";
-import { githubGetFile, githubPutFile } from "@/lib/github";
+import { z } from "zod";
+import { db } from "@/db/client";
+import { events } from "@/db/schema";
+import { eq, sql } from "drizzle-orm";
 
-export const runtime = "nodejs"; // asegurar Node runtime
+const TZ = "Europe/Madrid";
 
-type MatchKey = { title: string; date?: string; time?: string };
+const MatchSchema = z.union([
+  z.object({ id: z.union([z.string(), z.number()]) }),
+  z.object({
+    title: z.string().min(1),
+    date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+    time: z.string().regex(/^\d{2}:\d{2}$/),
+  }),
+]);
 
-type Patch = {
-  title?: string;
-  img?: string;
-  description?: string;
-  date?: string;   // YYYY-MM-DD
-  time?: string;   // HH:MM
-  location?: string;
-};
+const PatchSchema = z.object({
+  title: z.string().trim().min(1).optional(),
+  img: z.string().trim().min(1).or(z.literal("")).optional(),
+  description: z.string().optional(),
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+  time: z.string().regex(/^\d{2}:\d{2}$/).optional(),
+  location: z.string().optional(),
+  provisional: z.boolean().optional(),
+});
 
-function expectedCookieValue() {
-  const pass = (process.env.INTRANET_PASS || "").trim();
-  const secret = (process.env.SESSION_SECRET || "").trim();
-  return crypto.createHash("sha256").update(pass + secret).digest("hex");
-}
-
-function findArraySegments(tsSource: string) {
-  // Buscar: export const fiestas [: tipo opcional] = [
-  const re = /export\s+const\s+fiestas(?:\s*:\s*[\w\[\]\s<>|&?,.]+)?\s*=\s*\[/m;
-  const match = tsSource.match(re);
-  if (!match || typeof match.index !== "number") {
-    throw new Error("No se encontró la declaración del array 'fiestas'.");
+async function findEventId(match: z.infer<typeof MatchSchema>) {
+  if ("id" in match) {
+    const [row] = await db
+      .select({ id: events.id })
+      .from(events)
+      .where(sql`${events.id}::text = ${String(match.id)}`)
+      .limit(1);
+    return row?.id ?? null;
   }
-  const start = match.index;
-  const openBracket = tsSource.indexOf("[", start);
-  const closeBracket = tsSource.indexOf("];", openBracket);
-  if (openBracket === -1 || closeBracket === -1) {
-    throw new Error("No se pudo localizar el array 'fiestas' completo.");
-  }
-  const before = tsSource.slice(0, openBracket + 1);
-  const inside = tsSource.slice(openBracket + 1, closeBracket);
-  const after = tsSource.slice(closeBracket);
-  return { before, inside, after };
+  const [row] = await db
+    .select({ id: events.id })
+    .from(events)
+    .where(sql`
+      ${events.title} = ${match.title}
+      AND to_char(${events.startsAt} AT TIME ZONE ${sql.raw(`'${TZ}'`)}, 'YYYY-MM-DD') = ${match.date}
+      AND to_char(${events.startsAt} AT TIME ZONE ${sql.raw(`'${TZ}'`)}, 'HH24:MI') = ${match.time}
+    `)
+    .limit(1);
+  return row?.id ?? null;
 }
 
-function splitTopLevelObjects(inside: string): string[] {
-  const out: string[] = [];
-  let depth = 0;
-  let buf = "";
-  for (let i = 0; i < inside.length; i++) {
-    const ch = inside[i];
-    if (ch === "{") depth++;
-    if (ch === "}") depth--;
-    if (ch === "," && depth === 0) {
-      out.push(buf);
-      buf = "";
-      continue;
-    }
-    buf += ch;
-  }
-  const last = buf.trim();
-  if (last) out.push(buf);
-  return out.map(s => s.trim()).filter(s => s.length > 0);
-}
-
-function extractField(objText: string, field: "title" | "date" | "time" | "img" | "description" | "location"): string | undefined {
-  const re = new RegExp(field + String.raw`\s*:\s*"([^"]*)"`);
-  const m = objText.match(re);
-  return m ? m[1] : undefined;
-}
-
-function replaceField(objText: string, field: keyof Patch, value: string | undefined) {
-  // Si value es undefined, no tocamos el campo
-  if (typeof value === "undefined") return objText;
-  const hasField = new RegExp(field + String.raw`\s*:`).test(objText);
-  const serialized = `${field}: ${JSON.stringify(value)}`;
-  if (hasField) {
-    // Reemplaza el valor existente
-    const re = new RegExp(field + String.raw`\s*:\s*"([^"]*)"`);
-    return objText.replace(re, serialized);
-  }
-  // Insertar antes del cierre '}' con una coma si hace falta
-  const insertPos = objText.lastIndexOf("}");
-  if (insertPos === -1) return objText; // inválido, lo dejamos
-  const before = objText.slice(0, insertPos).trimEnd();
-  const needsComma = /\{$/.test(before) ? "" : ",";
-  const after = objText.slice(insertPos);
-  return `${before}${needsComma} ${serialized}${after}`;
-}
-
-function applyPatch(objText: string, patch: Patch): string {
-  let t = objText;
-  t = replaceField(t, "title", patch.title);
-  t = replaceField(t, "img", patch.img);
-  t = replaceField(t, "description", patch.description);
-  t = replaceField(t, "date", patch.date);
-  t = replaceField(t, "time", patch.time);
-  t = replaceField(t, "location", patch.location);
-  return t;
-}
-
-function updateMatchingObject(inside: string, match: MatchKey, patch: Patch) {
-  const parts = splitTopLevelObjects(inside);
-  let updated = false;
-  const mapped = parts.map(p => {
-    const t = extractField(p, "title");
-    const d = extractField(p, "date");
-    const ti = extractField(p, "time");
-    const titleEq = (t || "") === (match.title || "");
-    const dateEq = match.date ? (d || "") === match.date : true;
-    const timeEq = match.time ? (ti || "") === match.time : true;
-    if (!updated && titleEq && dateEq && timeEq) {
-      updated = true;
-      // Mantener indentación básica
-      const base = p.replace(/^\s+|\s+$/g, "");
-      const patched = applyPatch(base, patch);
-      return patched;
-    }
-    return p;
-  });
-  return { updated, newInside: mapped.length ? "\n  " + mapped.map(s => s.replace(/^\s*/,"  ")).join(",\n  ") + "\n" : "" };
+async function getLocalDateTimeStringsById(id: number | string) {
+  const [row] = await db
+    .select({
+      date: sql<string>`to_char(${events.startsAt} AT TIME ZONE ${sql.raw(`'${TZ}'`)}, 'YYYY-MM-DD')`,
+      time: sql<string>`to_char(${events.startsAt} AT TIME ZONE ${sql.raw(`'${TZ}'`)}, 'HH24:MI')`,
+    })
+    .from(events)
+    .where(sql`${events.id}::text = ${String(id)}`)
+    .limit(1);
+  if (!row) throw new Error("Evento no encontrado al leer fecha/hora");
+  return row;
 }
 
 export async function POST(req: Request) {
   try {
-    // 1) Auth por cookie
-    const cookieStore = await cookies();
-    const cookie = cookieStore.get("commission_auth")?.value || "";
-    if (cookie !== expectedCookieValue()) {
-      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+    const body = await req.json().catch(() => ({}));
+    const match = MatchSchema.parse(body?.match);
+    const patch = PatchSchema.parse(body?.patch ?? {});
+    const id = await findEventId(match);
+    if (!id) return NextResponse.json({ error: "Evento no encontrado" }, { status: 404 });
+
+    const updateSet: Record<string, unknown> = {};
+    if (patch.title !== undefined) updateSet.title = patch.title;
+    if (patch.img !== undefined) updateSet.img = patch.img;
+    if (patch.description !== undefined) updateSet.description = patch.description;
+    if (patch.location !== undefined) updateSet.location = patch.location;
+    if (patch.provisional !== undefined) updateSet.provisional = patch.provisional;
+
+    if (patch.date !== undefined || patch.time !== undefined) {
+      const curr = await getLocalDateTimeStringsById(id);
+      const dateStr = patch.date ?? curr.date;
+      const timeStr = patch.time ?? curr.time;
+      updateSet.startsAt = sql`
+        (to_timestamp(${dateStr} || ' ' || ${timeStr}, 'YYYY-MM-DD HH24:MI') AT TIME ZONE ${sql.raw(`'${TZ}'`)})
+      `;
     }
 
-    // 2) Payload
-    const body = await req.json();
-    const match = (body?.match || {}) as MatchKey;
-    const patch = (body?.patch || {}) as Patch;
-    if (!match?.title) {
-      return NextResponse.json({ error: "match.title requerido" }, { status: 400 });
-    }
+    const [updated] = await db
+      .update(events)
+      .set(updateSet)
+      .where(sql`${events.id}::text = ${String(id)}`)
+      .returning({
+        id: events.id,
+        title: events.title,
+        img: events.img,
+        description: events.description,
+        startsAt: events.startsAt,
+        location: events.location,
+        provisional: events.provisional,
+        attendees: events.attendees,
+      });
 
-    // 3) Leer archivo
-    const { content, sha, encoding } = await githubGetFile();
-    if (encoding !== "base64") throw new Error("Encoding inesperado en GitHub.");
-    const tsSource = Buffer.from(content, "base64").toString("utf8");
-
-    // 4) Actualizar
-    const { before, inside, after } = findArraySegments(tsSource);
-    const { updated, newInside } = updateMatchingObject(inside, match, patch);
-    if (!updated) {
-      return NextResponse.json({ error: "No se encontró un evento que coincida con title/date/time" }, { status: 404 });
-    }
-
-    const newTs = before + newInside + after;
-
-    // 5) Commit
-    const titleForMsg = patch.title || match.title;
-    const msg = `chore(events): update "${titleForMsg}"`;
-    await githubPutFile({ newContent: newTs, sha, message: msg, author: { name: "Fiestas Matet Bot", email: "bot@matet.local" } });
-
-    return NextResponse.json({ ok: true });
-  } catch (err) {
-    const msg = err instanceof Error ? err.message : "Unknown error";
-    return NextResponse.json({ error: msg }, { status: 500 });
+    return NextResponse.json({ ok: true, event: updated });
+  } catch (err: unknown) {
+    return NextResponse.json({ error: err instanceof Error ? err.message : "Error inesperado" }, { status: 400 });
   }
 }

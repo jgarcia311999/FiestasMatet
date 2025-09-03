@@ -1,178 +1,85 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import crypto from "node:crypto";
-import { githubGetFile, githubPutFile } from "@/lib/github";
+import type { ReadonlyRequestCookies } from "next/dist/server/web/spec-extension/adapters/request-cookies";
+import { z } from "zod";
+import { db } from "@/db/client";
+import { events } from "@/db/schema";
+import { eq, sql } from "drizzle-orm";
 
-export const runtime = "nodejs";
+const TZ = "Europe/Madrid";
 
-type MatchKey = { title: string; date?: string; time?: string };
-type Body = { match: MatchKey; action?: "toggle"|"add"|"remove" };
+const MatchSchema = z.union([
+  z.object({ id: z.union([z.string(), z.number()]) }),
+  z.object({
+    title: z.string().min(1),
+    date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+    time: z.string().regex(/^\d{2}:\d{2}$/),
+  }),
+]);
 
-function expectedCookieValue() {
-  const pass = (process.env.INTRANET_PASS || "").trim();
-  const secret = (process.env.SESSION_SECRET || "").trim();
-  return crypto.createHash("sha256").update(pass + secret).digest("hex");
-}
+const Payload = z.object({
+  match: MatchSchema,
+  action: z.literal("toggle"),
+});
 
-// Igual que en update/delete (regex flexible)
-function findArraySegments(tsSource: string) {
-  const re = /export\s+const\s+fiestas(?:\s*:\s*[\w\[\]\s<>|&?,.]+)?\s*=\s*\[/m;
-  const match = tsSource.match(re);
-  if (!match || typeof match.index !== "number") throw new Error("No se encontró el array 'fiestas'.");
-  const start = match.index;
-  const open = tsSource.indexOf("[", start);
-  const close = tsSource.indexOf("];", open);
-  if (open === -1 || close === -1) throw new Error("Array 'fiestas' incompleto.");
-  return {
-    before: tsSource.slice(0, open + 1),
-    inside: tsSource.slice(open + 1, close),
-    after: tsSource.slice(close),
-  };
-}
-
-// Como en update/delete
-function splitTopLevelObjects(inside: string): string[] {
-  const out: string[] = [];
-  let depth = 0, buf = "";
-  for (let i = 0; i < inside.length; i++) {
-    const ch = inside[i];
-    if (ch === "{") depth++;
-    if (ch === "}") depth--;
-    if (ch === "," && depth === 0) { out.push(buf); buf = ""; continue; }
-    buf += ch;
+async function findEventId(match: z.infer<typeof MatchSchema>): Promise<number | null> {
+  if ("id" in match) {
+    const parsedId = typeof match.id === "string" ? Number(match.id) : match.id;
+    const [row] = await db.select({ id: events.id }).from(events).where(eq(events.id, parsedId)).limit(1);
+    return row?.id ?? null;
   }
-  const last = buf.trim();
-  if (last) out.push(buf);
-  return out.map(s => s.trim()).filter(Boolean);
-}
-
-function extractString(objText: string, field: string): string | undefined {
-  const re = new RegExp(field + String.raw`\s*:\s*"(.*?)"`);
-  const m = objText.match(re);
-  return m ? m[1] : undefined;
-}
-
-function userInAttendees(objText: string, user: string): boolean {
-  const m = objText.match(/attendees\s*:\s*\[([\s\S]*?)\]/);
-  if (!m) return false;
-  const raw = m[1] ?? "";
-  const current = raw
-    .split(",")
-    .map(s => s.trim().replace(/^"(.*)"$/, "$1").replace(/^'(.*)'$/, "$1"))
-    .filter(Boolean);
-  return current.includes(user);
-}
-
-function upsertAttendees(objText: string, user: string, act: "toggle"|"add"|"remove"): string {
-  // busca attendees: ["A","B"] o no presente
-  const hasField = /attendees\s*:/.test(objText);
-  if (!hasField) {
-    const insertPos = objText.lastIndexOf("}");
-    const before = objText.slice(0, insertPos).trimEnd();
-    const needsComma = /\{$/.test(before) ? "" : ",";
-    const arr = act === "remove" ? [] : [user];
-    return `${before}${needsComma} attendees: ${JSON.stringify(arr)}${objText.slice(insertPos)}`;
-  }
-
-  // extraer array existente (versión simple)
-  const m = objText.match(/attendees\s*:\s*\[([\s\S]*?)\]/);
-  const raw = m?.[1] ?? "";
-  const current = raw.split(",").map(s => s.trim().replace(/^"(.*)"$/, "$1")).filter(Boolean);
-  const set = new Set(current);
-  if (act === "toggle") { set.has(user) ? set.delete(user) : set.add(user); }
-  if (act === "add") set.add(user);
-  if (act === "remove") set.delete(user);
-  const arrText = JSON.stringify(Array.from(set));
-  return objText.replace(/attendees\s*:\s*\[[\s\S]*?\]/, `attendees: ${arrText}`);
-}
-
-function applyAttend(inside: string, match: MatchKey, user: string, action: "toggle"|"add"|"remove"): { updated: boolean; newInside: string; finalAction: "add"|"remove"|"noop" } {
-  const parts = splitTopLevelObjects(inside);
-  let updated = false;
-  let effective: "add" | "remove" | "noop" = "noop";
-
-  const mapped = parts.map(p => {
-    const t = extractString(p, "title");
-    const d = extractString(p, "date");
-    const ti = extractString(p, "time");
-    const ok =
-      (t || "") === (match.title || "") &&
-      (match.date ? (d || "") === match.date : true) &&
-      (match.time ? (ti || "") === match.time : true);
-
-    if (ok) {
-      const isCommented = /^\s*\/\//.test(p);
-      if (isCommented) return p; // no tocar eventos comentados
-    }
-
-    if (!updated && ok) {
-      const wasPresent = userInAttendees(p, user);
-
-      if (action === "toggle") {
-        effective = wasPresent ? "remove" : "add";
-      } else if (action === "add") {
-        effective = wasPresent ? "noop" : "add";
-      } else { // action === "remove"
-        effective = wasPresent ? "remove" : "noop";
-      }
-
-      if (effective === "noop") {
-        return p; // no hay cambios reales
-      }
-
-      updated = true;
-      return upsertAttendees(p, user, effective);
-    }
-    return p;
-  });
-
-  return {
-    updated,
-    newInside: mapped.length ? "\n  " + mapped.map(s => s.replace(/^\s*/, "  ")).join(",\n  ") + "\n" : "",
-    finalAction: effective,
-  };
+  const [row] = await db
+    .select({ id: events.id })
+    .from(events)
+    .where(sql`
+      ${events.title} = ${match.title}
+      AND to_char(${events.startsAt} AT TIME ZONE ${sql.raw(`'${TZ}'`)}, 'YYYY-MM-DD') = ${match.date}
+      AND to_char(${events.startsAt} AT TIME ZONE ${sql.raw(`'${TZ}'`)}, 'HH24:MI') = ${match.time}
+    `)
+    .limit(1);
+  return row?.id ?? null;
 }
 
 export async function POST(req: Request) {
   try {
-    const cookieStore = await cookies();
-    const auth = cookieStore.get("commission_auth")?.value || "";
-    if (auth !== expectedCookieValue()) {
-      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
-    }
-    const user = cookieStore.get("commission_user")?.value || "";
-    if (!user) return NextResponse.json({ error: "Usuario no identificado" }, { status: 400 });
+    const body = await req.json().catch(() => ({}));
+    const { match } = Payload.parse(body);
 
-    const body = await req.json() as Body;
-    const match = body?.match;
-    const action = body?.action || "toggle";
-    if (!match?.title) return NextResponse.json({ error: "match.title requerido" }, { status: 400 });
+    // Next.js 13.4+ cookies() is sync, but `await` also works (it just returns the same value).
+    // In older versions where cookies() returns a Promise, `await` resolves it.
+    const jar = await (cookies() as unknown as Promise<ReadonlyRequestCookies> | ReadonlyRequestCookies);
+    const user =
+      jar.get("commission_user")?.value?.trim() ||
+      jar.get("usuario")?.value?.trim() ||
+      "";
 
-    const { content, sha, encoding } = await githubGetFile();
-    if (encoding !== "base64") throw new Error("Encoding inesperado.");
-    const ts = Buffer.from(content, "base64").toString("utf8");
-
-    const { before, inside, after } = findArraySegments(ts);
-    const { updated, newInside, finalAction } = applyAttend(inside, match, user, action);
-    if (!updated) {
-      // No hay cambios que aplicar (noop o ya estaba en el estado deseado)
-      return NextResponse.json({ ok: true, action: finalAction });
+    if (!user) {
+      return NextResponse.json({ error: "No autenticado", action: "noop" }, { status: 401 });
     }
 
-    const newTs = before + newInside + after;
-    let msg = "";
-    if (finalAction === "add") {
-      msg = `${user} se apuntó a "${match.title}"`;
-    } else if (finalAction === "remove") {
-      msg = `${user} canceló asistencia a "${match.title}"`;
-    } else {
-      msg = `${user} cambió asistencia a "${match.title}"`;
-    }
-    await githubPutFile({ newContent: newTs, sha, message: msg, author: { name: "Fiestas Matet Bot", email: "bot@matet.local" } });
+    const id = await findEventId(match);
+    if (!id) return NextResponse.json({ error: "Evento no encontrado", action: "noop" }, { status: 404 });
 
-    return NextResponse.json({ ok: true, action: finalAction });
-  } catch (e) {
-    const msg = e instanceof Error ? e.message : "Unknown error";
-    return NextResponse.json({ error: msg }, { status: 500 });
+    const [row] = await db
+      .select({ attendees: events.attendees })
+      .from(events)
+      .where(eq(events.id, id))
+      .limit(1);
+
+    const current = Array.isArray(row?.attendees) ? (row!.attendees as string[]) : [];
+    const set = new Set(current);
+    const had = set.has(user);
+    let action: "add" | "remove" | "noop" = "noop";
+
+    if (had) { set.delete(user); action = "remove"; }
+    else { set.add(user); action = "add"; }
+
+    const nextArr = Array.from(set);
+
+    await db.update(events).set({ attendees: nextArr as unknown as string[] }).where(eq(events.id, id));
+
+    return NextResponse.json({ ok: true, action });
+  } catch (err: unknown) {
+    return NextResponse.json({ error: err instanceof Error ? err.message : "Error inesperado", action: "noop" }, { status: 400 });
   }
 }

@@ -1,141 +1,110 @@
-"use client";
-import { useState } from "react";
-import { fiestas as fiestasData, type Fiesta } from "../../data/fiestas";
+import { db } from "@/db/client";
+import { events } from "@/db/schema";
+import { InferModel } from "drizzle-orm";
 
+// Tipado derivado de la tabla events
+type Event = InferModel<typeof events>;
 
-function parseISODateLocal(s: string): Date {
-  const [y, m, d] = s.split("-").map(Number);
-  return new Date(y, (m || 1) - 1, d || 1);
+// Utilidades de fecha
+function toDateKey(d: Date) {
+  return d.toISOString().slice(0, 10); // YYYY-MM-DD
+}
+function toTimeHHMM(d: Date) {
+  return d.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit", hour12: false });
+}
+function sortNightLast(items: { time: string }[]) {
+  const toMin = (t: string) => {
+    const [hh, mm] = t.split(":").map(Number);
+    return hh >= 0 && hh < 6 ? hh * 60 + (mm || 0) + 24 * 60 : hh * 60 + (mm || 0);
+  };
+  items.sort((a, b) => toMin(a.time) - toMin(b.time));
 }
 
-function startOfTodayLocal(): Date {
-  const now = new Date();
-  return new Date(now.getFullYear(), now.getMonth(), now.getDate());
-}
-
+// Agrega formato largo "Lunes 12 de agosto"
 function formatSpanishLong(date: Date): string {
   const s = new Intl.DateTimeFormat("es-ES", {
     weekday: "long",
     day: "numeric",
     month: "long",
   }).format(date);
-  // Quitar coma y capitalizar primera letra
   const noComma = s.replace(", ", " ");
   return noComma.charAt(0).toUpperCase() + noComma.slice(1);
 }
 
-function getSecciones(fiestaLista: Fiesta[], includePast: boolean): { label: string; date: Date; key: string }[] {
-  const today = startOfTodayLocal();
-  const enriched = fiestaLista
-    .map(f => ({ ...f, dateObj: parseISODateLocal(f.date) }))
-    .filter(f => !isNaN(f.dateObj.getTime()) && (includePast ? true : f.dateObj >= today));
+export default async function CalendarPage() {
+  // 1) Leer todos los eventos de la BD
+  const rows: Event[] = await db.select().from(events);
 
-  const byDate = new Map<string, Date>();
-  for (const f of enriched) {
-    if (!byDate.has(f.date)) byDate.set(f.date, f.dateObj);
+  // 2) Agrupar por fecha "YYYY-MM-DD" con la estructura que espera el calendario
+  const byDate = new Map<string, { label: string; items: { id: number; time: string; title: string; provisional: boolean; location: string }[] }>();
+
+  for (const ev of rows) {
+    const d = new Date(ev.startsAt);
+    const key = toDateKey(d);
+    const label = formatSpanishLong(d);
+    const item = {
+      id: ev.id,
+      time: toTimeHHMM(d),
+      title: ev.title,
+      provisional: !!ev.provisional,
+      location: ev.location,
+    };
+    if (!byDate.has(key)) byDate.set(key, { label, items: [] });
+    byDate.get(key)!.items.push(item);
   }
 
-  return Array.from(byDate.entries())
-    .sort((a, b) => a[1].getTime() - b[1].getTime())
-    .map(([key, d]) => ({ key, date: d, label: formatSpanishLong(d) }));
-}
-
-function getEventosPorFecha(fiestaLista: Fiesta[], dateKey: string): Fiesta[] {
-  const byDate = fiestaLista.filter(f => f.date === dateKey);
-  // Madrugada (00:00–05:59) cuenta como final del día
-  const parseTime = (t: string) => {
-    const [hh, mm] = (t || "00:00").split(":").map(Number);
-    let minutes = (hh || 0) * 60 + (mm || 0);
-    // Si es madrugada (00:00–05:59), lo empujamos al final del día
-    if (!isNaN(hh) && hh >= 0 && hh < 6) minutes += 24 * 60;
-    return minutes;
-  };
-  return byDate.sort((a, b) => parseTime(a.time) - parseTime(b.time));
-}
-
-function getFranjaHorariaLabel(time: string): string {
-  const [hhStr, mmStr] = (time || "00:00").split(":");
-  const hh = Number(hhStr);
-  // Mañana: 06:00–13:59, Tarde: 14:00–20:59, Noche: 21:00–05:59
-  if (hh >= 6 && hh < 14) return "de la mañana";
-  if (hh >= 14 && hh < 21) return "de la tarde";
-  return "de la noche";
-}
-
-export default function TodasPage() {
-  const [showAll, setShowAll] = useState(false);
-  const secciones = getSecciones(fiestasData, showAll);
+  // 3) Orden cronológico de días y de items por hora (madrugada al final)
+  const days = Array.from(byDate.entries())
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([key, { label, items }]) => {
+      sortNightLast(items);
+      return { key, label, items };
+    });
 
   return (
     <main className="min-h-screen bg-[#E85D6A] text-[#0C2335]">
       <div className="mx-auto max-w-sm px-1 pt-10 pb-24">
-        {/* Headline */}
         <h1 className="font-serif text-[36px] leading-[1.05] tracking-tight">
-          Entérate de <strong>todas</strong> las fiestas de <strong className="block mt-2">MATET</strong>
+          Calendario de <strong>fiestas</strong> de <strong className="block mt-2">MATET</strong>
         </h1>
-        {!showAll && (
-          <button
-            type="button"
-            onClick={() => setShowAll(true)}
-            className="mt-2 text-[12px] underline underline-offset-2"
-          >
-            ← Ver anteriores
-          </button>
-        )}
 
-        {/* Divider rows of chips */}
         <div className="mt-5 border-t border-[#0C2335]" />
-        {secciones.length === 0 ? (
+
+        {days.length === 0 ? (
           <div className="py-2 text-[12px] italic">Sin fiestas</div>
         ) : (
           <>
-            {secciones.map((sec, idx) => (
-              <div key={sec.key}>
-                <div
-                  className="text-lg uppercase tracking-[0.18em] py-2 cursor-pointer"
-                >
-                  <span className="border-b border-transparent">{sec.label}</span>
+            {days.map((day) => (
+              <div key={day.key}>
+                <div className="text-lg uppercase tracking-[0.18em] py-2">
+                  <span className="border-b border-transparent">{day.label}</span>
                 </div>
-                <>
-                  <div className="p-2 text-base">
-                    {getEventosPorFecha(fiestasData, sec.key).length === 0 ? (
-                      <div className="italic">Sin eventos para este día</div>
-                    ) : (
-                      <ul className="space-y-1">
-                        {getEventosPorFecha(fiestasData, sec.key).map((ev, i) => (
-                          <li key={i} className="text-lg">
-                            A las {ev.time} {getFranjaHorariaLabel(ev.time)}{ev.provisional && "*"} - {ev.title}
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                  </div>
-                  {/*
-                  <div className="mt-5 mb-5 relative h-[180px] rounded-3xl bg-[#083279] overflow-hidden">
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="h-24 w-24 rounded-full border border-[#0C2335] flex items-center justify-center">
-                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <line x1="12" y1="4" x2="12" y2="18" stroke="#0C2335" strokeWidth="2"/>
-                          <polyline points="6,12 12,18 18,12" stroke="#0C2335" strokeWidth="2" fill="none"/>
-                        </svg>
-                      </div>
-                    </div>
-                  </div>
-                  */}
-                </>
+
+                <div className="p-2 text-base">
+                  {day.items.length === 0 ? (
+                    <div className="italic">Sin eventos para este día</div>
+                  ) : (
+                    <ul className="space-y-1">
+                      {day.items.map((ev) => (
+                        <li key={ev.id} className="text-lg">
+                          A las {ev.time} {getFranjaHorariaLabel(ev.time)}{ev.provisional && "*"} - {ev.title}
+                          {ev.location ? <span className="ml-1">({ev.location})</span> : null}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+
                 <div className="border-t border-[#0C2335]" />
               </div>
             ))}
           </>
         )}
 
-        {fiestasData.some(f => f.provisional) && (
-          <p className="mt-4 text-sm italic">
-            *La hora es provisional y puede variar.
-          </p>
+        {rows.some((f) => f.provisional) && (
+          <p className="mt-4 text-sm italic">*La hora es provisional y puede variar.</p>
         )}
 
-        {/* Call to action serif */}
         <div className="mt-8">
           <p className="font-serif text-[28px] leading-tight">Matet</p>
           <p className="font-serif text-[28px] leading-tight">es su gente</p>
@@ -144,4 +113,12 @@ export default function TodasPage() {
       </div>
     </main>
   );
+}
+
+function getFranjaHorariaLabel(timeHHMM: string): string {
+  const [hhStr] = timeHHMM.split(":");
+  const hh = Number(hhStr);
+  if (hh >= 6 && hh < 14) return "de la mañana";
+  if (hh >= 14 && hh < 21) return "de la tarde";
+  return "de la noche";
 }
