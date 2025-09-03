@@ -14,5 +14,4 @@ export const USERS = [
   "Javi",
   "Jaime",
   "Pablo",
-  "Victor",
 ];
