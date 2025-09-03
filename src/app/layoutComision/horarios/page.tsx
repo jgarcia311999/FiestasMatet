@@ -324,7 +324,7 @@ export default function HorariosPage() {
 
         {/* Listado: fecha - hora, nombre */}
         <ul className="mt-6 divide-y divide-[#0C2335]/10">
-          {eventosOrdenados.filter(ev => !removed[makeKey(ev)]).map((ev, idx) => {
+          {eventosOrdenados.filter(ev => !removed[makeKey(ev)]).map((ev, idx) => { 
             const fechaHora = ev.date && ev.time
               ? `${ev.date} - ${ev.time}`
               : ev.date || ev.time || "—";
