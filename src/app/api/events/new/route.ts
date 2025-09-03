@@ -22,39 +22,44 @@ function expectedCookieValue() {
   return crypto.createHash("sha256").update(pass + secret).digest("hex");
 }
 
-// Función que inserta el nuevo evento en el array export const fiestas: Fiesta[] = [ ... ];
+// Inserta el nuevo evento en el array export const fiestas[ : Fiesta[] ] = [ ... ];
 function appendEventToFile(tsSource: string, newEvent: Evento): string {
-  // Soportamos dos variantes del marcador (con y sin tipo)
-  const markers = [
-    "export const fiestas: Fiesta[] = [",
-    "export const fiestas = [",
-  ];
-  let start = -1;
-  let marker = "";
-  for (const m of markers) {
-    const idx = tsSource.indexOf(m);
-    if (idx !== -1) { start = idx; marker = m; break; }
-  }
-  if (start === -1) {
-    throw new Error("No se encontró 'export const fiestas: Fiesta[] = [' ni 'export const fiestas = [' en el archivo.");
+  // Regex robusta: permite espacios, salto de línea, y tipo opcional `: Fiesta[]`
+  const re = /export\s+const\s+fiestas\s*(?::\s*Fiesta\s*\[\s*\]\s*)?=\s*\[([\s\S]*?)\]\s*;?/m;
+  const match = tsSource.match(re);
+  if (!match) {
+    throw new Error(
+      "No se pudo localizar el array exportado 'fiestas'. Asegúrate de que exista `export const fiestas: Fiesta[] = [ ... ];` o `export const fiestas = [ ... ];`"
+    );
   }
 
-  const openBracket = tsSource.indexOf("[", start);
-  const closeBracket = tsSource.indexOf("];", openBracket);
-  if (openBracket === -1 || closeBracket === -1) {
-    throw new Error("No se pudo localizar el array 'fiestas' completo.");
+  const inside = match[1]; // contenido actual del array sin corchetes
+
+  // Serializamos el nuevo objeto manteniendo claves explícitas (evita undefined)
+  const e = newEvent;
+  const objLine = `  {\n`+
+    `    title: ${JSON.stringify(e.title ?? "")},\n`+
+    `    img: ${JSON.stringify(e.img ?? "")},\n`+
+    `    description: ${JSON.stringify(e.description ?? "")},\n`+
+    `    date: ${JSON.stringify(e.date ?? "")},\n`+
+    `    time: ${JSON.stringify(e.time ?? "")},\n`+
+    `    location: ${JSON.stringify(e.location ?? "")}\n`+
+    `  }`;
+
+  let newInside: string;
+  const trimmed = inside.trim();
+  if (trimmed === "") {
+    // Array vacío
+    newInside = `\n${objLine}\n`;
+  } else {
+    // Asegura coma final en el último elemento existente
+    const hasTrailingComma = /,\s*$/.test(trimmed);
+    const insideWithComma = hasTrailingComma ? inside : inside.replace(/\s*$/, ",\n");
+    newInside = insideWithComma + objLine + "\n";
   }
 
-  const before = tsSource.slice(0, openBracket + 1);
-  const inside = tsSource.slice(openBracket + 1, closeBracket).trim();
-  const after = tsSource.slice(closeBracket);
-
-  const ev = newEvent;
-  const line =
-    `\n  { title: ${JSON.stringify(ev.title)}, img: ${JSON.stringify(ev.img || "")}, description: ${JSON.stringify(ev.description || "")}, date: ${JSON.stringify(ev.date || "")}, time: ${JSON.stringify(ev.time || "")}, location: ${JSON.stringify(ev.location || "")} },`;
-
-  const newInside = inside ? inside + line : line.slice(1); // si estaba vacío, quita salto inicial
-  return before + newInside + "\n" + after;
+  // Sustituimos el bloque completo preservando el resto del fichero
+  return tsSource.replace(re, (full) => full.replace(match[1], newInside));
 }
 
 export async function POST(req: Request) {
@@ -75,6 +80,10 @@ export async function POST(req: Request) {
     const { content, sha, encoding } = await githubGetFile();
     if (encoding !== "base64") throw new Error("Encoding inesperado en GitHub.");
     const tsSource = Buffer.from(content, "base64").toString("utf8");
+    // Debug ligero (solo en desarrollo)
+    if (process.env.NODE_ENV !== "production") {
+      console.log("[events/new] tsSource length:", tsSource.length);
+    }
 
     // 4) Insertar nuevo evento
     const newTs = appendEventToFile(tsSource, payload);
@@ -91,6 +100,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: true });
   } catch (err) {
     const msg = err instanceof Error ? err.message : "Unknown error";
-    return NextResponse.json({ error: msg }, { status: 500 });
+    console.error("/api/events/new error:", err);
+    return NextResponse.json({ error: msg, code: "EVENTS_NEW_ERROR" }, { status: 500 });
   }
 }
