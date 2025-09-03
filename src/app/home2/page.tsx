@@ -119,9 +119,11 @@ export default function Home2Page() {
           </div>
         </div>
 
-        <div className="mt-8 mb-8 text-right text-[12px] uppercase tracking-[0.2em] text-[#0C2335]">
-          Busca por fecha →
-        </div>
+        <Link href="/calendar">
+          <div className="mt-8 mb-8 text-right text-[12px] uppercase tracking-[0.2em] text-[#0C2335] cursor-pointer hover:underline">
+            Busca por fecha →
+          </div>
+        </Link>
       </div>
     </main>
   );
