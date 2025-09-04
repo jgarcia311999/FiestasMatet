@@ -1,18 +1,9 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { ideasData } from "@/data/ideas";
-import type { IdeasData } from "@/data/ideas.types";
-import { githubGetFile, githubPutFile } from "@/lib/github";
-
-process.env.EVENTS_FILE_PATH = "src/data/ideas.ts";
-
-function serializeIdeasTs(data: IdeasData): string {
-  const body = JSON.stringify(data, null, 2);
-  return `import type { IdeasData } from "./ideas.types";\n\nexport const ideasData: IdeasData = ${body} as const;\n\nexport default ideasData;\n`;
-}
+import { db } from "@/db/client";
+import { ideaSections, ideaItems } from "@/db/schema";
 
 export async function GET() {
-  // autenticación básica: mismo cookie que usas en intranet
   const cookieStore = await cookies();
   const pass =
     cookieStore.get("commission_session") ??
@@ -24,7 +15,16 @@ export async function GET() {
     const debug = process.env.NODE_ENV !== "production" ? { cookies: cookieStore.getAll().map(c => c.name) } : undefined;
     return NextResponse.json({ error: "Unauthorized", ...debug }, { status: 401 });
   }
-  return NextResponse.json(ideasData);
+
+  const sections = await db.select().from(ideaSections);
+  const items = await db.select().from(ideaItems);
+  const grouped = sections.map(sec => ({
+    key: sec.key,
+    title: sec.title,
+    items: items.filter(it => it.sectionKey === sec.key).map(it => ({ id: String(it.id), text: it.text }))
+  }));
+
+  return NextResponse.json({ data: grouped });
 }
 
 export async function PUT(req: Request) {
@@ -40,25 +40,24 @@ export async function PUT(req: Request) {
     return NextResponse.json({ error: "Unauthorized", ...debug }, { status: 401 });
   }
 
-  const payload = (await req.json()) as { data: IdeasData; message?: string };
-  // Validación mínima
+  const payload = (await req.json()) as { data: { key: string; title: string; items: { id: string; text: string }[] }[] };
   if (!Array.isArray(payload.data)) {
     return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
   }
 
-  // 1) Lee el fichero actual (opcional si no lo necesitas)
-  const current = await githubGetFile();
+  // Limpiar tablas
+  await db.delete(ideaItems);
+  await db.delete(ideaSections);
 
-  // 2) Serializa a TS
-  const newContent = serializeIdeasTs(payload.data);
-
-  // 3) Commit
-  const msg = payload.message ?? "chore(ideas): update ideas";
-  await githubPutFile({
-    newContent,
-    sha: current.sha,
-    message: msg,
-  });
+  // Insertar secciones e items
+  for (const sec of payload.data) {
+    await db.insert(ideaSections).values({ key: sec.key, title: sec.title });
+    if (Array.isArray(sec.items)) {
+      for (const it of sec.items) {
+        await db.insert(ideaItems).values({ sectionKey: sec.key, text: it.text });
+      }
+    }
+  }
 
   return NextResponse.json({ ok: true });
 }
