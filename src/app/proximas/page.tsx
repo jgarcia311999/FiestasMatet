@@ -1,3 +1,22 @@
+export const metadata = {
+  title: "Fiestas en Matet | Próximas fiestas",
+  description: "Consulta las próximas fiestas y eventos en Matet. Encuentra las proximas fiestas y no te pierdas nada!",
+  openGraph: {
+    title: "Fiestas en Matet | Próximas fiestas",
+    description: "Consulta las próximas fiestas y eventos en Matet. Encuentra las proximas fiestas y no te pierdas nada!",
+    url: "https://matet-es-fiesta.vercel.app/proximas",
+    siteName: "Fiestas Matet",
+    images: [
+      {
+        url: "https://matet-es-fiesta.vercel.app/og-image.png",
+        width: 1200,
+        height: 630,
+      },
+    ],
+    locale: "es_ES",
+    type: "website",
+  },
+};
 import { db } from "@/db/client";
 import { events } from "@/db/schema";
 import { InferModel } from "drizzle-orm";

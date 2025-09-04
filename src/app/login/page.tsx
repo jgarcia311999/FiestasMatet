@@ -1,3 +1,22 @@
+export const metadata = {
+  title: "Fiestas en Matet | Acceso comisión",
+  description: "Accede al panel de la comisión de fiestas de Matet.",
+  openGraph: {
+    title: "Fiestas en Matet | Acceso comisión",
+    description: "Accede al panel de la comisión de fiestas de Matet.",
+    url: "https://matet-es-fiesta.vercel.app/login",
+    siteName: "Fiestas Matet",
+    images: [
+      {
+        url: "https://matet-es-fiesta.vercel.app/og-image.png",
+        width: 1200,
+        height: 630,
+      },
+    ],
+    locale: "es_ES",
+    type: "website",
+  },
+};
 import { USERS } from "@/data/users";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
