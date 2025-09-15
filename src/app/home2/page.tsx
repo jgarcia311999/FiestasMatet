@@ -1,23 +1,4 @@
 "use client";
-export const metadata = {
-  title: "Fiestas en Matet | Página principal",
-  description: "Descubre el calendario de fiestas, actividades y eventos en Matet. ¡No te pierdas nada!",
-  openGraph: {
-    title: "Fiestas en Matet | Página principal",
-    description: "Descubre el calendario de fiestas, actividades y eventos en Matet. ¡No te pierdas nada!",
-    url: "https://matet-es-fiesta.vercel.app/",
-    siteName: "Fiestas Matet",
-    images: [
-      {
-        url: "https://matet-es-fiesta.vercel.app/og-image.png",
-        width: 1200,
-        height: 630,
-      },
-    ],
-    locale: "es_ES",
-    type: "website",
-  },
-};
 import Link from "next/link";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
