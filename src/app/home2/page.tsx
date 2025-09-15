@@ -54,8 +54,8 @@ export default function Home2Page() {
 
         {/* Duplicated Produced by row (now condition inverted) */}
         <div className="mt-6 flex items-center justify-between">
-          <span className="text-[10px] uppercase tracking-[0.2em]">Disfruta de nuestro</span>
-          <span className="text-[10px] uppercase tracking-[0.2em]">mayor tesoro</span>
+          <span className="text-[10px] uppercase tracking-[0.2em]">Fiestas del pueblo</span>
+          <span className="text-[10px] uppercase tracking-[0.2em]">para el pueblo</span>
         </div>
 
         <div className="mt-6 flex items-start justify-between">
