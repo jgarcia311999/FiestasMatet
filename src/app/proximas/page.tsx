@@ -75,7 +75,7 @@ export default async function ProximasPage() {
     <main className="min-h-screen bg-[#FFF5BA] text-[#0C2335]">
       <div className="mx-auto max-w-sm px-1 pt-10 pb-24">
         <h1 className="font-serif text-[36px] leading-[1.05] tracking-tight">
-          Enterate de todas las proximas fiestas de <strong className="block mt-2">MATET</strong>
+          Descubre las <strong>proximas</strong> fiestas de <strong>MATET</strong>
         </h1>
 
         <div className="mt-5 border-t border-[#0C2335]" />
@@ -98,6 +98,7 @@ export default async function ProximasPage() {
                           A las {ev.startsAt?.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit", timeZone: MADRID_TZ })}{" "}
                           {getFranjaHorariaLabel(ev.startsAt!)}
                           {ev.provisional && " *"} - {ev.title}
+                          {ev.location ? <span> ({ev.location})</span> : null}
                         </li>
                       ))}
                     </ul>

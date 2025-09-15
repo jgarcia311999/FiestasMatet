@@ -41,7 +41,11 @@ function isNoche(date: Date): boolean {
 function getSecciones(eventsList: Event[]): { label: string; date: Date; key: string }[] {
   const todayKey = dateKeyMadrid(new Date());
   const nocturnosFuturos = eventsList.filter(
-    (f) => f.startsAt && dateKeyMadrid(f.startsAt) >= todayKey && isNoche(f.startsAt)
+    (f) =>
+      f.startsAt &&
+      dateKeyMadrid(f.startsAt) >= todayKey &&
+      isNoche(f.startsAt) &&
+      !f.title.toLowerCase().includes("sobaquillo")
   );
 
   const byDate = new Map<string, Date>();
@@ -57,7 +61,10 @@ function getSecciones(eventsList: Event[]): { label: string; date: Date; key: st
 
 function getEventosPorFecha(eventsList: Event[], dateKey: string): Event[] {
   const byDate = eventsList.filter(
-    (f) => dateKeyMadrid(f.startsAt!) === dateKey && isNoche(f.startsAt!)
+    (f) =>
+      dateKeyMadrid(f.startsAt!) === dateKey &&
+      isNoche(f.startsAt!) &&
+      !f.title.toLowerCase().includes("sobaquillo")
   );
   const parseTime = (d: Date) => {
     const parts = new Intl.DateTimeFormat("es-ES", { hour: "2-digit", minute: "2-digit", hourCycle: "h23", timeZone: MADRID_TZ }).formatToParts(d);
@@ -78,7 +85,7 @@ export default async function Noche() {
     <main className="min-h-screen bg-[#083279] text-[#FFD966]">
       <div className="mx-auto max-w-sm px-1 pt-10 pb-24">
         <h1 className="font-serif text-[36px] leading-[1.05] tracking-tight text-[#FFD966]">
-          Disfruta de todas las noches de fiesta de <strong className="block mt-2 text-[#FFD966]">MATET</strong>
+          Disfruta de todas las <strong>noches</strong> de fiesta de <strong>MATET</strong>
         </h1>
 
         <div className="mt-5 border-t border-[#0C2335]" />
@@ -101,6 +108,7 @@ export default async function Noche() {
                         {ev.startsAt?.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit", timeZone: MADRID_TZ })}{" "}
                         {getFranjaHorariaLabel(ev.startsAt!)}
                         {ev.provisional && " *"} - {ev.title}
+                        {ev.location ? <span> ({ev.location})</span> : null}
                       </li>
                     ))}
                   </ul>

@@ -35,8 +35,8 @@ export default function Home2Page() {
 
         {/* Duplicated Produced by row (now condition inverted) */}
         <div className="mt-6 flex items-center justify-between">
-          <span className="text-[10px] uppercase tracking-[0.2em]">Fiestas del pueblo</span>
-          <span className="text-[10px] uppercase tracking-[0.2em]">para el pueblo</span>
+          <span className="text-[10px] uppercase tracking-[0.2em]">Disfruta de nuestro</span>
+          <span className="text-[10px] uppercase tracking-[0.2em]">mayor tesoro</span>
         </div>
 
         <div className="mt-6 flex items-start justify-between">
@@ -51,7 +51,7 @@ export default function Home2Page() {
         {/* New Card: Todas */}
         <Link href="/todas" prefetch>
           <div className="mt-3 relative h-[250px] rounded-3xl bg-[#E85D6A] overflow-hidden">
-            <div className="absolute top-3 left-4 text-[10px] uppercase tracking-[0.2em]">Enterate de todo!</div>
+            <div className="absolute top-3 left-4 text-[10px] uppercase tracking-[0.2em]">¡Enterate de todo!</div>
 
             {/* Giant word behind */}
             <div className="absolute bottom-[-6px] left-4 right-4 text-[80px] leading-none font-semibold text-[#0C2335]/90 select-none">
@@ -73,7 +73,7 @@ export default function Home2Page() {
         {/* Card */}
         <Link href="/proximas" prefetch>
           <div className="mt-8 relative h-[250px] rounded-3xl bg-[#FFF5BA] overflow-hidden">
-            <div className="absolute top-3 left-4 text-[10px] uppercase tracking-[0.2em]">Enterate de las proximas actividades</div>
+            <div className="absolute top-3 left-4 text-[10px] uppercase tracking-[0.2em]">¡Todas las proximas actividades!</div>
 
             {/* Giant word behind */}
             <div className="absolute bottom-[-6px] left-4 right-4 text-[80px] leading-none font-semibold text-[#0C2335]/90 select-none">
@@ -95,7 +95,7 @@ export default function Home2Page() {
         {/* Card */}
         <Link href="/noche" prefetch>
           <div className="mt-8 relative h-[250px] rounded-3xl bg-[#083279] overflow-hidden">
-            <div className="absolute top-3 left-4 text-[10px] uppercase tracking-[0.2em] text-[#FFD966]">No llegues hasta el amanecer</div>
+            <div className="absolute top-3 left-4 text-[10px] uppercase tracking-[0.2em] text-[#FFD966]">¡Para que no llegues hasta el amanecer!</div>
 
             {/* Giant word behind */}
             <div className="absolute bottom-[-6px] left-4 right-4 text-[80px] leading-none font-semibold text-[#FFD966]/90 select-none">

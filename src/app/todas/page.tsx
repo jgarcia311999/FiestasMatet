@@ -108,7 +108,7 @@ export default function CalendarPage() {
     <main className="min-h-screen bg-[#E85D6A] text-[#0C2335]">
       <div className="mx-auto max-w-sm px-1 pt-10 pb-24">
         <h1 className="font-serif text-[36px] leading-[1.05] tracking-tight">
-          Calendario de <strong>fiestas</strong> de <strong className="block mt-2">MATET</strong>
+          Vive <strong>todas</strong> las fiestas de <strong className="block mt-2">MATET</strong>
         </h1>
         <div className="mt-2">
           <button
@@ -141,7 +141,7 @@ export default function CalendarPage() {
                         <li key={ev.id} className="text-lg">
                           A las {ev.time} {getFranjaHorariaLabel(ev.time)}
                           {ev.provisional && "*"} - {ev.title}
-                          {ev.location ? <span className="ml-1">({ev.location})</span> : null}
+                          {ev.location ? <span> ({ev.location})</span> : null}
                         </li>
                       ))}
                     </ul>
