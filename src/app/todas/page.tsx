@@ -1,7 +1,8 @@
 
-import { useState, useEffect } from "react";
 
-import { InferModel } from "drizzle-orm";
+"use client";
+
+import { useState, useEffect } from "react";
 
 // Tipado derivado de la tabla events
 type Event = {
