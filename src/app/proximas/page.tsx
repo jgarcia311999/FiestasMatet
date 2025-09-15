@@ -1,37 +1,43 @@
-
 import { db } from "@/db/client";
 import { events } from "@/db/schema";
 import { InferModel } from "drizzle-orm";
 
-type Event = InferModel<typeof events>;
+const MADRID_TZ = "Europe/Madrid";
 
-function startOfTodayLocal(): Date {
-  const now = new Date();
-  return new Date(now.getFullYear(), now.getMonth(), now.getDate());
-}
+type Event = InferModel<typeof events>;
 
 function formatSpanishLong(date: Date): string {
   const s = new Intl.DateTimeFormat("es-ES", {
     weekday: "long",
     day: "numeric",
     month: "long",
+    timeZone: MADRID_TZ,
   }).format(date);
   const noComma = s.replace(", ", " ");
   return noComma.charAt(0).toUpperCase() + noComma.slice(1);
 }
 
+function dateKeyMadrid(d: Date): string {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: MADRID_TZ,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(d);
+}
+
 function getSecciones(eventos: Event[]): { label: string; date: Date; key: string }[] {
-  const today = startOfTodayLocal();
+  const todayKey = dateKeyMadrid(new Date());
 
   const futuras = eventos
-    .filter(e => e.startsAt && e.startsAt >= today)
+    .filter(e => e.startsAt && dateKeyMadrid(e.startsAt) >= todayKey)
     .sort((a, b) => a.startsAt!.getTime() - b.startsAt!.getTime());
 
   const seen = new Set<string>();
   const result: { label: string; date: Date; key: string }[] = [];
 
   for (const e of futuras) {
-    const key = e.startsAt!.toISOString().split("T")[0];
+    const key = dateKeyMadrid(e.startsAt!);
     if (!seen.has(key)) {
       seen.add(key);
       result.push({ key, date: e.startsAt!, label: formatSpanishLong(e.startsAt!) });
@@ -43,7 +49,7 @@ function getSecciones(eventos: Event[]): { label: string; date: Date; key: strin
 }
 
 function getEventosPorFecha(eventos: Event[], dateKey: string): Event[] {
-  const byDate = eventos.filter(e => e.startsAt && e.startsAt.toISOString().split("T")[0] === dateKey);
+  const byDate = eventos.filter(e => e.startsAt && dateKeyMadrid(e.startsAt) === dateKey);
   const parseTime = (d: Date) => {
     const hh = d.getHours();
     const mm = d.getMinutes();
@@ -89,7 +95,7 @@ export default async function ProximasPage() {
                     <ul className="space-y-1">
                       {getEventosPorFecha(allEvents, sec.key).map((ev) => (
                         <li key={ev.id} className="text-lg">
-                          A las {ev.startsAt?.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" })}{" "}
+                          A las {ev.startsAt?.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit", timeZone: MADRID_TZ })}{" "}
                           {getFranjaHorariaLabel(ev.startsAt!)}
                           {ev.provisional && " *"} - {ev.title}
                         </li>
