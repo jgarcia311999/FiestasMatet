@@ -1,57 +1,50 @@
-
-
+// scripts/seed-events.ts
 import "dotenv/config";
 import { neon } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-http";
-import { users, events, ideaSections, ideaItems } from "../src/db/schema";
-import { USERS } from "../src/data/users";
-import { fiestas } from "../src/data/fiestas";
-import ideasData from "../src/data/ideas";
+import { events } from "../src/db/schema";
+type JsonEvent = {
+  id?: number;
+  title: string;
+  img?: string | null;
+  description?: string | null;
+  starts_at: string; // UTC string from JSON
+  location?: string | null;
+  provisional?: boolean | null;
+  attendees?: string[] | null;
+};
+import eventsData from "../events.json"; // ajusta la ruta si guardas el JSON en otra carpeta
+const eventsDataTyped = eventsData as unknown as JsonEvent[];
 
 const sql = neon(process.env.DATABASE_URL!);
 const db = drizzle(sql);
 
 async function main() {
-  console.log("🌱 Seeding database...");
+  console.log("🌱 Seeding events from JSON...");
 
-  // Insert users
-  for (const name of USERS) {
-    await db.insert(users).values({ name }).onConflictDoNothing();
-  }
-  console.log("✅ Users inserted");
+  await db.delete(events);
+  console.log("🗑️ Existing events deleted");
 
-  // Insert fiestas as events
-  for (const fiesta of fiestas) {
-    const startsAt = new Date(`${fiesta.date}T${fiesta.time}:00`);
-    await db.insert(events).values({
-      title: fiesta.title,
-      img: fiesta.img,
-      description: fiesta.description,
+  const rows: typeof events.$inferInsert[] = eventsDataTyped.map((ev) => {
+    const startsAt = new Date(ev.starts_at);
+    return {
+      title: ev.title,
       startsAt,
-      location: fiesta.location,
-      provisional: fiesta.provisional ?? false,
-      attendees: fiesta.attendees ? JSON.stringify(fiesta.attendees) : null,
-    }).onConflictDoNothing();
-  }
+      // Si tu columna `location` es NOT NULL, damos valor por defecto "" cuando falte.
+      location: ev.location ?? "",
+      // Si `img` y `description` son NULLABLE en el esquema, pasamos null cuando no vengan.
+      img: ev.img ?? null,
+      description: ev.description ?? null,
+      // Si `provisional` es NOT NULL con default false, enviamos false si falta.
+      provisional: ev.provisional ?? false,
+      // Evitamos `any`: asumimos columna nullable tipo text[]/jsonb[] -> string[] | null
+      attendees: ev.attendees ?? null,
+    } satisfies typeof events.$inferInsert;
+  });
+
+  await db.insert(events).values(rows).onConflictDoNothing();
+
   console.log("✅ Events inserted");
-
-  // Insert ideasData (sections + items)
-  for (const section of ideasData) {
-    await db.insert(ideaSections).values({
-      key: section.key,
-      title: section.title,
-    }).onConflictDoNothing();
-
-    for (const item of section.items) {
-      await db.insert(ideaItems).values({
-        sectionKey: section.key,
-        text: item.text,
-      }).onConflictDoNothing();
-    }
-  }
-  console.log("✅ Ideas inserted");
-
-  console.log("🌱 Seeding finished!");
 }
 
 main().catch((err) => {

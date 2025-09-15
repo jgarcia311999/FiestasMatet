@@ -1,46 +1,52 @@
-
 import { db } from "@/db/client";
 import { events } from "@/db/schema";
 import { InferModel } from "drizzle-orm";
 
-type Event = InferModel<typeof events>;
+const MADRID_TZ = "Europe/Madrid";
 
-function startOfTodayLocal(): Date {
-  const now = new Date();
-  return new Date(now.getFullYear(), now.getMonth(), now.getDate());
-}
+type Event = InferModel<typeof events>;
 
 function formatSpanishLong(date: Date): string {
   const s = new Intl.DateTimeFormat("es-ES", {
     weekday: "long",
     day: "numeric",
     month: "long",
+    timeZone: MADRID_TZ,
   }).format(date);
   const noComma = s.replace(", ", " ");
   return noComma.charAt(0).toUpperCase() + noComma.slice(1);
 }
 
+function dateKeyMadrid(d: Date): string {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: MADRID_TZ,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(d);
+}
+
 function getFranjaHorariaLabel(date: Date): string {
-  const hh = date.getHours();
+  const hh = Number(new Intl.DateTimeFormat("es-ES", { hour: "2-digit", hourCycle: "h23", timeZone: MADRID_TZ }).format(date));
   if (hh >= 6 && hh < 14) return "de la mañana";
   if (hh >= 14 && hh < 21) return "de la tarde";
   return "de la noche";
 }
 
 function isNoche(date: Date): boolean {
-  const hh = date.getHours();
+  const hh = Number(new Intl.DateTimeFormat("es-ES", { hour: "2-digit", hourCycle: "h23", timeZone: MADRID_TZ }).format(date));
   return hh >= 21 || hh < 6;
 }
 
 function getSecciones(eventsList: Event[]): { label: string; date: Date; key: string }[] {
-  const today = startOfTodayLocal();
+  const todayKey = dateKeyMadrid(new Date());
   const nocturnosFuturos = eventsList.filter(
-    (f) => f.startsAt && f.startsAt >= today && isNoche(f.startsAt)
+    (f) => f.startsAt && dateKeyMadrid(f.startsAt) >= todayKey && isNoche(f.startsAt)
   );
 
   const byDate = new Map<string, Date>();
   for (const f of nocturnosFuturos) {
-    const key = f.startsAt!.toISOString().split("T")[0];
+    const key = dateKeyMadrid(f.startsAt!);
     if (!byDate.has(key)) byDate.set(key, f.startsAt!);
   }
 
@@ -51,11 +57,12 @@ function getSecciones(eventsList: Event[]): { label: string; date: Date; key: st
 
 function getEventosPorFecha(eventsList: Event[], dateKey: string): Event[] {
   const byDate = eventsList.filter(
-    (f) => f.startsAt!.toISOString().split("T")[0] === dateKey && isNoche(f.startsAt!)
+    (f) => dateKeyMadrid(f.startsAt!) === dateKey && isNoche(f.startsAt!)
   );
   const parseTime = (d: Date) => {
-    const hh = d.getHours();
-    const mm = d.getMinutes();
+    const parts = new Intl.DateTimeFormat("es-ES", { hour: "2-digit", minute: "2-digit", hourCycle: "h23", timeZone: MADRID_TZ }).formatToParts(d);
+    const hh = Number(parts.find(p => p.type === "hour")!.value);
+    const mm = Number(parts.find(p => p.type === "minute")!.value);
     let minutes = hh * 60 + mm;
     if (hh >= 0 && hh < 6) minutes += 24 * 60;
     return minutes;
@@ -91,7 +98,7 @@ export default async function Noche() {
                     {getEventosPorFecha(allEvents, sec.key).map((ev) => (
                       <li key={ev.id} className="text-lg text-[#FFD966]">
                         A las{" "}
-                        {ev.startsAt?.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" })}{" "}
+                        {ev.startsAt?.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit", timeZone: MADRID_TZ })}{" "}
                         {getFranjaHorariaLabel(ev.startsAt!)}
                         {ev.provisional && " *"} - {ev.title}
                       </li>

@@ -23,9 +23,6 @@ export async function GET() {
         provisional: events.provisional,
         attendees: events.attendees,
         startsAt: events.startsAt,
-        // Derivamos date/time en el propio SQL para que la UI tenga lo que espera
-        date: sql<string>`to_char(${events.startsAt} AT TIME ZONE ${sql.raw(`'${TZ}'`)}, 'YYYY-MM-DD')`,
-        time: sql<string>`to_char(${events.startsAt} AT TIME ZONE ${sql.raw(`'${TZ}'`)}, 'HH24:MI')`,
       })
       .from(events)
       .orderBy(asc(events.startsAt));

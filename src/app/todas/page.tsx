@@ -25,8 +25,13 @@ function toDateKeyTZ(d: Date, tz: string) {
   }).format(d);
 }
 
-function toTimeHHMM(d: Date) {
-  return d.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit", hour12: false });
+function toTimeHHMM(d: Date, tz: string = TZ) {
+  return new Intl.DateTimeFormat("es-ES", {
+    timeZone: tz,
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).format(d);
 }
 function sortNightLast(items: { time: string }[]) {
   const toMin = (t: string) => {
@@ -82,7 +87,7 @@ export default function CalendarPage() {
     const label = formatSpanishLong(d, TZ);
     const item = {
       id: ev.id,
-      time: toTimeHHMM(d),
+      time: toTimeHHMM(d, TZ),
       title: ev.title,
       provisional: !!ev.provisional,
       location: ev.location || "",
