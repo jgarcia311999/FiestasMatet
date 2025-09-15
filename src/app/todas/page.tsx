@@ -1,23 +1,4 @@
-"use client";
-export const metadata = {
-  title: "Fiestas en Matet | Todas las fiestas",
-  description: "Consulta todas las fiestas y eventos en Matet.",
-  openGraph: {
-    title: "Fiestas en Matet | Todas las fiestas",
-    description: "Consulta todas las fiestas y eventos en Matet. ",
-    url: "https://matet-es-fiesta.vercel.app/todas",
-    siteName: "Fiestas Matet",
-    images: [
-      {
-        url: "https://matet-es-fiesta.vercel.app/og-image.png",
-        width: 1200,
-        height: 630,
-      },
-    ],
-    locale: "es_ES",
-    type: "website",
-  },
-};
+
 import { useState, useEffect } from "react";
 
 import { InferModel } from "drizzle-orm";
