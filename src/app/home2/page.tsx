@@ -1,5 +1,4 @@
 "use client";
-"use client";
 export const metadata = {
   title: "Fiestas en Matet | Página principal",
   description: "Descubre el calendario de fiestas, actividades y eventos en Matet. ¡No te pierdas nada!",
@@ -20,7 +19,17 @@ export const metadata = {
   },
 };
 import Link from "next/link";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 export default function Home2Page() {
+  const router = useRouter();
+  useEffect(() => {
+    // Prefetch Next.js RSC payloads for faster navigation
+    router.prefetch("/todas");
+    router.prefetch("/proximas");
+    router.prefetch("/noche");
+    router.prefetch("/calendar");
+  }, [router]);
   return (
     <main className="min-h-screen bg-[#E7DAD1]">
       <div className="mx-auto max-w-sm px-1 pb-2 pt-7 text-black">
@@ -53,13 +62,13 @@ export default function Home2Page() {
           <div className="text-[84px] leading-none font-semibold mt-2">2026</div>
         </div>
 
-        <Link href="/calendar">
+        <Link href="/calendar" prefetch>
           <div className="mt-10 mb-0 mr-2 text-right text-[12px] uppercase tracking-[0.2em] text-[#0C2335] cursor-pointer hover:underline">
             Busca por fecha →
           </div>
         </Link>
         {/* New Card: Todas */}
-        <Link href="/todas">
+        <Link href="/todas" prefetch>
           <div className="mt-3 relative h-[250px] rounded-3xl bg-[#E85D6A] overflow-hidden">
             <div className="absolute top-3 left-4 text-[10px] uppercase tracking-[0.2em]">Enterate de todo!</div>
 
@@ -81,7 +90,7 @@ export default function Home2Page() {
         </Link>
 
         {/* Card */}
-        <Link href="/proximas">
+        <Link href="/proximas" prefetch>
           <div className="mt-8 relative h-[250px] rounded-3xl bg-[#FFF5BA] overflow-hidden">
             <div className="absolute top-3 left-4 text-[10px] uppercase tracking-[0.2em]">Enterate de las proximas actividades</div>
 
@@ -103,7 +112,7 @@ export default function Home2Page() {
         </Link>
 
         {/* Card */}
-        <Link href="/noche">
+        <Link href="/noche" prefetch>
           <div className="mt-8 relative h-[250px] rounded-3xl bg-[#083279] overflow-hidden">
             <div className="absolute top-3 left-4 text-[10px] uppercase tracking-[0.2em] text-[#FFD966]">No llegues hasta el amanecer</div>
 
