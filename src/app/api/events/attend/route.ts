@@ -33,8 +33,8 @@ async function findEventId(match: z.infer<typeof MatchSchema>): Promise<number |
     .from(events)
     .where(sql`
       ${events.title} = ${match.title}
-      AND to_char(${events.startsAt} AT TIME ZONE ${sql.raw(`'${TZ}'`)}, 'YYYY-MM-DD') = ${match.date}
-      AND to_char(${events.startsAt} AT TIME ZONE ${sql.raw(`'${TZ}'`)}, 'HH24:MI') = ${match.time}
+      AND to_char(${events.startsAt}, 'YYYY-MM-DD') = ${match.date}
+      AND to_char(${events.startsAt}, 'HH24:MI') = ${match.time}
     `)
     .limit(1);
   return row?.id ?? null;
