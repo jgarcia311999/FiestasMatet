@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/db/client";
 import { events } from "@/db/schema";
 import { asc, sql } from "drizzle-orm";
-import { toZonedTime } from "date-fns-tz";
+import { formatInTimeZone } from "date-fns-tz";
 
 // Evita cache en desarrollo/producción; siempre datos frescos
 export const dynamic = "force-dynamic";
@@ -32,20 +32,11 @@ export async function GET() {
     // (porque en la BBDD es TIMESTAMP WITHOUT TIME ZONE) y conviértela a UTC ISO.
     const normalized = rows.map((e) => {
       const d = e.startsAt instanceof Date ? e.startsAt : new Date(String(e.startsAt));
-      // Interpretamos los valores como hora local de Madrid y los convertimos a UTC ISO
-      const utcDate = new Date(
-        Date.UTC(
-          d.getFullYear(),
-          d.getMonth(),
-          d.getDate(),
-          d.getHours(),
-          d.getMinutes(),
-          d.getSeconds()
-        )
-      );
+      // Interpretamos `d` como hora local de Madrid y lo convertimos a UTC ISO
+      const iso = formatInTimeZone(d, TZ, "yyyy-MM-dd'T'HH:mm:ssXXX");
       return {
         ...e,
-        startsAt: utcDate.toISOString(),
+        startsAt: new Date(iso).toISOString(),
       };
     });
 
