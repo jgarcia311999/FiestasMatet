@@ -95,8 +95,16 @@ export default async function ProximasPage() {
                     <ul className="space-y-1">
                       {getEventosPorFecha(allEvents, sec.key).map((ev) => (
                         <li key={ev.id} className="text-lg">
-                          A las {ev.startsAt?.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit", timeZone: MADRID_TZ })}{" "}
-                          {getFranjaHorariaLabel(ev.startsAt!)}
+                          {(() => {
+                            const d = ev.startsAt!;
+                            const hh = String(d.getUTCHours()).padStart(2, "0");
+                            const mm = String(d.getUTCMinutes()).padStart(2, "0");
+                            return (
+                              <>
+                                A las {hh}:{mm} {getFranjaHorariaLabel(d)}
+                              </>
+                            );
+                          })()}
                           {ev.provisional && " *"} - {ev.title}
                           {ev.location ? <span> ({ev.location})</span> : null}
                         </li>
