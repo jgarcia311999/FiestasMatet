@@ -96,14 +96,14 @@ export default function LayoutComisionPage() {
         </Link>
 
         {/* Quehaceres */}
-        <Link href="/layoutComision/quehaceres">
+        {/* <Link href="/layoutComision/quehaceres">
           <div className="mt-2 relative h-[180px] rounded-3xl bg-[#083279] overflow-hidden">
             <div className="absolute top-3 left-4 text-[10px] uppercase tracking-[0.2em] text-[#FFD966]">Tareas pendientes y asignadas</div>
             <div className="absolute bottom-[-6px] left-4 right-4 text-[80px] leading-none font-semibold text-[#FFD966]/90 select-none">
               Quehaceres
             </div>
           </div>
-        </Link>
+        </Link> */}
 
         {/* Próximamente (sin link) */}
         <div>
