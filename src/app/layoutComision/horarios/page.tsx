@@ -299,7 +299,14 @@ export default function HorariosPage() {
         const res = await fetch("/api/events/attend", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ match: payload, action: "toggle" }),
+          body: JSON.stringify({
+            match: payload,
+            // Preferir id si viene de la API para evitar fallos de coincidencia
+            id: (ev as { id?: number | string }).id ?? null,
+            // Enviar también la marca exacta como está en la BBDD (timestamp sin zona con segundos)
+            startsAt: payload.date && payload.time ? `${payload.date} ${payload.time}:00` : null,
+            action: "toggle",
+          }),
         });
         type AttendResponse = { ok?: boolean; action?: string; error?: string };
         const data: AttendResponse = await res.json().catch((): AttendResponse => ({}));
