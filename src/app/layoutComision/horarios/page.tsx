@@ -58,9 +58,26 @@ function fromApi(ev: EventApi): LocalFiesta {
   let date = ev.date ?? undefined;
   let time = ev.time ?? undefined;
   if ((!date || !time) && ev.startsAt) {
-    const d = new Date(ev.startsAt);
-    date = date ?? toYMD(d, TZ);
-    time = time ?? toHM(d, TZ);
+    const s = String(ev.startsAt).trim();
+    // Caso 1: tiene zona (Z o ±HH:MM) → es un instante UTC/offset real
+    if (/Z|[+-]\d{2}:\d{2}$/.test(s)) {
+      const d = new Date(s);
+      date = date ?? toYMD(d, TZ);
+      time = time ?? toHM(d, TZ);
+    } else if (/^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}(:\d{2})?$/.test(s)) {
+      // Caso 2: timestamp "naive" (sin zona). Trátalo como hora LOCAL de Madrid, sin desplazar.
+      const withT = s.replace(" ", "T");
+      const [ymd, hms = "00:00:00"] = withT.split("T");
+      date = date ?? ymd;
+      time = time ?? hms.slice(0,5);
+    } else {
+      // Fallback defensivo: intentar parsear como fecha y formatear en TZ
+      const d = new Date(s);
+      if (!Number.isNaN(d.getTime())) {
+        date = date ?? toYMD(d, TZ);
+        time = time ?? toHM(d, TZ);
+      }
+    }
   }
   return {
     id: ev.id,
