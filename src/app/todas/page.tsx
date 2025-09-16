@@ -1,5 +1,3 @@
-
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -25,9 +23,8 @@ function toDateKeyTZ(d: Date, tz: string) {
   }).format(d);
 }
 
-function toTimeHHMM(d: Date, tz: string = TZ) {
+function toTimeHHMM(d: Date) {
   return new Intl.DateTimeFormat("es-ES", {
-    timeZone: tz,
     hour: "2-digit",
     minute: "2-digit",
     hour12: false,
@@ -87,7 +84,7 @@ export default function CalendarPage() {
     const label = formatSpanishLong(d, TZ);
     const item = {
       id: ev.id,
-      time: toTimeHHMM(d, TZ),
+      time: toTimeHHMM(d),
       title: ev.title,
       provisional: !!ev.provisional,
       location: ev.location || "",
