@@ -95,7 +95,7 @@ export default function Home2Page() {
         {/* Card */}
         <Link href="/noche" prefetch>
           <div className="mt-8 relative h-[250px] rounded-3xl bg-[#083279] overflow-hidden">
-            <div className="absolute top-3 left-4 text-[10px] uppercase tracking-[0.2em] text-[#FFD966]">¡Para que no llegues hasta el amanecer!</div>
+            <div className="absolute top-3 left-4 text-[10px] uppercase tracking-[0.2em] text-[#FFD966]">¡Disfruta de todas las noches de fiesta!</div>
 
             {/* Giant word behind */}
             <div className="absolute bottom-[-6px] left-4 right-4 text-[80px] leading-none font-semibold text-[#FFD966]/90 select-none">
