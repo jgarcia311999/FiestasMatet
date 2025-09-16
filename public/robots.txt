@@ -1,15 +1,6 @@
-# robots.txt — producción
 User-agent: *
-Allow: /
-
-# No indexar zonas internas/privadas ni rutas técnicas
 Disallow: /api/
-Disallow: /layoutComision/
-Disallow: /layoutComision/*
 Disallow: /_next/
 Disallow: /__nextjs_original-stack-frame/
-
-# (Opcional) Evitar duplicados por parámetros de URL
-# Disallow: /*?*
-
-Sitemap: https://matet-es-fiesta.vercel.app/sitemap.xml
+Disallow: /layoutComision/
+Sitemap: https://tudominio.com/sitemap.xml
