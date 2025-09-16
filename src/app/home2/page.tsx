@@ -1,7 +1,9 @@
 "use client";
 import Link from "next/link";
 import { useEffect } from "react";
+import * as webVitals from "web-vitals";
 import { useRouter } from "next/navigation";
+import { initGA, trackEvent } from "@/lib/analytics";
 export default function Home2Page() {
   const router = useRouter();
   useEffect(() => {
@@ -11,6 +13,83 @@ export default function Home2Page() {
     router.prefetch("/noche");
     router.prefetch("/calendar");
   }, [router]);
+
+  useEffect(() => {
+    initGA();
+    trackEvent("page_view");
+    const startTime = Date.now();
+    return () => {
+      const seconds = (Date.now() - startTime) / 1000;
+      trackEvent("time_on_page", { seconds });
+    };
+  }, []);
+
+  useEffect(() => {
+    function handleClick(event: MouseEvent) {
+      const target = event.target as HTMLElement | null;
+      if (!target) return;
+      const el = target.closest("[data-track-id]") as HTMLElement | null;
+      if (el && el.dataset.trackId) {
+        trackEvent("click", { element: el.dataset.trackId });
+      }
+    }
+    document.addEventListener("click", handleClick);
+    return () => {
+      document.removeEventListener("click", handleClick);
+    };
+  }, []);
+
+  useEffect(() => {
+    let maxDepth = 0;
+    let scroll75Tracked = false;
+
+    function handleScroll() {
+      const scrollTop = window.scrollY || window.pageYOffset || document.documentElement.scrollTop;
+      const docHeight = document.documentElement.scrollHeight;
+      const winHeight = window.innerHeight;
+      const scrollableHeight = docHeight - winHeight;
+      if (scrollableHeight <= 0) return;
+
+      const newDepth = (scrollTop / scrollableHeight) * 100;
+
+      if (newDepth > maxDepth) {
+        maxDepth = newDepth;
+        trackEvent("scroll_depth", { depth: newDepth });
+      }
+
+      if (newDepth >= 75 && !scroll75Tracked) {
+        scroll75Tracked = true;
+        trackEvent("scroll_75");
+      }
+    }
+
+    window.addEventListener("scroll", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
+
+  useEffect(() => {
+    function handler(e: ErrorEvent) {
+      trackEvent("js_error", { message: e.message, filename: e.filename, lineno: e.lineno, colno: e.colno });
+    }
+    window.addEventListener("error", handler);
+    return () => {
+      window.removeEventListener("error", handler);
+    };
+  }, []);
+
+  useEffect(() => {
+    function onWebVital(metric: { name: string; value: number }) {
+      trackEvent("web_vital", { name: metric.name, value: metric.value });
+    }
+    webVitals.onCLS(onWebVital);
+    webVitals.onLCP(onWebVital);
+    webVitals.onINP(onWebVital);
+    webVitals.onFCP(onWebVital);
+    webVitals.onTTFB(onWebVital);
+  }, []);
+
   return (
     <main className="min-h-screen bg-[#E7DAD1]">
       <div className="mx-auto max-w-sm px-1 pb-2 pt-7 text-black">

@@ -1,7 +1,4 @@
 "use client";
-import { useEffect } from "react";
-import { usePathname, useSearchParams } from "next/navigation";
-import { initGA, trackEvent } from "@/lib/analytics";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
@@ -43,29 +40,6 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-
-  // Initialize Google Analytics once
-  useEffect(() => {
-    initGA();
-  }, []);
-
-  // Track page view on route/searchParams change
-  useEffect(() => {
-    if (!pathname) return;
-    trackEvent("page_view");
-  }, [pathname, searchParams]);
-
-  // Track time on page for each route
-  useEffect(() => {
-    const start = Date.now();
-    return () => {
-      const seconds = Math.round((Date.now() - start) / 1000);
-      trackEvent("time_on_page", { seconds });
-    };
-  }, [pathname, searchParams]);
-
   return (
     <html lang="es">
       <body
