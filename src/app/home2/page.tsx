@@ -44,13 +44,13 @@ export default function Home2Page() {
         </div>
 
         <Link href="/calendar" prefetch>
-          <div className="mt-10 mb-0 mr-2 text-right text-[12px] uppercase tracking-[0.2em] text-[#0C2335] cursor-pointer hover:underline">
+          <div className="mt-10 mb-0 mr-2 text-right text-[12px] uppercase tracking-[0.2em] text-[#0C2335] cursor-pointer hover:underline" data-track-id="btn_calendar">
             Busca por fecha →
           </div>
         </Link>
         {/* New Card: Todas */}
         <Link href="/todas" prefetch>
-          <div className="mt-3 relative h-[250px] rounded-3xl bg-[#E85D6A] overflow-hidden">
+          <div className="mt-3 relative h-[250px] rounded-3xl bg-[#E85D6A] overflow-hidden" data-track-id="btn_todas">
             <div className="absolute top-3 left-4 text-[10px] uppercase tracking-[0.2em]">¡Enterate de todo!</div>
 
             {/* Giant word behind */}
@@ -72,7 +72,7 @@ export default function Home2Page() {
 
         {/* Card */}
         <Link href="/proximas" prefetch>
-          <div className="mt-8 relative h-[250px] rounded-3xl bg-[#FFF5BA] overflow-hidden">
+          <div className="mt-8 relative h-[250px] rounded-3xl bg-[#FFF5BA] overflow-hidden" data-track-id="btn_proximas">
             <div className="absolute top-3 left-4 text-[10px] uppercase tracking-[0.2em]">¡Todas las proximas actividades!</div>
 
             {/* Giant word behind */}
@@ -94,7 +94,7 @@ export default function Home2Page() {
 
         {/* Card */}
         <Link href="/noche" prefetch>
-          <div className="mt-8 relative h-[250px] rounded-3xl bg-[#083279] overflow-hidden">
+          <div className="mt-8 relative h-[250px] rounded-3xl bg-[#083279] overflow-hidden" data-track-id="btn_noche">
             <div className="absolute top-3 left-4 text-[10px] uppercase tracking-[0.2em] text-[#FFD966]">¡Disfruta de todas las noches de fiesta!</div>
 
             {/* Giant word behind */}
