@@ -30,14 +30,24 @@ export async function GET() {
 
     // Normaliza las fechas: interpreta `startsAt` como hora local de Europe/Madrid
     // (porque en la BBDD es TIMESTAMP WITHOUT TIME ZONE) y conviértela a UTC ISO.
-    const normalized = rows.map((e) => ({
-      ...e,
-      // Si `startsAt` ya es Date, lo tratamos como hora local Madrid y lo pasamos a UTC
-      startsAt: toZonedTime(
-        e.startsAt instanceof Date ? e.startsAt : new Date(String(e.startsAt)),
-        TZ
-      ).toISOString(),
-    }));
+    const normalized = rows.map((e) => {
+      const d = e.startsAt instanceof Date ? e.startsAt : new Date(String(e.startsAt));
+      // Interpretamos los valores como hora local de Madrid y los convertimos a UTC ISO
+      const utcDate = new Date(
+        Date.UTC(
+          d.getFullYear(),
+          d.getMonth(),
+          d.getDate(),
+          d.getHours(),
+          d.getMinutes(),
+          d.getSeconds()
+        )
+      );
+      return {
+        ...e,
+        startsAt: utcDate.toISOString(),
+      };
+    });
 
     return NextResponse.json({ events: normalized });
   } catch (err: unknown) {
