@@ -54,28 +54,28 @@ function toHM(date: Date, tz: string) {
 }
 
 function fromApi(ev: EventApi): LocalFiesta {
-  // Si ya vienen date/time, las usamos; si no, derivamos de startsAt en TZ local
+  // Si ya vienen date/time, las usamos; si no, derivamos de startsAt SIN aplicar zonas
   let date = ev.date ?? undefined;
   let time = ev.time ?? undefined;
   if ((!date || !time) && ev.startsAt) {
     const s = String(ev.startsAt).trim();
-    // Caso 1: tiene zona (Z o ±HH:MM) → es un instante UTC/offset real
-    if (/Z|[+-]\d{2}:\d{2}$/.test(s)) {
-      const d = new Date(s);
-      date = date ?? toYMD(d, TZ);
-      time = time ?? toHM(d, TZ);
-    } else if (/^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}(:\d{2})?$/.test(s)) {
-      // Caso 2: timestamp "naive" (sin zona). Trátalo como hora LOCAL de Madrid, sin desplazar.
-      const withT = s.replace(" ", "T");
-      const [ymd, hms = "00:00:00"] = withT.split("T");
-      date = date ?? ymd;
-      time = time ?? hms.slice(0,5);
+    // Intenta extraer YYYY-MM-DD y HH:MM de forma textual (soporta " ", "T" y sufijos Z/±HH:MM)
+    const m = s.match(/^(\d{4}-\d{2}-\d{2})[ T](\d{2}:\d{2})(?::\d{2})?(?:Z|[+-]\d{2}:\d{2})?$/);
+    if (m) {
+      date = date ?? m[1];
+      time = time ?? m[2];
     } else {
-      // Fallback defensivo: intentar parsear como fecha y formatear en TZ
+      // Fallback: si no coincide el patrón, intenta parsear como Date solo para rescatar texto
       const d = new Date(s);
       if (!Number.isNaN(d.getTime())) {
-        date = date ?? toYMD(d, TZ);
-        time = time ?? toHM(d, TZ);
+        // Importante: usamos componentes UTC para evitar desplazamientos del entorno
+        const y = d.getUTCFullYear();
+        const mo = String(d.getUTCMonth() + 1).padStart(2, '0');
+        const da = String(d.getUTCDate()).padStart(2, '0');
+        const hh = String(d.getUTCHours()).padStart(2, '0');
+        const mi = String(d.getUTCMinutes()).padStart(2, '0');
+        date = date ?? `${y}-${mo}-${da}`;
+        time = time ?? `${hh}:${mi}`;
       }
     }
   }
