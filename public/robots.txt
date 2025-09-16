@@ -3,4 +3,4 @@ Disallow: /api/
 Disallow: /_next/
 Disallow: /__nextjs_original-stack-frame/
 Disallow: /layoutComision/
-Sitemap: https://tudominio.com/sitemap.xml
+Sitemap: https://matet-es-fiesta.vercel.app/sitemap.xml
