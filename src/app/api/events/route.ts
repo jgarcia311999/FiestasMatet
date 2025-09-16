@@ -3,8 +3,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/db/client";
 import { events } from "@/db/schema";
 import { asc, sql } from "drizzle-orm";
-// @ts-expect-error – TypeScript definitions for date-fns-tz may be incomplete
-import { zonedTimeToUtc } from "date-fns-tz";
+import { toZonedTime } from "date-fns-tz";
 
 // Evita cache en desarrollo/producción; siempre datos frescos
 export const dynamic = "force-dynamic";
@@ -34,10 +33,10 @@ export async function GET() {
     const normalized = rows.map((e) => ({
       ...e,
       // Si `startsAt` ya es Date, lo tratamos como hora local Madrid y lo pasamos a UTC
-      startsAt:
-        e.startsAt instanceof Date
-          ? zonedTimeToUtc(e.startsAt, TZ).toISOString()
-          : zonedTimeToUtc(String(e.startsAt), TZ).toISOString(),
+      startsAt: toZonedTime(
+        e.startsAt instanceof Date ? e.startsAt : new Date(String(e.startsAt)),
+        TZ
+      ).toISOString(),
     }));
 
     return NextResponse.json({ events: normalized });
