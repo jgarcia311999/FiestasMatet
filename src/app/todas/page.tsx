@@ -24,11 +24,9 @@ function toDateKeyTZ(d: Date, tz: string) {
 }
 
 function toTimeHHMM(d: Date) {
-  return new Intl.DateTimeFormat("es-ES", {
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  }).format(d);
+  const hh = String(d.getUTCHours()).padStart(2, "0");
+  const mm = String(d.getUTCMinutes()).padStart(2, "0");
+  return `${hh}:${mm}`;
 }
 function sortNightLast(items: { time: string }[]) {
   const toMin = (t: string) => {
