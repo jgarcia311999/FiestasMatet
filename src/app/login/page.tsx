@@ -4,11 +4,11 @@ export const metadata = {
   openGraph: {
     title: "Fiestas en Matet | Acceso comisión",
     description: "Accede al panel de la comisión de fiestas de Matet.",
-    url: "https://matet-es-fiesta.vercel.app/login",
+    url: "https://fiestasmatet.vercel.app/login",
     siteName: "Fiestas Matet",
     images: [
       {
-        url: "https://matet-es-fiesta.vercel.app/og-image.png",
+        url: "https://fiestasmatet.vercel.app/og-image.png",
         width: 1200,
         height: 630,
       },

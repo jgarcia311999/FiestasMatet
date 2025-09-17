@@ -3,4 +3,4 @@ Disallow: /api/
 Disallow: /_next/
 Disallow: /__nextjs_original-stack-frame/
 Disallow: /layoutComision/
-Sitemap: https://matet-es-fiesta.vercel.app/sitemap.xml
+Sitemap: https://fiestasmatet.vercel.app

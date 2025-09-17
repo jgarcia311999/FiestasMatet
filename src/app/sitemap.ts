@@ -2,7 +2,7 @@
 import type { MetadataRoute } from "next";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = "https://matet-es-fiesta.vercel.app";
+  const baseUrl = "https://fiestasmatet.vercel.app";
 
   // TODO: aquí iría la llamada a tu BD o API para traer eventos
   // const events = await fetch(`${baseUrl}/api/events`).then(res => res.json());
