@@ -27,8 +27,8 @@ type LocalFiesta = {
   location?: string;
   provisional?: boolean;
   attendees?: string[];
-  date?: string; // YYYY-MM-DD
-  time?: string; // HH:MM
+  date?: string; // YYYY-MM-DD en zona Europe/Madrid
+  time?: string; // HH:MM en texto, ya normalizado, sin UTC
 };
 
 const TZ = "Europe/Madrid";
@@ -53,6 +53,15 @@ function toHM(date: Date, tz: string) {
     .replace(/^([0-9]{2}):([0-9]{2}).*$/, "$1:$2");
 }
 
+function formatHHMMMadrid(date: Date): string {
+  return new Intl.DateTimeFormat("es-ES", {
+    timeZone: TZ,
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).format(date);
+}
+
 function fromApi(ev: EventApi): LocalFiesta {
   // Si ya vienen date/time, las usamos; si no, derivamos de startsAt SIN aplicar zonas
   let date = ev.date ?? undefined;
@@ -65,17 +74,11 @@ function fromApi(ev: EventApi): LocalFiesta {
       date = date ?? m[1];
       time = time ?? m[2];
     } else {
-      // Fallback: si no coincide el patrón, intenta parsear como Date solo para rescatar texto
+      // Fallback: si no coincide el patrón, intenta parsear como Date y formatear en zona Madrid
       const d = new Date(s);
       if (!Number.isNaN(d.getTime())) {
-        // Importante: usamos componentes UTC para evitar desplazamientos del entorno
-        const y = d.getUTCFullYear();
-        const mo = String(d.getUTCMonth() + 1).padStart(2, '0');
-        const da = String(d.getUTCDate()).padStart(2, '0');
-        const hh = String(d.getUTCHours()).padStart(2, '0');
-        const mi = String(d.getUTCMinutes()).padStart(2, '0');
-        date = date ?? `${y}-${mo}-${da}`;
-        time = time ?? `${hh}:${mi}`;
+        date = date ?? toYMD(d, TZ);
+        time = time ?? toHM(d, TZ);
       }
     }
   }

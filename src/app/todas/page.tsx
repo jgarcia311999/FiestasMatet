@@ -5,10 +5,11 @@ import { useState, useEffect } from "react";
 // Tipado derivado de la tabla events
 type Event = {
   id: number;
-  startsAt: string;
+  startsAt: string; // ISO con la fecha para agrupar el día
   title: string;
   provisional?: boolean;
   location?: string;
+  time?: string; // HH:MM en texto, si viene del backend
 };
 
 const TZ = "Europe/Madrid";
@@ -24,9 +25,12 @@ function toDateKeyTZ(d: Date, tz: string) {
 }
 
 function toTimeHHMM(d: Date) {
-  const hh = String(d.getUTCHours()).padStart(2, "0");
-  const mm = String(d.getUTCMinutes()).padStart(2, "0");
-  return `${hh}:${mm}`;
+  return new Intl.DateTimeFormat("es-ES", {
+    timeZone: TZ,
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).format(d);
 }
 function sortNightLast(items: { time: string }[]) {
   const toMin = (t: string) => {
@@ -82,7 +86,8 @@ export default function CalendarPage() {
     const label = formatSpanishLong(d, TZ);
     const item = {
       id: ev.id,
-      time: toTimeHHMM(d),
+      // Si el backend proporciona la hora fija como texto, úsala. Si no, caemos al cálculo anterior.
+      time: ev.time || toTimeHHMM(d),
       title: ev.title,
       provisional: !!ev.provisional,
       location: ev.location || "",

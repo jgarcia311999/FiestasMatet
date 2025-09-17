@@ -26,6 +26,15 @@ function dateKeyMadrid(d: Date): string {
   }).format(d);
 }
 
+function formatHHMMMadrid(date: Date): string {
+  return new Intl.DateTimeFormat("es-ES", {
+    timeZone: MADRID_TZ,
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).format(date);
+}
+
 function getFranjaHorariaLabel(date: Date): string {
   const hh = Number(new Intl.DateTimeFormat("es-ES", { hour: "2-digit", hourCycle: "h23", timeZone: MADRID_TZ }).format(date));
   if (hh >= 6 && hh < 14) return "de la mañana";
@@ -106,11 +115,10 @@ export default async function Noche() {
                       <li key={ev.id} className="text-lg text-[#FFD966]">
                         {(() => {
                           const d = ev.startsAt!;
-                          const hh = String(d.getUTCHours()).padStart(2, "0");
-                          const mm = String(d.getUTCMinutes()).padStart(2, "0");
+                          const hora = formatHHMMMadrid(d);
                           return (
                             <>
-                              A las {hh}:{mm} {getFranjaHorariaLabel(d)}
+                              A las {hora} {getFranjaHorariaLabel(d)}
                             </>
                           );
                         })()}

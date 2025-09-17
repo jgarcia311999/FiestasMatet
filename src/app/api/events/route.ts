@@ -28,17 +28,11 @@ export async function GET() {
       .from(events)
       .orderBy(asc(events.startsAt));
 
-    // Normaliza las fechas: interpreta `startsAt` como hora local de Europe/Madrid
-    // (porque en la BBDD es TIMESTAMP WITHOUT TIME ZONE) y conviértela a UTC ISO.
-    const normalized = rows.map((e) => {
-      const d = e.startsAt instanceof Date ? e.startsAt : new Date(String(e.startsAt));
-      // Interpretamos `d` como hora local de Madrid y lo convertimos a UTC ISO
-      const iso = formatInTimeZone(d, TZ, "yyyy-MM-dd'T'HH:mm:ssXXX");
-      return {
-        ...e,
-        startsAt: new Date(iso).toISOString(),
-      };
-    });
+    // Devuelve las filas con startsAt como string
+    const normalized = rows.map((e) => ({
+      ...e,
+      startsAt: String(e.startsAt),
+    }));
 
     return NextResponse.json({ events: normalized });
   } catch (err: unknown) {

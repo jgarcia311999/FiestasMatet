@@ -26,6 +26,29 @@ function dateKeyMadrid(d: Date): string {
   }).format(d);
 }
 
+function formatHHMMMadrid(date: Date): string {
+  return new Intl.DateTimeFormat("es-ES", {
+    timeZone: MADRID_TZ,
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).format(date);
+}
+
+function hourMinuteMadrid(date: Date): { hour: number; minute: number } {
+  const hourStr = new Intl.DateTimeFormat("en-GB", {
+    timeZone: MADRID_TZ,
+    hour: "2-digit",
+    hour12: false,
+  }).format(date);
+  const minuteStr = new Intl.DateTimeFormat("en-GB", {
+    timeZone: MADRID_TZ,
+    minute: "2-digit",
+    hour12: false,
+  }).format(date);
+  return { hour: parseInt(hourStr, 10), minute: parseInt(minuteStr, 10) };
+}
+
 function getSecciones(eventos: Event[]): { label: string; date: Date; key: string }[] {
   const todayKey = dateKeyMadrid(new Date());
 
@@ -51,8 +74,7 @@ function getSecciones(eventos: Event[]): { label: string; date: Date; key: strin
 function getEventosPorFecha(eventos: Event[], dateKey: string): Event[] {
   const byDate = eventos.filter(e => e.startsAt && dateKeyMadrid(e.startsAt) === dateKey);
   const parseTime = (d: Date) => {
-    const hh = d.getHours();
-    const mm = d.getMinutes();
+    const { hour: hh, minute: mm } = hourMinuteMadrid(d);
     let minutes = hh * 60 + mm;
     if (hh >= 0 && hh < 6) minutes += 24 * 60;
     return minutes;
@@ -61,7 +83,7 @@ function getEventosPorFecha(eventos: Event[], dateKey: string): Event[] {
 }
 
 function getFranjaHorariaLabel(date: Date): string {
-  const hh = date.getHours();
+  const { hour: hh } = hourMinuteMadrid(date);
   if (hh >= 6 && hh < 14) return "de la mañana";
   if (hh >= 14 && hh < 21) return "de la tarde";
   return "de la noche";
@@ -97,11 +119,10 @@ export default async function ProximasPage() {
                         <li key={ev.id} className="text-lg">
                           {(() => {
                             const d = ev.startsAt!;
-                            const hh = String(d.getUTCHours()).padStart(2, "0");
-                            const mm = String(d.getUTCMinutes()).padStart(2, "0");
+                            const hora = formatHHMMMadrid(d);
                             return (
                               <>
-                                A las {hh}:{mm} {getFranjaHorariaLabel(d)}
+                                A las {hora} {getFranjaHorariaLabel(d)}
                               </>
                             );
                           })()}
