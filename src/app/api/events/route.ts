@@ -28,10 +28,12 @@ export async function GET() {
       .from(events)
       .orderBy(asc(events.startsAt));
 
-    // Devuelve las filas con startsAt como string
+    // Devuelve las filas con startsAt como string y añade date/time normalizados en zona Madrid
     const normalized = rows.map((e) => ({
       ...e,
       startsAt: String(e.startsAt),
+      date: formatInTimeZone(e.startsAt, TZ, "yyyy-MM-dd"),
+      time: formatInTimeZone(e.startsAt, TZ, "HH:mm"),
     }));
 
     return NextResponse.json({ events: normalized });
