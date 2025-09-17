@@ -3,6 +3,7 @@ import { z } from "zod";
 import { db } from "@/db/client";
 import { events } from "@/db/schema";
 import { eq, sql } from "drizzle-orm";
+import { DateTime } from "luxon";
 
 const TZ = "Europe/Madrid";
 
@@ -78,9 +79,8 @@ export async function POST(req: Request) {
       const curr = await getLocalDateTimeStringsById(id);
       const dateStr = patch.date ?? curr.date;
       const timeStr = patch.time ?? curr.time;
-      updateSet.startsAt = sql`
-        (to_timestamp(${dateStr} || ' ' || ${timeStr}, 'YYYY-MM-DD HH24:MI') AT TIME ZONE ${sql.raw(`'${TZ}'`)})
-      `;
+      const dateTime = DateTime.fromISO(`${dateStr}T${timeStr}`, { zone: TZ });
+      updateSet.startsAt = dateTime.toUTC().toJSDate();
     }
 
     const [updated] = await db
