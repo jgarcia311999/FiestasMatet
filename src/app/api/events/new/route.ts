@@ -4,8 +4,7 @@ import { events } from "@/db/schema";
 import { sql } from "drizzle-orm";
 import type { SQL } from "drizzle-orm";
 import { z } from "zod";
-// @ts-expect-error: date-fns-tz typings issue in some TS configs, but function exists at runtime
-import { zonedTimeToUtc } from "date-fns-tz";
+import { toZonedTime } from "date-fns-tz";
 
 export const dynamic = "force-dynamic";
 // export const runtime = "edge"; // opcional si usas Edge
@@ -46,7 +45,7 @@ export async function POST(req: Request) {
     let startsAtValue: SQL | Date;
     if (body.date && body.time) {
       const dateTime = `${body.date}T${body.time}:00`;
-      startsAtValue = zonedTimeToUtc(dateTime, TZ);
+      startsAtValue = toZonedTime(dateTime, TZ);
     } else if (body.startsAt) {
       // Aceptamos string o Date; Drizzle soporta Date para timestamptz
       const dt = typeof body.startsAt === "string" ? new Date(body.startsAt) : body.startsAt;
