@@ -4,6 +4,8 @@ import { events } from "@/db/schema";
 import { sql } from "drizzle-orm";
 import type { SQL } from "drizzle-orm";
 import { z } from "zod";
+// @ts-expect-error: date-fns-tz typings do not expose zonedTimeToUtc correctly
+import zonedTimeToUtc from "date-fns-tz/zonedTimeToUtc";
 
 export const dynamic = "force-dynamic";
 // export const runtime = "edge"; // opcional si usas Edge
@@ -43,7 +45,8 @@ export async function POST(req: Request) {
     // Componer startsAt en SQL si llega date+time; si llega startsAt, lo usamos tal cual
     let startsAtValue: SQL | Date;
     if (body.date && body.time) {
-      startsAtValue = sql`(to_timestamp(${body.date} || ' ' || ${body.time}, 'YYYY-MM-DD HH24:MI') AT TIME ZONE ${sql.raw(`'${TZ}'`)})`;
+      const dateTime = `${body.date}T${body.time}:00`;
+      startsAtValue = zonedTimeToUtc(dateTime, TZ);
     } else if (body.startsAt) {
       // Aceptamos string o Date; Drizzle soporta Date para timestamptz
       const dt = typeof body.startsAt === "string" ? new Date(body.startsAt) : body.startsAt;
