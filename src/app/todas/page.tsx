@@ -5,11 +5,11 @@ import { useState, useEffect } from "react";
 // Tipado derivado de la tabla events
 type Event = {
   id: number;
-  startsAt: string; // ISO con la fecha para agrupar el día
   title: string;
   provisional?: boolean;
   location?: string;
-  time?: string; // HH:MM en texto, si viene del backend
+  date?: string; // YYYY-MM-DD en texto, ya normalizado desde backend
+  time?: string; // HH:MM en texto, ya normalizado desde backend
 };
 
 const TZ = "Europe/Madrid";
@@ -24,14 +24,6 @@ function toDateKeyTZ(d: Date, tz: string) {
   }).format(d);
 }
 
-function toTimeHHMM(d: Date) {
-  return new Intl.DateTimeFormat("es-ES", {
-    timeZone: TZ,
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  }).format(d);
-}
 function sortNightLast(items: { time: string }[]) {
   const toMin = (t: string) => {
     const [hh, mm] = t.split(":").map(Number);
@@ -80,14 +72,14 @@ export default function CalendarPage() {
   >();
 
   for (const ev of rows) {
-    const d = new Date(ev.startsAt);
-    const key = toDateKeyTZ(d, TZ);
+    if (!ev.date) continue;
+    const key = ev.date;
     if (!showPast && key < todayKey) continue;
+    const d = new Date(ev.date);
     const label = formatSpanishLong(d, TZ);
     const item = {
       id: ev.id,
-      // Si el backend proporciona la hora fija como texto, úsala. Si no, caemos al cálculo anterior.
-      time: ev.time || toTimeHHMM(d),
+      time: ev.time || "",
       title: ev.title,
       provisional: !!ev.provisional,
       location: ev.location || "",
