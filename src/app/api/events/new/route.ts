@@ -4,8 +4,8 @@ import { events } from "@/db/schema";
 import { sql } from "drizzle-orm";
 import type { SQL } from "drizzle-orm";
 import { z } from "zod";
-// @ts-expect-error: workaround because TS types for date-fns-tz don't expose zonedTimeToUtc properly
-import zonedTimeToUtc from "date-fns-tz/zonedTimeToUtc/index.js";
+// @ts-expect-error: date-fns-tz typings issue in some TS configs, but function exists at runtime
+import { zonedTimeToUtc } from "date-fns-tz";
 
 export const dynamic = "force-dynamic";
 // export const runtime = "edge"; // opcional si usas Edge
