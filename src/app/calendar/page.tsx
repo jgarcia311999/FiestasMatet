@@ -263,6 +263,8 @@ export default function CalendarPage() {
                         : hasEvents
                         ? "bg-[#A5B7D3]"
                         : "bg-white"
+                      : hasEvents
+                      ? "bg-[#A5B7D3]/70 text-[#0C2335]"
                       : "bg-white/60 text-[#2D4659] opacity-70",
                     isSelected
                       ? "border-[#0C2335] ring-2 ring-[#0C2335]/20"
