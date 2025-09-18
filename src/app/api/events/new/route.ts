@@ -18,8 +18,7 @@ const EmptyToUndef = <T extends z.ZodTypeAny>(schema: T) =>
 const CreateSchema = z
   .object({
     title: z.string().trim().min(1, "Título requerido"),
-    img: EmptyToUndef(z.string().trim().min(1)).optional(),
-    description: EmptyToUndef(z.string()).optional(),
+    // img and description removed
     // O bien nos mandan startsAt directamente, o bien date+time
     startsAt: z.union([z.string(), z.date()]).optional(),
     date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
@@ -27,6 +26,7 @@ const CreateSchema = z
     location: EmptyToUndef(z.string()).optional(),
     provisional: z.boolean().optional(),
     attendees: z.array(z.string()).optional(),
+    tags: z.array(z.string()).optional(),
   })
   .refine(
     (v) => !!v.startsAt || (!!v.date && !!v.time),
@@ -61,22 +61,22 @@ export async function POST(req: Request) {
       .insert(events)
       .values({
         title: body.title,
-        img: body.img ?? "",
-        description: body.description ?? "",
+        // img and description removed
         startsAt: startsAtValue,
         location: body.location ?? "",
         provisional: body.provisional ?? false,
         attendees: body.attendees ?? [],
+        tags: body.tags ?? [],
       })
       .returning({
         id: events.id,
         title: events.title,
-        img: events.img,
-        description: events.description,
+        // img and description removed
         startsAt: events.startsAt,
         location: events.location,
         provisional: events.provisional,
         attendees: events.attendees,
+        tags: events.tags,
         date: sql<string>`to_char(${events.startsAt} AT TIME ZONE ${sql.raw(`'${TZ}'`)}, 'YYYY-MM-DD')`,
         time: sql<string>`to_char(${events.startsAt} AT TIME ZONE ${sql.raw(`'${TZ}'`)}, 'HH24:MI')`,
       });

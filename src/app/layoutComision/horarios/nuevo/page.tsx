@@ -5,21 +5,19 @@ import { useRouter } from "next/navigation";
 export default function NuevoEventoPage() {
   type FormState = {
     title: string;
-    img: string;
-    description: string;
     date: string; // YYYY-MM-DD
     time: string; // HH:MM
     location: string;
     provisional: boolean;
+    tags: string[];
   };
   const [form, setForm] = useState<FormState>({
     title: "",
-    img: "",
-    description: "",
     date: "",
     time: "",
     location: "",
     provisional: false,
+    tags: [],
   });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -47,12 +45,11 @@ export default function NuevoEventoPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           title: title,
-          img: form.img.trim(),
-          description: form.description.trim(),
           date: form.date,
           time: form.time,
           location: form.location.trim(),
           provisional: form.provisional,
+          tags: form.tags,
         }),
       });
       const data = await res.json();
@@ -133,25 +130,31 @@ export default function NuevoEventoPage() {
           <label htmlFor="provisional" className="text-sm font-semibold">Provisional</label>
         </div>
 
-        <div>
-          <label className="text-sm font-semibold">Descripción</label>
-          <textarea
-            value={form.description}
-            onChange={(e) => set("description", e.target.value)}
-            rows={3}
-            className="w-full rounded-md border px-3 py-2 text-sm bg-[#E85D6A] text-[#0C2335]"
-          />
-        </div>
-
-        <div>
-          <label className="text-sm font-semibold">Imagen (URL)</label>
-          <input
-            value={form.img}
-            onChange={(e) => set("img", e.target.value)}
-            className="w-full rounded-md border px-3 py-2 text-sm bg-[#E85D6A] text-[#0C2335]"
-            placeholder="/bannerGenerico.png"
-          />
-        </div>
+        <fieldset className="text-sm">
+          <legend className="font-semibold">Etiquetas</legend>
+          <div className="mt-1 grid grid-cols-2 gap-2">
+            {["noche","familia","todos los públicos","comida/cena","toros"].map(tag => (
+              <label key={tag} className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  value={tag}
+                  checked={form.tags.includes(tag)}
+                  onChange={e => {
+                    const checked = e.target.checked;
+                    set(
+                      "tags",
+                      checked
+                        ? [...form.tags, tag]
+                        : form.tags.filter(t => t !== tag)
+                    );
+                  }}
+                  className="h-4 w-4 border"
+                />
+                {tag}
+              </label>
+            ))}
+          </div>
+        </fieldset>
 
         {error && <p className="text-sm text-red-700">{error}</p>}
 

@@ -702,23 +702,31 @@ prevEditRef.current = null;
   <label htmlFor="edit-provisional" className="text-sm font-semibold">Provisional</label>
 </div>
 
-                <label className="text-sm">Etiquetas
-                  <select
-                    multiple
-                    value={editForm.tags}
-                    onChange={e => {
-                      const options = Array.from(e.target.selectedOptions).map(o => o.value);
-                      setEditForm({...editForm, tags: options});
-                    }}
-                    className="mt-1 w-full rounded border border-[#0C2335]/30 bg-[#E85D6A] px-3 py-2 text-sm text-[#0C2335]"
-                  >
-                    <option value="noche">Noche</option>
-                    <option value="familia">Familia</option>
-                    <option value="todos los públicos">Todos los públicos</option>
-                    <option value="comida/cena">Comida/Cena</option>
-                    <option value="toros">Toros</option>
-                  </select>
-                </label>
+                <fieldset className="text-sm">
+                  <legend className="font-semibold">Etiquetas</legend>
+                  <div className="mt-1 grid grid-cols-2 gap-2">
+                    {["noche","familia","todos los públicos","comida/cena","toros"].map(tag => (
+                      <label key={tag} className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          value={tag}
+                          checked={editForm.tags.includes(tag)}
+                          onChange={e => {
+                            const checked = e.target.checked;
+                            setEditForm({
+                              ...editForm,
+                              tags: checked
+                                ? [...editForm.tags, tag]
+                                : editForm.tags.filter(t => t !== tag),
+                            });
+                          }}
+                          className="h-4 w-4 border"
+                        />
+                        {tag}
+                      </label>
+                    ))}
+                  </div>
+                </fieldset>
 
                 <div className="flex justify-end items-center gap-3 pt-2">
                   {savingEdit && <span className="text-xs opacity-80">Guardando…</span>}
