@@ -24,6 +24,7 @@ const PatchSchema = z.object({
   time: z.string().regex(/^\d{2}:\d{2}$/).optional(),
   location: z.string().optional(),
   provisional: z.boolean().optional(),
+  tags: z.array(z.string()).optional(),
 });
 
 async function findEventId(match: z.infer<typeof MatchSchema>) {
@@ -74,6 +75,7 @@ export async function POST(req: Request) {
     if (patch.description !== undefined) updateSet.description = patch.description;
     if (patch.location !== undefined) updateSet.location = patch.location;
     if (patch.provisional !== undefined) updateSet.provisional = patch.provisional;
+    if (patch.tags !== undefined) updateSet.tags = patch.tags;
 
     if (patch.date !== undefined || patch.time !== undefined) {
       const curr = await getLocalDateTimeStringsById(id);
@@ -90,12 +92,11 @@ export async function POST(req: Request) {
       .returning({
         id: events.id,
         title: events.title,
-        img: events.img,
-        description: events.description,
         startsAt: events.startsAt,
         location: events.location,
         provisional: events.provisional,
         attendees: events.attendees,
+        tags: events.tags,
       });
 
     return NextResponse.json({ ok: true, event: updated });

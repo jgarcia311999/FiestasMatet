@@ -18,12 +18,11 @@ export async function GET() {
       .select({
         id: events.id,
         title: events.title,
-        img: events.img,
-        description: events.description,
         location: events.location,
         provisional: events.provisional,
         attendees: events.attendees,
         startsAt: events.startsAt,
+        tags: events.tags,
       })
       .from(events)
       .orderBy(asc(events.startsAt));

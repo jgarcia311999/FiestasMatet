@@ -4,31 +4,27 @@ import { useState, useRef, useEffect } from "react";
 import { getCookie } from "cookies-next";
 import Link from "next/link";
 
-// Tipos y helpers para leer desde la API/BD
 export type EventApi = {
   id?: number | string;
   title?: string;
-  img?: string;
-  description?: string;
   location?: string;
   provisional?: boolean;
   attendees?: string[] | null;
-  // algunos GET pueden devolver startsAt; otros, date/time ya formateados
   startsAt?: string | null;
   date?: string | null;
   time?: string | null;
+  tags?: string[];
 };
 
 type LocalFiesta = {
   id?: number | string;
   title?: string;
-  img?: string;
-  description?: string;
   location?: string;
   provisional?: boolean;
   attendees?: string[];
-  date?: string; // YYYY-MM-DD en zona Europe/Madrid
-  time?: string; // HH:MM en texto, ya normalizado, sin UTC
+  date?: string;
+  time?: string;
+  tags?: string[];
 };
 
 const TZ = "Europe/Madrid";
@@ -83,16 +79,15 @@ function fromApi(ev: EventApi): LocalFiesta {
     }
   }
   return {
-    id: ev.id,
-    title: ev.title ?? "",
-    img: ev.img ?? "",
-    description: ev.description ?? "",
-    location: ev.location ?? "",
-    provisional: ev.provisional ?? false,
-    attendees: Array.isArray(ev.attendees) ? (ev.attendees as string[]) : [],
-    date,
-    time,
-  };
+  id: ev.id,
+  title: ev.title ?? "",
+  location: ev.location ?? "",
+  provisional: ev.provisional ?? false,
+  attendees: Array.isArray(ev.attendees) ? (ev.attendees as string[]) : [],
+  date,
+  time,
+  tags: Array.isArray(ev.tags) ? ev.tags : [],
+};
 }
 
 export default function HorariosPage() {
@@ -249,14 +244,20 @@ export default function HorariosPage() {
   // --- Edit Modal State ---
   const [editOpen, setEditOpen] = useState(false);
   const [editMatch, setEditMatch] = useState<{ title: string; date: string; time: string } | null>(null);
-  const [editForm, setEditForm] = useState<{ title: string; img: string; description: string; date: string; time: string; location: string; provisional: boolean }>({
+const [editForm, setEditForm] = useState<{
+  title: string;
+  date: string;
+  time: string;
+  location: string;
+  provisional: boolean;
+  tags: string[];
+}>({
   title: "",
-  img: "",
-  description: "",
   date: "",
   time: "",
   location: "",
   provisional: false,
+  tags: [],
 });
   const [savingEdit, setSavingEdit] = useState(false);
   const prevEditRef = useRef<LocalFiesta | null>(null);
@@ -348,17 +349,16 @@ export default function HorariosPage() {
     })();
   }
 
-  function openEdit(ev: { title?: string; img?: string; description?: string; date?: string; time?: string; location?: string; provisional?: boolean }) {
+  function openEdit(ev: { title?: string; img?: string; description?: string; date?: string; time?: string; location?: string; provisional?: boolean; tags?: string[] }) {
     const match = { title: ev.title || "", date: ev.date || "", time: ev.time || "" };
     setEditMatch(match);
     setEditForm({
   title: ev.title || "",
-  img: ev.img || "",
-  description: ev.description || "",
   date: ev.date || "",
   time: ev.time || "",
   location: ev.location || "",
   provisional: ev.provisional ?? false,
+  tags: (ev as { tags?: string[] }).tags ?? [],
 });
     // snapshot previo para revertir si falla
     const found = items.find(it => (it.title||"")===match.title && (it.date||"")===match.date && (it.time||"")===match.time) || null;
@@ -595,60 +595,60 @@ prevEditRef.current = null;
                 </div>
                 {isOpen && (
                   <div className="mt-2 pl-2 text-sm space-y-2">
-                    <p className="opacity-90"><span className="font-semibold">Descripción:</span> {ev.description?.trim() || "Sin descripción"}</p>
-                    <p className="opacity-90"><span className="font-semibold">Lugar:</span> {ev.location?.trim() || "Sin lugar"}</p>
-                    <p className="opacity-90">
+                    <p><span className="font-semibold">Lugar:</span> {ev.location || "—"}</p>
+                    <p><span className="font-semibold">Provisional:</span> {ev.provisional ? "Sí" : "No"}</p>
+                    <p>
                       <span className="font-semibold">Asistirá:</span>{" "}
-                      {asistentes.length > 0 ? (
-                        <span>{asistentes.join(", ")}</span>
-                      ) : (
-                        <span className="italic">de momento nadie...</span>
-                      )}
+                      {asistentes.length > 0 ? asistentes.join(", ") : <span className="italic">de momento nadie...</span>}
+                    </p>
+                    <p>
+                      <span className="font-semibold">Etiquetas:</span>{" "}
+                      {ev.tags && ev.tags.length > 0 ? ev.tags.join(", ") : "—"}
                     </p>
 
                     {/* Action buttons: trash, pencil, check */}
                     {!selectMode && (
-                    <div className="pt-1 flex items-center gap-3 justify-end">
-                      {/* Trash */}
-                      <button
-                        type="button"
-                        aria-label="Eliminar"
-                        onClick={() => handleDelete(ev)}
-                        className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-[#0C2335]/30 hover:bg-[#0C2335]/5"
-                      >
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M3 6h18" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                          <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                          <path d="M6 6l1 14a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-14" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                          <path d="M10 11v6M14 11v6" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                        </svg>
-                      </button>
+                      <div className="pt-1 flex items-center gap-3 justify-end">
+                        {/* Trash */}
+                        <button
+                          type="button"
+                          aria-label="Eliminar"
+                          onClick={() => handleDelete(ev)}
+                          className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-[#0C2335]/30 hover:bg-[#0C2335]/5"
+                        >
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M3 6h18" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                            <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                            <path d="M6 6l1 14a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-14" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                            <path d="M10 11v6M14 11v6" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                          </svg>
+                        </button>
 
-                      {/* Pencil */}
-                      <button
-                        type="button"
-                        aria-label="Editar"
-                        onClick={() => openEdit(ev)}
-                        className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-[#0C2335]/30 hover:bg-[#0C2335]/5"
-                      >
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25z" stroke="currentColor" strokeWidth="1.5" fill="none"/>
-                          <path d="M20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" stroke="currentColor" strokeWidth="1.5" fill="none"/>
-                        </svg>
-                      </button>
+                        {/* Pencil */}
+                        <button
+                          type="button"
+                          aria-label="Editar"
+                          onClick={() => openEdit(ev)}
+                          className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-[#0C2335]/30 hover:bg-[#0C2335]/5"
+                        >
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25z" stroke="currentColor" strokeWidth="1.5" fill="none"/>
+                            <path d="M20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" stroke="currentColor" strokeWidth="1.5" fill="none"/>
+                          </svg>
+                        </button>
 
-                      {/* Check */}
-                      <button
-                        type="button"
-                        aria-label="Confirmar"
-                        onClick={() => handleAttendClick(ev)}
-                        className={`inline-flex h-9 w-9 items-center justify-center rounded-md border ${isAttending ? 'bg-green-500 text-white border-green-600' : 'border-[#0C2335]/30 hover:bg-[#0C2335]/5'}`}
-                      >
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M20 6L9 17l-5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
-                      </button>
-                    </div>
+                        {/* Check */}
+                        <button
+                          type="button"
+                          aria-label="Confirmar"
+                          onClick={() => handleAttendClick(ev)}
+                          className={`inline-flex h-9 w-9 items-center justify-center rounded-md border ${isAttending ? 'bg-green-500 text-white border-green-600' : 'border-[#0C2335]/30 hover:bg-[#0C2335]/5'}`}
+                        >
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M20 6L9 17l-5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                        </button>
+                      </div>
                     )}
                   </div>
                 )}
@@ -690,13 +690,6 @@ prevEditRef.current = null;
                   <input value={editForm.location} onChange={e=>setEditForm({...editForm, location: e.target.value})} className="mt-1 w-full rounded border border-[#0C2335]/30 bg-[#E85D6A] px-3 py-2 text-sm text-[#0C2335]" />
                 </label>
 
-                <label className="text-sm">Descripción
-                  <textarea value={editForm.description} onChange={e=>setEditForm({...editForm, description: e.target.value})} rows={4} className="mt-1 w-full rounded border border-[#0C2335]/30 bg-[#E85D6A] px-3 py-2 text-sm text-[#0C2335]" />
-                </label>
-
-                <label className="text-sm">Imagen (URL)
-                  <input value={editForm.img} onChange={e=>setEditForm({...editForm, img: e.target.value})} className="mt-1 w-full rounded border border-[#0C2335]/30 bg-[#E85D6A] px-3 py-2 text-sm text-[#0C2335]" placeholder="/bannerGenerico.png" />
-                </label>
 
                 <div className="flex items-center gap-2">
   <input
@@ -708,6 +701,24 @@ prevEditRef.current = null;
   />
   <label htmlFor="edit-provisional" className="text-sm font-semibold">Provisional</label>
 </div>
+
+                <label className="text-sm">Etiquetas
+                  <select
+                    multiple
+                    value={editForm.tags}
+                    onChange={e => {
+                      const options = Array.from(e.target.selectedOptions).map(o => o.value);
+                      setEditForm({...editForm, tags: options});
+                    }}
+                    className="mt-1 w-full rounded border border-[#0C2335]/30 bg-[#E85D6A] px-3 py-2 text-sm text-[#0C2335]"
+                  >
+                    <option value="noche">Noche</option>
+                    <option value="familia">Familia</option>
+                    <option value="todos los públicos">Todos los públicos</option>
+                    <option value="comida/cena">Comida/Cena</option>
+                    <option value="toros">Toros</option>
+                  </select>
+                </label>
 
                 <div className="flex justify-end items-center gap-3 pt-2">
                   {savingEdit && <span className="text-xs opacity-80">Guardando…</span>}

@@ -12,6 +12,7 @@ type JsonEvent = {
   location?: string | null;
   provisional?: boolean | null;
   attendees?: string[] | null;
+  tags?: string[] | null;
 };
 import eventsData from "../events.json"; // ajusta la ruta si guardas el JSON en otra carpeta
 const eventsDataTyped = eventsData as unknown as JsonEvent[];
@@ -33,12 +34,11 @@ async function main() {
       // Si tu columna `location` es NOT NULL, damos valor por defecto "" cuando falte.
       location: ev.location ?? "",
       // Si `img` y `description` son NULLABLE en el esquema, pasamos null cuando no vengan.
-      img: ev.img ?? null,
-      description: ev.description ?? null,
       // Si `provisional` es NOT NULL con default false, enviamos false si falta.
       provisional: ev.provisional ?? false,
       // Evitamos `any`: asumimos columna nullable tipo text[]/jsonb[] -> string[] | null
       attendees: ev.attendees ?? null,
+      tags: ev.tags ?? [],
     } satisfies typeof events.$inferInsert;
   });
 

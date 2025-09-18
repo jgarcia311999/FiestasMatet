@@ -7,14 +7,13 @@ export const users = pgTable("users", {
   name: varchar("name", { length: 100 }).notNull(),
   email: varchar("email", { length: 191 }).unique(),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  tags: jsonb("tags").$type<string[]>().default([]),
 });
 
 /* EVENTS (fiestas) */
 export const events = pgTable("events", {
   id: serial("id").primaryKey(),
   title: varchar("title", { length: 200 }).notNull(),
-  img: text("img"),
-  description: text("description"),
   // Combina date + time en un solo campo timestamp (UTC)
   startsAt: timestamp("starts_at", { withTimezone: true }).notNull(),
   location: varchar("location", { length: 200 }).notNull(),
@@ -22,6 +21,7 @@ export const events = pgTable("events", {
   // Lista de asistentes (nombres) tal y como la manejas ahora
   attendees: jsonb("attendees"), // $type<string[]>() si quieres tipado más estricto en consultas
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  tags: jsonb("tags").$type<string[]>().default([]),
 });
 
 /* IDEAS: secciones + items */
