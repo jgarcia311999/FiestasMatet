@@ -194,22 +194,26 @@ export default function Home2Page() {
         </Link>
 
         {/* New Card */}
-        {/* <div className="mt-8 relative h-[250px] rounded-3xl bg-[#a3b18a] overflow-hidden">
-          <div className="absolute top-3 left-4 text-[10px] uppercase tracking-[0.2em]">Para que disfrute toda la familia</div>
+        <Link href="/peques" prefetch>
+          <div className="mt-8 relative h-[250px] rounded-3xl bg-[#a3b18a] overflow-hidden" data-track-id="btn_peques">
+            <div className="absolute top-3 left-4 text-[10px] uppercase tracking-[0.2em]">Para que disfrute toda la familia</div>
 
-          <div className="absolute bottom-[-6px] left-4 right-4 text-[80px] leading-none font-semibold text-[#0C2335]/90 select-none">
-            Peques
-          </div>
+            {/* Giant word behind */}
+            <div className="absolute bottom-[-6px] left-4 right-4 text-[80px] leading-none font-semibold text-[#0C2335]/90 select-none">
+              Peques
+            </div>
 
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="h-28 w-28 rounded-full border border-[#0C2335] flex items-center justify-center mb-6 text-[#0C2335]">
-              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <line x1="3" y1="21" x2="21" y2="3" stroke="currentColor" strokeWidth="2"/>
-                <polyline points="6,3 21,3 21,18" stroke="currentColor" strokeWidth="2" fill="none"/>
-              </svg>
+            {/* Center circle with arrow */}
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="h-28 w-28 rounded-full border border-[#0C2335] flex items-center justify-center mb-6 text-[#0C2335]">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <line x1="3" y1="21" x2="21" y2="3" stroke="currentColor" strokeWidth="2"/>
+                  <polyline points="6,3 21,3 21,18" stroke="currentColor" strokeWidth="2" fill="none"/>
+                </svg>
+              </div>
             </div>
           </div>
-        </div> */}
+        </Link>
 
       </div>
     </main>
