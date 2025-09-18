@@ -53,8 +53,7 @@ function getSecciones(eventsList: Event[]): { label: string; date: Date; key: st
     (f) =>
       f.startsAt &&
       dateKeyMadrid(f.startsAt) >= todayKey &&
-      isNoche(f.startsAt) &&
-      !f.title.toLowerCase().includes("sobaquillo")
+      f.tags?.includes("noche")
   );
 
   const byDate = new Map<string, Date>();
@@ -72,8 +71,7 @@ function getEventosPorFecha(eventsList: Event[], dateKey: string): Event[] {
   const byDate = eventsList.filter(
     (f) =>
       dateKeyMadrid(f.startsAt!) === dateKey &&
-      isNoche(f.startsAt!) &&
-      !f.title.toLowerCase().includes("sobaquillo")
+      f.tags?.includes("noche")
   );
   const parseTime = (d: Date) => {
     const parts = new Intl.DateTimeFormat("es-ES", { hour: "2-digit", minute: "2-digit", hourCycle: "h23", timeZone: MADRID_TZ }).formatToParts(d);
