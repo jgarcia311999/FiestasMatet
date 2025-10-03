@@ -134,7 +134,7 @@ export default async function Noche() {
 
         {allEvents.some((f) => f.provisional) && (
           <p className="mt-4 text-sm italic text-[#FFD966]">
-            *La hora es provisional y puede variar.
+            *La hora es provisional y puede variar. 
           </p>
         )}
 
