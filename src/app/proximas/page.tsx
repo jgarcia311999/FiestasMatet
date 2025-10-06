@@ -1,10 +1,19 @@
-import { db } from "@/db/client";
-import { events } from "@/db/schema";
-import { InferModel } from "drizzle-orm";
+"use client";
+
+import React, { useState, useEffect } from "react";
 
 const MADRID_TZ = "Europe/Madrid";
 
-type Event = InferModel<typeof events>;
+type Event = {
+  id: number;
+  title: string;
+  provisional: boolean;
+  location?: string;
+  date: string;
+  time: string;
+  tags?: string[];
+  startsAt?: string;
+};
 
 function formatSpanishLong(date: Date): string {
   const s = new Intl.DateTimeFormat("es-ES", {
@@ -53,17 +62,17 @@ function getSecciones(eventos: Event[]): { label: string; date: Date; key: strin
   const todayKey = dateKeyMadrid(new Date());
 
   const futuras = eventos
-    .filter(e => e.startsAt && dateKeyMadrid(e.startsAt) >= todayKey)
-    .sort((a, b) => a.startsAt!.getTime() - b.startsAt!.getTime());
+    .filter(e => e.startsAt && dateKeyMadrid(new Date(e.startsAt)) >= todayKey)
+    .sort((a, b) => new Date(a.startsAt!).getTime() - new Date(b.startsAt!).getTime());
 
   const seen = new Set<string>();
   const result: { label: string; date: Date; key: string }[] = [];
 
   for (const e of futuras) {
-    const key = dateKeyMadrid(e.startsAt!);
+    const key = dateKeyMadrid(new Date(e.startsAt!));
     if (!seen.has(key)) {
       seen.add(key);
-      result.push({ key, date: e.startsAt!, label: formatSpanishLong(e.startsAt!) });
+      result.push({ key, date: new Date(e.startsAt!), label: formatSpanishLong(new Date(e.startsAt!)) });
       if (result.length >= 5) break;
     }
   }
@@ -72,14 +81,14 @@ function getSecciones(eventos: Event[]): { label: string; date: Date; key: strin
 }
 
 function getEventosPorFecha(eventos: Event[], dateKey: string): Event[] {
-  const byDate = eventos.filter(e => e.startsAt && dateKeyMadrid(e.startsAt) === dateKey);
+  const byDate = eventos.filter(e => e.startsAt && dateKeyMadrid(new Date(e.startsAt)) === dateKey);
   const parseTime = (d: Date) => {
     const { hour: hh, minute: mm } = hourMinuteMadrid(d);
     let minutes = hh * 60 + mm;
     if (hh >= 0 && hh < 6) minutes += 24 * 60;
     return minutes;
   };
-  return byDate.sort((a, b) => parseTime(a.startsAt!) - parseTime(b.startsAt!));
+  return byDate.sort((a, b) => parseTime(new Date(a.startsAt!)) - parseTime(new Date(b.startsAt!)));
 }
 
 function getFranjaHorariaLabel(date: Date): string {
@@ -89,8 +98,25 @@ function getFranjaHorariaLabel(date: Date): string {
   return "de la noche";
 }
 
-export default async function ProximasPage() {
-  const allEvents = await db.select().from(events);
+export default function ProximasPage() {
+  const [allEvents, setAllEvents] = useState<Event[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/events")
+      .then((res) => res.json())
+      .then((json) => {
+        const list: Event[] = Array.isArray(json?.events)
+          ? json.events
+          : Array.isArray(json)
+          ? json
+          : [];
+        setAllEvents(list);
+        setLoading(false);
+      })
+      .catch(() => setAllEvents([]));
+  }, []);
+
   const secciones = getSecciones(allEvents);
 
   return (
@@ -101,7 +127,11 @@ export default async function ProximasPage() {
         </h1>
 
         <div className="mt-5 border-t border-[#0C2335]" />
-        {secciones.length === 0 ? (
+        {loading ? (
+          <div className="flex items-center justify-center py-8">
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#0C2335]"></div>
+          </div>
+        ) : secciones.length === 0 ? (
           <div className="py-2 text-[12px] italic">Sin próximas fiestas</div>
         ) : (
           <>
@@ -118,7 +148,7 @@ export default async function ProximasPage() {
                       {getEventosPorFecha(allEvents, sec.key).map((ev) => (
                         <li key={ev.id} className="text-lg">
                           {(() => {
-                            const d = ev.startsAt!;
+                            const d = new Date(ev.startsAt!);
                             const hora = formatHHMMMadrid(d);
                             return (
                               <>
@@ -145,7 +175,7 @@ export default async function ProximasPage() {
                 <div className="border-t border-[#0C2335]" />
               </>
             )}
-            {allEvents.some(f => f.provisional) && (
+            {allEvents.some(f => f.provisional) && !loading && (
               <p className="mt-4 text-sm italic">
                 *La hora es provisional y puede variar.
               </p>
