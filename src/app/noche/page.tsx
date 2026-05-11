@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import BookPageLayout from "@/components/BookPageLayout";
+import ArchivePageLayout from "@/components/ArchivePageLayout";
 
 const MADRID_TZ = "Europe/Madrid";
 
@@ -14,13 +14,6 @@ type Event = {
   time: string;
   tags?: string[];
   startsAt?: string;
-};
-
-type Section = {
-  key: string;
-  label: string;
-  date: Date;
-  events: Event[];
 };
 
 function formatSpanishLong(date: Date): string {
@@ -95,29 +88,6 @@ function getEventosPorFecha(eventsList: Event[], dateKey: string): Event[] {
   return byDate.sort((a, b) => parseTime(new Date(a.startsAt!)) - parseTime(new Date(b.startsAt!)));
 }
 
-function paginateSections(sections: Section[], maxUnits: number): Section[][] {
-  const pages: Section[][] = [];
-  let current: Section[] = [];
-  let units = 0;
-
-  for (const section of sections) {
-    const sectionUnits = 3 + section.events.length * 2;
-    if (current.length > 0 && units + sectionUnits > maxUnits) {
-      pages.push(current);
-      current = [];
-      units = 0;
-    }
-    current.push(section);
-    units += sectionUnits;
-  }
-
-  if (current.length > 0) {
-    pages.push(current);
-  }
-
-  return pages;
-}
-
 export default function Noche() {
   const [allEvents, setAllEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
@@ -138,73 +108,58 @@ export default function Noche() {
   }, []);
 
   const secciones = getSecciones(allEvents);
-  const sectionsWithEvents: Section[] = secciones.map((sec) => ({
-    ...sec,
-    events: getEventosPorFecha(allEvents, sec.key),
-  }));
-  const pagedSections = paginateSections(sectionsWithEvents, 14);
   const hasProvisional = allEvents.some((f) => f.provisional);
 
   return (
-    <BookPageLayout
+    <ArchivePageLayout
       title="Noche"
       kicker="Verbenas y música"
-      page="02"
+      chapter="Cap. 02"
       accent="#345DB8"
-      pages={
-        loading
-          ? [
-              <div key="loading" className="flex items-center justify-center py-12">
-                <div className="h-5 w-5 animate-spin rounded-full border-b-2 border-[#8c7259]/60" />
-              </div>,
-            ]
-          : secciones.length === 0
-          ? [<p key="empty" className="py-4 text-[12px] italic text-[#8c7259]/75">Sin próximas noches con eventos</p>]
-          : pagedSections.map((pageSections, pageIndex) => (
-              <React.Fragment key={pageIndex}>
-                {pageSections.map((sec) => (
-                  <div key={sec.key}>
-                    <div className="border-b border-[#9a8366]/24 py-3">
-                      <p className="mb-0.5 text-[7px] uppercase tracking-[0.26em] text-[#345DB8]/75">
-                        {sec.date.toLocaleDateString("es-ES", { month: "long", year: "numeric", timeZone: MADRID_TZ })}
-                      </p>
-                      <p className="font-serif text-[1.05rem] font-semibold leading-snug text-[#3a2418]">
-                        {sec.label}
-                      </p>
-                    </div>
-                    <ul className="mb-1">
-                      {sec.events.map((ev) => {
-                        const d = new Date(ev.startsAt!);
-                        return (
-                          <li key={ev.id} className="flex gap-3 border-b border-[#9a8366]/15 py-2.5 last:border-0">
-                            <span className="w-10 shrink-0 pt-px font-serif text-[13px] tabular-nums text-[#345DB8]/85">
-                              {formatHHMMMadrid(d)}
-                            </span>
-                            <span className="text-[13px] leading-snug text-[#3a2418]">
-                              {ev.title}
-                              {ev.location && (
-                                <span className="text-[#8c7259]/85"> · {ev.location}</span>
-                              )}
-                              {ev.provisional && (
-                                <span className="text-[#8c7259]/80"> *</span>
-                              )}
-                            </span>
-                          </li>
-                        );
-                      })}
-                    </ul>
-                  </div>
-                ))}
-                {pageIndex === pagedSections.length - 1 && hasProvisional && (
-                  <p className="mt-6 text-[10px] italic text-[#8c7259]/75">
-                    * La hora es provisional y puede variar.
-                  </p>
-                )}
-              </React.Fragment>
-            ))
-      }
+      intro="Cuando baja el sol, el programa se lee distinto: escenario, plaza, música y gente entrando y saliendo del mismo recorrido."
     >
-      <div />
-    </BookPageLayout>
+      {loading ? (
+        <div className="flex items-center justify-center py-16">
+          <div className="h-6 w-6 animate-spin rounded-full border-b-2 border-[#c7b098]" />
+        </div>
+      ) : secciones.length === 0 ? (
+        <p className="text-sm italic text-[#dbcab7]">Sin próximas noches con eventos.</p>
+      ) : (
+        <div className="space-y-6">
+          {secciones.map((sec) => (
+            <div key={sec.key} className="rounded-[1.75rem] border border-white/10 bg-[#131119] p-5">
+              <div className="grid gap-5 lg:grid-cols-[12rem_minmax(0,1fr)]">
+                <div>
+                  <p className="text-[10px] uppercase tracking-[0.3em] text-[#345DB8]">
+                    {sec.date.toLocaleDateString("es-ES", { month: "long", year: "numeric", timeZone: MADRID_TZ })}
+                  </p>
+                  <h3 className="mt-3 text-2xl font-semibold">{sec.label}</h3>
+                </div>
+                <ul className="space-y-3">
+                  {getEventosPorFecha(allEvents, sec.key).map((ev) => {
+                    const d = new Date(ev.startsAt!);
+                    return (
+                      <li key={ev.id} className="grid gap-2 border-t border-white/10 pt-3 sm:grid-cols-[4.2rem_minmax(0,1fr)]">
+                        <span className="font-serif text-lg text-[#8fb0ff]">{formatHHMMMadrid(d)}</span>
+                        <span className="text-[15px] leading-7 text-[#f3eadc]">
+                          {ev.title}
+                          {ev.location && <span className="text-[#c7b098]"> · {ev.location}</span>}
+                          {ev.provisional && <span className="text-[#c7b098]"> *</span>}
+                        </span>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            </div>
+          ))}
+          {hasProvisional && (
+            <p className="text-[12px] italic text-[#c7b098]">
+              * La hora es provisional y puede variar.
+            </p>
+          )}
+        </div>
+      )}
+    </ArchivePageLayout>
   );
 }

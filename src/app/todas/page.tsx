@@ -2,7 +2,7 @@
 
 import React from "react";
 import { useState, useEffect } from "react";
-import BookPageLayout from "@/components/BookPageLayout";
+import ArchivePageLayout from "@/components/ArchivePageLayout";
 
 type Event = {
   id: number;
@@ -11,12 +11,6 @@ type Event = {
   location?: string;
   date?: string;
   time?: string;
-};
-
-type Day = {
-  key: string;
-  label: string;
-  items: { id: number; time: string; title: string; provisional: boolean; location: string }[];
 };
 
 const TZ = "Europe/Madrid";
@@ -47,29 +41,6 @@ function formatSpanishLong(date: Date, tz: string): string {
   }).format(date);
   const noComma = s.replace(", ", " ");
   return noComma.charAt(0).toUpperCase() + noComma.slice(1);
-}
-
-function paginateDays(days: Day[], maxUnits: number): Day[][] {
-  const pages: Day[][] = [];
-  let current: Day[] = [];
-  let units = 0;
-
-  for (const day of days) {
-    const dayUnits = 3 + day.items.length * 2;
-    if (current.length > 0 && units + dayUnits > maxUnits) {
-      pages.push(current);
-      current = [];
-      units = 0;
-    }
-    current.push(day);
-    units += dayUnits;
-  }
-
-  if (current.length > 0) {
-    pages.push(current);
-  }
-
-  return pages;
 }
 
 export default function TodasPage() {
@@ -119,80 +90,69 @@ export default function TodasPage() {
     byDate.get(key)!.items.push(item);
   }
 
-  const days: Day[] = Array.from(byDate.entries())
+  const days = Array.from(byDate.entries())
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([key, { label, items }]) => {
       sortNightLast(items);
       return { key, label, items };
     });
-  const pagedDays = paginateDays(days, 14);
   const hasProvisional = rows.some((f) => f.provisional);
 
   return (
-    <BookPageLayout
+    <ArchivePageLayout
       title="Todas"
       kicker="Programa completo"
-      page="04"
+      chapter="Cap. 04"
       accent="#A61F24"
-      pages={
-        loading
-          ? [
-              <div key="loading" className="flex items-center justify-center py-12">
-                <div className="h-5 w-5 animate-spin rounded-full border-b-2 border-[#8c7259]/60" />
-              </div>,
-            ]
-          : days.length === 0
-          ? [<p key="empty" className="py-4 text-[12px] italic text-[#8c7259]/75">Sin fiestas</p>]
-          : pagedDays.map((pageDays, pageIndex) => (
-              <React.Fragment key={pageIndex}>
-                {pageIndex === 0 && (
-                  <div className="mb-4 flex items-center justify-between">
-                    <button
-                      type="button"
-                      onClick={() => setShowPast((v) => !v)}
-                      className="text-[9px] uppercase tracking-[0.22em] text-[#8c7259] transition-colors hover:text-[#6f5944]"
-                    >
-                      {showPast ? "Ocultar anteriores" : "Ver anteriores"}
-                    </button>
-                  </div>
-                )}
-                {pageDays.map((day) => (
-                  <div key={day.key}>
-                    <div className="border-b border-[#9a8366]/24 py-3">
-                      <p className="font-serif text-[1.05rem] font-semibold leading-snug text-[#3a2418]">
-                        {day.label}
-                      </p>
-                    </div>
-                    <ul className="mb-1">
-                      {day.items.map((ev) => (
-                        <li key={ev.id} className="flex gap-3 border-b border-[#9a8366]/15 py-2.5 last:border-0">
-                          <span className="w-10 shrink-0 pt-px font-serif text-[13px] tabular-nums text-[#345DB8]/82">
-                            {ev.time}
-                          </span>
-                          <span className="text-[13px] leading-snug text-[#3a2418]">
-                            {ev.title}
-                            {ev.location && (
-                              <span className="text-[#8c7259]/85"> · {ev.location}</span>
-                            )}
-                            {ev.provisional && (
-                              <span className="text-[#8c7259]/80"> *</span>
-                            )}
-                          </span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                ))}
-                {pageIndex === pagedDays.length - 1 && hasProvisional && (
-                  <p className="mt-6 text-[10px] italic text-[#8c7259]/75">
-                    * La hora es provisional y puede variar.
-                  </p>
-                )}
-              </React.Fragment>
-            ))
-      }
+      intro="La versión íntegra del programa, planteada como una cronología visual para entrar, salir y volver sin perder el hilo."
     >
-      <div />
-    </BookPageLayout>
+      <div className="mb-6 flex items-center justify-between">
+        <button
+          type="button"
+          onClick={() => setShowPast((value) => !value)}
+          className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-[10px] uppercase tracking-[0.28em] text-[#c7b098] transition hover:bg-white/10"
+        >
+          {showPast ? "Ocultar anteriores" : "Ver anteriores"}
+        </button>
+      </div>
+
+      {loading ? (
+        <div className="flex items-center justify-center py-16">
+          <div className="h-6 w-6 animate-spin rounded-full border-b-2 border-[#c7b098]" />
+        </div>
+      ) : days.length === 0 ? (
+        <p className="text-sm italic text-[#dbcab7]">Sin fiestas.</p>
+      ) : (
+        <div className="space-y-5">
+          {days.map((day) => (
+            <div key={day.key} className="rounded-[1.75rem] border border-white/10 bg-white/5 p-5">
+              <div className="grid gap-4 lg:grid-cols-[13rem_minmax(0,1fr)]">
+                <div>
+                  <p className="text-[10px] uppercase tracking-[0.3em] text-[#A61F24]">Día</p>
+                  <h3 className="mt-3 text-2xl font-semibold">{day.label}</h3>
+                </div>
+                <ul className="space-y-3">
+                  {day.items.map((ev) => (
+                    <li key={ev.id} className="grid gap-2 border-t border-white/10 pt-3 sm:grid-cols-[4.2rem_minmax(0,1fr)]">
+                      <span className="font-serif text-lg text-[#8fb0ff]">{ev.time}</span>
+                      <span className="text-[15px] leading-7 text-[#f3eadc]">
+                        {ev.title}
+                        {ev.location && <span className="text-[#c7b098]"> · {ev.location}</span>}
+                        {ev.provisional && <span className="text-[#c7b098]"> *</span>}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          ))}
+          {hasProvisional && (
+            <p className="text-[12px] italic text-[#c7b098]">
+              * La hora es provisional y puede variar.
+            </p>
+          )}
+        </div>
+      )}
+    </ArchivePageLayout>
   );
 }
