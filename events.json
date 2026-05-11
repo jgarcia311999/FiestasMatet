@@ -2,7 +2,7 @@
   {
     "id": 224,
     "title": "Discomovil",
-    "starts_at": "2025-10-31 23:00:00+00",
+    "starts_at": "2026-10-31 23:00:00+00",
     "location": "Polifuncional",
     "provisional": false,
     "attendees": ["Jesus"],
@@ -12,7 +12,7 @@
   {
     "id": 223,
     "title": "Comida popular",
-    "starts_at": "2025-10-05 12:00:00+00",
+    "starts_at": "2026-10-05 12:00:00+00",
     "location": "Plaza de la Iglesia",
     "provisional": true,
     "attendees": ["Jesus"],
@@ -22,7 +22,7 @@
   {
     "id": 221,
     "title": "Cena de sobaquillo",
-    "starts_at": "2025-10-04 20:00:00+00",
+    "starts_at": "2026-10-04 20:00:00+00",
     "location": "Plaza de la Iglesia",
     "provisional": false,
     "attendees": ["Jesus"],
@@ -32,7 +32,7 @@
   {
     "id": 220,
     "title": "Exposición del concurso de pintura rápida",
-    "starts_at": "2025-10-04 16:00:00+00",
+    "starts_at": "2026-10-04 16:00:00+00",
     "location": "Plaza de la Iglesia",
     "provisional": true,
     "attendees": ["Jesus"],
@@ -42,7 +42,7 @@
   {
     "id": 273,
     "title": "Juegos Infantiles",
-    "starts_at": "2025-10-04 15:30:00+00",
+    "starts_at": "2026-10-04 15:30:00+00",
     "location": "Plaza de la iglesia",
     "provisional": true,
     "attendees": [],
@@ -52,7 +52,7 @@
   {
     "id": 219,
     "title": "Concurso de pintura rápida",
-    "starts_at": "2025-10-04 07:00:00+00",
+    "starts_at": "2026-10-04 07:00:00+00",
     "location": "Todo el pueblo",
     "provisional": true,
     "attendees": ["Jesus"],
@@ -62,7 +62,7 @@
   {
     "id": 222,
     "title": "Discomovil",
-    "starts_at": "2025-10-03 22:00:00+00",
+    "starts_at": "2026-10-03 22:00:00+00",
     "location": "Plaza de la Iglesia",
     "provisional": false,
     "attendees": ["Jesus"],
@@ -72,7 +72,7 @@
   {
     "id": 272,
     "title": "Suelta de vaquillas y toro de la merienda (Ganadería LA MORADA)",
-    "starts_at": "2025-08-24 14:00:00+00",
+    "starts_at": "2026-08-24 14:00:00+00",
     "location": "Plaza de la iglesia",
     "provisional": false,
     "attendees": null,
@@ -82,7 +82,7 @@
   {
     "id": 271,
     "title": "Entrada de toros y prueba de ganado LA MORADA",
-    "starts_at": "2025-08-24 10:00:00+00",
+    "starts_at": "2026-08-24 10:00:00+00",
     "location": "Plaza de la iglesia",
     "provisional": false,
     "attendees": null,
@@ -92,7 +92,7 @@
   {
     "id": 270,
     "title": "Trashumancia de “MANSETS”",
-    "starts_at": "2025-08-24 08:30:00+00",
+    "starts_at": "2026-08-24 08:30:00+00",
     "location": "Plaza de la iglesia",
     "provisional": false,
     "attendees": null,
@@ -102,7 +102,7 @@
   {
     "id": 269,
     "title": "Toro embolado (Ganadería EL CID)",
-    "starts_at": "2025-08-23 20:00:00+00",
+    "starts_at": "2026-08-23 20:00:00+00",
     "location": "Plaza de la iglesia",
     "provisional": false,
     "attendees": null,
@@ -112,7 +112,7 @@
   {
     "id": 268,
     "title": "Suelta de vaquillas y toro de la merienda (Ganadería EL CID)",
-    "starts_at": "2025-08-23 14:00:00+00",
+    "starts_at": "2026-08-23 14:00:00+00",
     "location": "Plaza de la iglesia",
     "provisional": false,
     "attendees": null,
@@ -122,7 +122,7 @@
   {
     "id": 267,
     "title": "Entrada de toros y prueba de ganado EL CID",
-    "starts_at": "2025-08-23 10:00:00+00",
+    "starts_at": "2026-08-23 10:00:00+00",
     "location": "Plaza de la iglesia",
     "provisional": false,
     "attendees": null,
@@ -132,7 +132,7 @@
   {
     "id": 266,
     "title": "Pasacalle (Agrupación Musical Xaranga XARANÇAINA)",
-    "starts_at": "2025-08-23 09:00:00+00",
+    "starts_at": "2026-08-23 09:00:00+00",
     "location": "Plaza de la iglesia",
     "provisional": false,
     "attendees": null,
@@ -142,7 +142,7 @@
   {
     "id": 265,
     "title": "Entrada de toros infantil",
-    "starts_at": "2025-08-23 07:00:00+00",
+    "starts_at": "2026-08-23 07:00:00+00",
     "location": "Plaza de la iglesia",
     "provisional": false,
     "attendees": null,
@@ -152,7 +152,7 @@
   {
     "id": 264,
     "title": "Toro embolado (Ganadería CAPOTA)",
-    "starts_at": "2025-08-22 20:00:00+00",
+    "starts_at": "2026-08-22 20:00:00+00",
     "location": "Plaza de la iglesia",
     "provisional": false,
     "attendees": null,
@@ -162,7 +162,7 @@
   {
     "id": 263,
     "title": "Suelta de vaquillas y toro de la merienda (Ganadería CAPOTA)",
-    "starts_at": "2025-08-22 14:00:00+00",
+    "starts_at": "2026-08-22 14:00:00+00",
     "location": "Plaza de la iglesia",
     "provisional": false,
     "attendees": null,
@@ -172,7 +172,7 @@
   {
     "id": 262,
     "title": "Entrada de toros y prueba de ganado CAPOTA",
-    "starts_at": "2025-08-22 10:00:00+00",
+    "starts_at": "2026-08-22 10:00:00+00",
     "location": "Plaza de la iglesia",
     "provisional": false,
     "attendees": null,
@@ -182,7 +182,7 @@
   {
     "id": 261,
     "title": "Entrada de toros infantil",
-    "starts_at": "2025-08-22 07:00:00+00",
+    "starts_at": "2026-08-22 07:00:00+00",
     "location": "Plaza de la iglesia",
     "provisional": false,
     "attendees": null,
@@ -192,7 +192,7 @@
   {
     "id": 260,
     "title": "Toro embolado (Ganadería LA MORADA)",
-    "starts_at": "2025-08-20 20:30:00+00",
+    "starts_at": "2026-08-20 20:30:00+00",
     "location": "Plaza de la iglesia",
     "provisional": false,
     "attendees": null,
@@ -202,7 +202,7 @@
   {
     "id": 259,
     "title": "Montaje de barreras para los toros",
-    "starts_at": "2025-08-18 08:00:00+00",
+    "starts_at": "2026-08-18 08:00:00+00",
     "location": "Plaza de la iglesia",
     "provisional": false,
     "attendees": null,
@@ -212,7 +212,7 @@
   {
     "id": 258,
     "title": "Eucaristía en la Ermita Santa Bárbara (Día de Almas)",
-    "starts_at": "2025-08-18 06:30:00+00",
+    "starts_at": "2026-08-18 06:30:00+00",
     "location": "Ermita Santa Bárbara",
     "provisional": false,
     "attendees": null,
@@ -222,7 +222,7 @@
   {
     "id": 257,
     "title": "Orquesta VENUS",
-    "starts_at": "2025-08-17 20:00:00+00",
+    "starts_at": "2026-08-17 20:00:00+00",
     "location": "Plaza de la iglesia",
     "provisional": false,
     "attendees": null,
@@ -232,7 +232,7 @@
   {
     "id": 256,
     "title": "Cena de sobaquillo",
-    "starts_at": "2025-08-17 18:30:00+00",
+    "starts_at": "2026-08-17 18:30:00+00",
     "location": "Plaza de la iglesia",
     "provisional": false,
     "attendees": null,
@@ -242,7 +242,7 @@
   {
     "id": 255,
     "title": "Procesión y Traca final",
-    "starts_at": "2025-08-17 17:00:00+00",
+    "starts_at": "2026-08-17 17:00:00+00",
     "location": "Todo el pueblo",
     "provisional": false,
     "attendees": null,
@@ -252,7 +252,7 @@
   {
     "id": 254,
     "title": "Eucaristía solemne",
-    "starts_at": "2025-08-17 08:00:00+00",
+    "starts_at": "2026-08-17 08:00:00+00",
     "location": "Plaza de la iglesia",
     "provisional": false,
     "attendees": null,
@@ -262,7 +262,7 @@
   {
     "id": 253,
     "title": "Pasacalles y recogida de Clavarias",
-    "starts_at": "2025-08-17 07:30:00+00",
+    "starts_at": "2026-08-17 07:30:00+00",
     "location": "Plaza de la iglesia",
     "provisional": false,
     "attendees": null,
@@ -272,7 +272,7 @@
   {
     "id": 252,
     "title": "Rock en Matet: MENUDA G-TA + EL SALMÓN + Disco Móvil",
-    "starts_at": "2025-08-16 20:00:00+00",
+    "starts_at": "2026-08-16 20:00:00+00",
     "location": "Plaza de la iglesia",
     "provisional": false,
     "attendees": null,
@@ -282,7 +282,7 @@
   {
     "id": 251,
     "title": "Cena de sobaquillo",
-    "starts_at": "2025-08-16 18:00:00+00",
+    "starts_at": "2026-08-16 18:00:00+00",
     "location": "Plaza de la iglesia",
     "provisional": false,
     "attendees": null,
@@ -292,7 +292,7 @@
   {
     "id": 250,
     "title": "Ofrenda de flores",
-    "starts_at": "2025-08-16 16:00:00+00",
+    "starts_at": "2026-08-16 16:00:00+00",
     "location": "Todo el pueblo",
     "provisional": false,
     "attendees": null,
@@ -302,7 +302,7 @@
   {
     "id": 249,
     "title": "Volteo de campanas y cohetes (inicio fiestas Virgen del Rosario)",
-    "starts_at": "2025-08-16 09:30:00+00",
+    "starts_at": "2026-08-16 09:30:00+00",
     "location": "Matet",
     "provisional": false,
     "attendees": null,
@@ -312,7 +312,7 @@
   {
     "id": 248,
     "title": "Orquesta CONTRABANDA",
-    "starts_at": "2025-08-15 20:00:00+00",
+    "starts_at": "2026-08-15 20:00:00+00",
     "location": "Plaza de la iglesia",
     "provisional": false,
     "attendees": null,
@@ -322,7 +322,7 @@
   {
     "id": 247,
     "title": "Cena de sobaquillo",
-    "starts_at": "2025-08-15 18:30:00+00",
+    "starts_at": "2026-08-15 18:30:00+00",
     "location": "Plaza de la iglesia",
     "provisional": false,
     "attendees": null,
@@ -332,7 +332,7 @@
   {
     "id": 246,
     "title": "Procesión",
-    "starts_at": "2025-08-15 17:00:00+00",
+    "starts_at": "2026-08-15 17:00:00+00",
     "location": "Todo el pueblo",
     "provisional": false,
     "attendees": null,
@@ -342,7 +342,7 @@
   {
     "id": 245,
     "title": "Eucaristía solemne",
-    "starts_at": "2025-08-15 08:00:00+00",
+    "starts_at": "2026-08-15 08:00:00+00",
     "location": "Plaza de la iglesia",
     "provisional": false,
     "attendees": null,
@@ -352,7 +352,7 @@
   {
     "id": 244,
     "title": "Pasacalles",
-    "starts_at": "2025-08-15 07:30:00+00",
+    "starts_at": "2026-08-15 07:30:00+00",
     "location": "Todo el pueblo",
     "provisional": false,
     "attendees": null,
@@ -362,7 +362,7 @@
   {
     "id": 243,
     "title": "Orquesta LEGADO",
-    "starts_at": "2025-08-14 20:00:00+00",
+    "starts_at": "2026-08-14 20:00:00+00",
     "location": "Plaza de la iglesia",
     "provisional": false,
     "attendees": null,
@@ -372,7 +372,7 @@
   {
     "id": 242,
     "title": "Cena de sobaquillo",
-    "starts_at": "2025-08-14 18:00:00+00",
+    "starts_at": "2026-08-14 18:00:00+00",
     "location": "Plaza de la iglesia",
     "provisional": false,
     "attendees": null,
@@ -382,7 +382,7 @@
   {
     "id": 241,
     "title": "Cabalgata de disfraces y reparto de fartons con horchata",
-    "starts_at": "2025-08-14 15:00:00+00",
+    "starts_at": "2026-08-14 15:00:00+00",
     "location": "Todo el pueblo",
     "provisional": false,
     "attendees": null,
@@ -392,7 +392,7 @@
   {
     "id": 240,
     "title": "Volteo de campanas y cohetes (inicio de fiestas)",
-    "starts_at": "2025-08-14 09:30:00+00",
+    "starts_at": "2026-08-14 09:30:00+00",
     "location": "Matet",
     "provisional": false,
     "attendees": null,
@@ -402,7 +402,7 @@
   {
     "id": 239,
     "title": "noche de Playbacks",
-    "starts_at": "2025-08-13 20:00:00+00",
+    "starts_at": "2026-08-13 20:00:00+00",
     "location": "Plaza de la iglesia",
     "provisional": false,
     "attendees": null,
@@ -412,7 +412,7 @@
   {
     "id": 238,
     "title": "Concurso de paellas",
-    "starts_at": "2025-08-13 17:00:00+00",
+    "starts_at": "2026-08-13 17:00:00+00",
     "location": "Plaza de la iglesia",
     "provisional": false,
     "attendees": null,
@@ -422,7 +422,7 @@
   {
     "id": 237,
     "title": "Teatro “LAS AVENTURAS DE ELSA Y PATO”",
-    "starts_at": "2025-08-12 19:00:00+00",
+    "starts_at": "2026-08-12 19:00:00+00",
     "location": "Plaza de la iglesia",
     "provisional": false,
     "attendees": null,
@@ -432,7 +432,7 @@
   {
     "id": 236,
     "title": "Cena de sobaquillo",
-    "starts_at": "2025-08-12 17:30:00+00",
+    "starts_at": "2026-08-12 17:30:00+00",
     "location": "Plaza de la iglesia",
     "provisional": false,
     "attendees": null,
@@ -442,7 +442,7 @@
   {
     "id": 235,
     "title": "Cine BÚFALO KIDS",
-    "starts_at": "2025-08-11 19:30:00+00",
+    "starts_at": "2026-08-11 19:30:00+00",
     "location": "Plaza de la iglesia",
     "provisional": false,
     "attendees": null,
@@ -452,7 +452,7 @@
   {
     "id": 234,
     "title": "Cena de sobaquillo",
-    "starts_at": "2025-08-11 17:30:00+00",
+    "starts_at": "2026-08-11 17:30:00+00",
     "location": "Plaza de la iglesia",
     "provisional": false,
     "attendees": null,
@@ -462,7 +462,7 @@
   {
     "id": 233,
     "title": "Parque infantil",
-    "starts_at": "2025-08-11 14:00:00+00",
+    "starts_at": "2026-08-11 14:00:00+00",
     "location": "Plaza de la iglesia",
     "provisional": false,
     "attendees": null,
@@ -472,7 +472,7 @@
   {
     "id": 232,
     "title": "Disco móvil",
-    "starts_at": "2025-08-10 20:00:00+00",
+    "starts_at": "2026-08-10 20:00:00+00",
     "location": "Plaza de la iglesia",
     "provisional": false,
     "attendees": null,
@@ -482,7 +482,7 @@
   {
     "id": 231,
     "title": "Cena de sobaquillo",
-    "starts_at": "2025-08-10 18:00:00+00",
+    "starts_at": "2026-08-10 18:00:00+00",
     "location": "Plaza de la iglesia",
     "provisional": false,
     "attendees": null,
@@ -492,7 +492,7 @@
   {
     "id": 230,
     "title": "Torneo de fútbol sala",
-    "starts_at": "2025-08-10 14:00:00+00",
+    "starts_at": "2026-08-10 14:00:00+00",
     "location": "Piscina",
     "provisional": false,
     "attendees": null,
@@ -502,7 +502,7 @@
   {
     "id": 229,
     "title": "Disco móvil con animación",
-    "starts_at": "2025-08-09 20:00:00+00",
+    "starts_at": "2026-08-09 20:00:00+00",
     "location": "Plaza de la iglesia",
     "provisional": false,
     "attendees": null,
@@ -512,7 +512,7 @@
   {
     "id": 228,
     "title": "Cena de sobaquillo",
-    "starts_at": "2025-08-09 18:00:00+00",
+    "starts_at": "2026-08-09 18:00:00+00",
     "location": "Plaza de la iglesia",
     "provisional": false,
     "attendees": null,
@@ -522,7 +522,7 @@
   {
     "id": 227,
     "title": "Torneo de fútbol sala",
-    "starts_at": "2025-08-09 14:00:00+00",
+    "starts_at": "2026-08-09 14:00:00+00",
     "location": "Piscina",
     "provisional": false,
     "attendees": null,
@@ -532,7 +532,7 @@
   {
     "id": 226,
     "title": "5º Concurso de adornos de balcones (hasta el domingo 17 a las 12:00 h)",
-    "starts_at": "2025-08-09 05:00:00+00",
+    "starts_at": "2026-08-09 05:00:00+00",
     "location": "Todo el pueblo",
     "provisional": false,
     "attendees": null,
@@ -542,7 +542,7 @@
   {
     "id": 225,
     "title": "Merienda de confraternidad con el DÚO MUSICAL GONSY",
-    "starts_at": "2025-08-08 16:30:00+00",
+    "starts_at": "2026-08-08 16:30:00+00",
     "location": "Plaza de la iglesia",
     "provisional": false,
     "attendees": null,

@@ -71,13 +71,14 @@ async function loginAction(formData: FormData) {
   redirect(next);
 }
 
-export default function LoginPage({
+export default async function LoginPage({
   searchParams,
 }: {
-  searchParams?: { next?: string; error?: string };
+  searchParams?: Promise<{ next?: string; error?: string }>;
 }) {
-  const next = searchParams?.next || "/layoutComision";
-  const hasError = searchParams?.error === "1";
+  const params = await searchParams;
+  const next = params?.next || "/layoutComision";
+  const hasError = params?.error === "1";
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#E7DAD1]">

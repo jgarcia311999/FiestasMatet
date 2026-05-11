@@ -14,7 +14,7 @@ export const fiestas: Fiesta[] = [
   /* {
     title: "Concurso de pintura rápida",
     description: "Recorre el pueblo descubriendo cada rincón",
-    date: "2025-10-04",
+    date: "2026-10-04",
     time: "09:00",
     location: "Todo el pueblo",
     provisional: true,
@@ -23,7 +23,7 @@ export const fiestas: Fiesta[] = [
     title: "Exposición del concurso de pintura rápida",
     description:
       "Ven al Polifuncional/Plaza de la Iglesia para ver todos los cuadros pintados durante el día.",
-    date: "2025-10-04",
+    date: "2026-10-04",
     time: "18:00",
     location: "Polifuncional/Plaza de la Iglesia",
     provisional: true,
@@ -32,7 +32,7 @@ export const fiestas: Fiesta[] = [
     title: "Cena de sobaquillo",
     description:
       "Trae tu bocata para cenar todos juntos en el Polifuncional/Plaza de la Iglesia",
-    date: "2025-10-04",
+    date: "2026-10-04",
     time: "22:00",
     location: "Polifuncional/Plaza de la Iglesia",
     provisional: false,
@@ -40,7 +40,7 @@ export const fiestas: Fiesta[] = [
   {
     title: "Discomovil",
     description: "¡Disfruta de la discomóvil!",
-    date: "2025-10-04",
+    date: "2026-10-04",
     time: "00:00",
     location: "Polifuncional/Plaza de la Iglesia",
     provisional: false,
@@ -49,7 +49,7 @@ export const fiestas: Fiesta[] = [
     title: "Comida popular",
     description:
       "Ven a comer a la plaza un buen plato de Arròs amb fesols i naps patrocinado por la Cofradía",
-    date: "2025-10-05",
+    date: "2026-10-05",
     time: "14:00",
     location: "Polifuncional/Plaza de la Iglesia",
     provisional: true,
@@ -57,7 +57,7 @@ export const fiestas: Fiesta[] = [
   {
     title: "Discomovil",
     description: "¡Disfruta de la discomóvil!",
-    date: "2025-11-01",
+    date: "2026-11-01",
     time: "00:00",
     location: "Polifuncional/Jubilados",
     provisional: false,
@@ -65,7 +65,7 @@ export const fiestas: Fiesta[] = [
   {
     title: "Merienda de confraternidad con el DÚO MUSICAL GONSY",
     description: "",
-    date: "2025-08-08",
+    date: "2026-08-08",
     time: "20:30",
     location: "Plaza de la iglesia",
     provisional: false,
@@ -74,7 +74,7 @@ export const fiestas: Fiesta[] = [
     title:
       "5º Concurso de adornos de balcones (hasta el domingo 17 a las 12:00 h)",
     description: "",
-    date: "2025-08-09",
+    date: "2026-08-09",
     time: "09:00",
     location: "Todo el pueblo",
     provisional: false,
@@ -82,7 +82,7 @@ export const fiestas: Fiesta[] = [
   {
     title: "Torneo de fútbol sala",
     description: "",
-    date: "2025-08-09",
+    date: "2026-08-09",
     time: "18:00",
     location: "Piscina",
     provisional: false,
@@ -90,7 +90,7 @@ export const fiestas: Fiesta[] = [
   {
     title: "Cena de sobaquillo",
     description: "",
-    date: "2025-08-09",
+    date: "2026-08-09",
     time: "22:00",
     location: "Plaza de la iglesia",
     provisional: false,
@@ -98,7 +98,7 @@ export const fiestas: Fiesta[] = [
   {
     title: "Disco móvil con animación",
     description: "",
-    date: "2025-08-09",
+    date: "2026-08-09",
     time: "24:00",
     location: "Plaza de la iglesia",
     provisional: false,
@@ -106,7 +106,7 @@ export const fiestas: Fiesta[] = [
   {
     title: "Torneo de fútbol sala",
     description: "",
-    date: "2025-08-10",
+    date: "2026-08-10",
     time: "18:00",
     location: "Piscina",
     provisional: false,
@@ -114,7 +114,7 @@ export const fiestas: Fiesta[] = [
   {
     title: "Cena de sobaquillo",
     description: "",
-    date: "2025-08-10",
+    date: "2026-08-10",
     time: "22:00",
     location: "Plaza de la iglesia",
     provisional: false,
@@ -122,7 +122,7 @@ export const fiestas: Fiesta[] = [
   {
     title: "Disco móvil",
     description: "",
-    date: "2025-08-10",
+    date: "2026-08-10",
     time: "24:00",
     location: "Plaza de la iglesia",
     provisional: false,
@@ -130,7 +130,7 @@ export const fiestas: Fiesta[] = [
   {
     title: "Parque infantil",
     description: "",
-    date: "2025-08-11",
+    date: "2026-08-11",
     time: "18:00",
     location: "Plaza de la iglesia",
     provisional: false,
@@ -138,7 +138,7 @@ export const fiestas: Fiesta[] = [
   {
     title: "Cena de sobaquillo",
     description: "",
-    date: "2025-08-11",
+    date: "2026-08-11",
     time: "21:30",
     location: "Plaza de la iglesia",
     provisional: false,
@@ -146,7 +146,7 @@ export const fiestas: Fiesta[] = [
   {
     title: "Cine BÚFALO KIDS",
     description: "",
-    date: "2025-08-11",
+    date: "2026-08-11",
     time: "23:30",
     location: "Plaza de la iglesia",
     provisional: false,
@@ -154,7 +154,7 @@ export const fiestas: Fiesta[] = [
   {
     title: "Cena de sobaquillo",
     description: "",
-    date: "2025-08-12",
+    date: "2026-08-12",
     time: "21:30",
     location: "Plaza de la iglesia",
     provisional: false,
@@ -162,7 +162,7 @@ export const fiestas: Fiesta[] = [
   {
     title: "Teatro “LAS AVENTURAS DE ELSA Y PATO”",
     description: "",
-    date: "2025-08-12",
+    date: "2026-08-12",
     time: "23:00",
     location: "Plaza de la iglesia",
     provisional: false,
@@ -170,7 +170,7 @@ export const fiestas: Fiesta[] = [
   {
     title: "Concurso de paellas",
     description: "",
-    date: "2025-08-13",
+    date: "2026-08-13",
     time: "21:00",
     location: "Plaza de la iglesia",
     provisional: false,
@@ -178,7 +178,7 @@ export const fiestas: Fiesta[] = [
   {
     title: "Noche de Playbacks",
     description: "",
-    date: "2025-08-13",
+    date: "2026-08-13",
     time: "24:00",
     location: "Plaza de la iglesia",
     provisional: false,
@@ -186,7 +186,7 @@ export const fiestas: Fiesta[] = [
   {
     title: "Volteo de campanas y cohetes (inicio de fiestas)",
     description: "",
-    date: "2025-08-14",
+    date: "2026-08-14",
     time: "13:30",
     location: "Matet",
     provisional: false,
@@ -194,7 +194,7 @@ export const fiestas: Fiesta[] = [
   {
     title: "Cabalgata de disfraces y reparto de fartons con horchata",
     description: "",
-    date: "2025-08-14",
+    date: "2026-08-14",
     time: "19:00",
     location: "Todo el pueblo",
     provisional: false,
@@ -202,7 +202,7 @@ export const fiestas: Fiesta[] = [
   {
     title: "Cena de sobaquillo",
     description: "",
-    date: "2025-08-14",
+    date: "2026-08-14",
     time: "22:00",
     location: "Plaza de la iglesia",
     provisional: false,
@@ -210,7 +210,7 @@ export const fiestas: Fiesta[] = [
   {
     title: "Orquesta LEGADO",
     description: "",
-    date: "2025-08-14",
+    date: "2026-08-14",
     time: "24:00",
     location: "Plaza de la iglesia",
     provisional: false,
@@ -218,7 +218,7 @@ export const fiestas: Fiesta[] = [
   {
     title: "Pasacalles",
     description: "Celebración de Nuestra Señora La Virgen de la Asunción",
-    date: "2025-08-15",
+    date: "2026-08-15",
     time: "11:30",
     location: "Todo el pueblo",
     provisional: false,
@@ -226,7 +226,7 @@ export const fiestas: Fiesta[] = [
   {
     title: "Eucaristía solemne",
     description: "Celebración de Nuestra Señora La Virgen de la Asunción",
-    date: "2025-08-15",
+    date: "2026-08-15",
     time: "12:00",
     location: "Plaza de la iglesia",
     provisional: false,
@@ -234,7 +234,7 @@ export const fiestas: Fiesta[] = [
   {
     title: "Procesión",
     description: "Celebración de Nuestra Señora La Virgen de la Asunción",
-    date: "2025-08-15",
+    date: "2026-08-15",
     time: "21:00",
     location: "Todo el pueblo",
     provisional: false,
@@ -242,7 +242,7 @@ export const fiestas: Fiesta[] = [
   {
     title: "Cena de sobaquillo",
     description: "Celebración de Nuestra Señora La Virgen de la Asunción",
-    date: "2025-08-15",
+    date: "2026-08-15",
     time: "22:30",
     location: "Plaza de la iglesia",
     provisional: false,
@@ -250,7 +250,7 @@ export const fiestas: Fiesta[] = [
   {
     title: "Orquesta CONTRABANDA",
     description: "Celebración de Nuestra Señora La Virgen de la Asunción",
-    date: "2025-08-15",
+    date: "2026-08-15",
     time: "24:00",
     location: "Plaza de la iglesia",
     provisional: false,
@@ -258,7 +258,7 @@ export const fiestas: Fiesta[] = [
   {
     title: "Volteo de campanas y cohetes (inicio fiestas Virgen del Rosario)",
     description: "",
-    date: "2025-08-16",
+    date: "2026-08-16",
     time: "13:30",
     location: "Matet",
     provisional: false,
@@ -266,7 +266,7 @@ export const fiestas: Fiesta[] = [
   {
     title: "Ofrenda de flores",
     description: "",
-    date: "2025-08-16",
+    date: "2026-08-16",
     time: "20:00",
     location: "Todo el pueblo",
     provisional: false,
@@ -274,7 +274,7 @@ export const fiestas: Fiesta[] = [
   {
     title: "Cena de sobaquillo",
     description: "",
-    date: "2025-08-16",
+    date: "2026-08-16",
     time: "22:00",
     location: "Plaza de la iglesia",
     provisional: false,
@@ -282,7 +282,7 @@ export const fiestas: Fiesta[] = [
   {
     title: "Rock en Matet: MENUDA G-TA + EL SALMÓN + Disco Móvil",
     description: "",
-    date: "2025-08-16",
+    date: "2026-08-16",
     time: "24:00",
     location: "Plaza de la iglesia",
     provisional: false,
@@ -290,7 +290,7 @@ export const fiestas: Fiesta[] = [
   {
     title: "Pasacalles y recogida de Clavarias",
     description: "Fiesta en Honor a Nuestra Señora la Virgen del Rosario",
-    date: "2025-08-17",
+    date: "2026-08-17",
     time: "11:30",
     location: "Plaza de la iglesia",
     provisional: false,
@@ -298,7 +298,7 @@ export const fiestas: Fiesta[] = [
   {
     title: "Eucaristía solemne",
     description: "Fiesta en Honor a Nuestra Señora la Virgen del Rosario",
-    date: "2025-08-17",
+    date: "2026-08-17",
     time: "12:00",
     location: "Plaza de la iglesia",
     provisional: false,
@@ -306,7 +306,7 @@ export const fiestas: Fiesta[] = [
   {
     title: "Procesión y Traca final",
     description: "Fiesta en Honor a Nuestra Señora la Virgen del Rosario",
-    date: "2025-08-17",
+    date: "2026-08-17",
     time: "21:00",
     location: "Todo el pueblo",
     provisional: false,
@@ -314,7 +314,7 @@ export const fiestas: Fiesta[] = [
   {
     title: "Cena de sobaquillo",
     description: "Fiesta en Honor a Nuestra Señora la Virgen del Rosario",
-    date: "2025-08-17",
+    date: "2026-08-17",
     time: "22:30",
     location: "Plaza de la iglesia",
     provisional: false,
@@ -322,7 +322,7 @@ export const fiestas: Fiesta[] = [
   {
     title: "Orquesta VENUS",
     description: "Fiesta en Honor a Nuestra Señora la Virgen del Rosario",
-    date: "2025-08-17",
+    date: "2026-08-17",
     time: "24:00",
     location: "Plaza de la iglesia",
     provisional: false,
@@ -330,7 +330,7 @@ export const fiestas: Fiesta[] = [
   {
     title: "Eucaristía en la Ermita Santa Bárbara (Día de Almas)",
     description: "",
-    date: "2025-08-18",
+    date: "2026-08-18",
     time: "10:30",
     location: "Ermita Santa Bárbara",
     provisional: false,
@@ -338,7 +338,7 @@ export const fiestas: Fiesta[] = [
   {
     title: "Montaje de barreras para los toros",
     description: "",
-    date: "2025-08-18",
+    date: "2026-08-18",
     time: "12:00",
     location: "Plaza de la iglesia",
     provisional: false,
@@ -346,7 +346,7 @@ export const fiestas: Fiesta[] = [
   {
     title: "Toro embolado (Ganadería LA MORADA)",
     description: "",
-    date: "2025-08-21",
+    date: "2026-08-21",
     time: "00:30",
     location: "Plaza de la iglesia",
     provisional: false,
@@ -354,7 +354,7 @@ export const fiestas: Fiesta[] = [
   {
     title: "Entrada de toros infantil",
     description: "1º Día de toros",
-    date: "2025-08-22",
+    date: "2026-08-22",
     time: "11:00",
     location: "Plaza de la iglesia",
     provisional: false,
@@ -362,7 +362,7 @@ export const fiestas: Fiesta[] = [
   {
     title: "Entrada de toros y prueba de ganado CAPOTA",
     description: "1º Día de toros",
-    date: "2025-08-22",
+    date: "2026-08-22",
     time: "14:00",
     location: "Plaza de la iglesia",
     provisional: false,
@@ -370,7 +370,7 @@ export const fiestas: Fiesta[] = [
   {
     title: "Suelta de vaquillas y toro de la merienda (Ganadería CAPOTA)",
     description: "1º Día de toros",
-    date: "2025-08-22",
+    date: "2026-08-22",
     time: "18:00",
     location: "Plaza de la iglesia",
     provisional: false,
@@ -378,7 +378,7 @@ export const fiestas: Fiesta[] = [
   {
     title: "Toro embolado (Ganadería CAPOTA)",
     description: "1º Día de toros",
-    date: "2025-08-22",
+    date: "2026-08-22",
     time: "24:00",
     location: "Plaza de la iglesia",
     provisional: false,
@@ -386,7 +386,7 @@ export const fiestas: Fiesta[] = [
   {
     title: "Entrada de toros infantil",
     description: "2º Día de toros",
-    date: "2025-08-23",
+    date: "2026-08-23",
     time: "11:00",
     location: "Plaza de la iglesia",
     provisional: false,
@@ -394,7 +394,7 @@ export const fiestas: Fiesta[] = [
   {
     title: "Pasacalle (Agrupación Musical Xaranga XARANÇAINA)",
     description: "2º Día de toros",
-    date: "2025-08-23",
+    date: "2026-08-23",
     time: "13:00",
     location: "Plaza de la iglesia",
     provisional: false,
@@ -402,7 +402,7 @@ export const fiestas: Fiesta[] = [
   {
     title: "Entrada de toros y prueba de ganado EL CID",
     description: "2º Día de toros",
-    date: "2025-08-23",
+    date: "2026-08-23",
     time: "14:00",
     location: "Plaza de la iglesia",
     provisional: false,
@@ -410,7 +410,7 @@ export const fiestas: Fiesta[] = [
   {
     title: "Suelta de vaquillas y toro de la merienda (Ganadería EL CID)",
     description: "2º Día de toros",
-    date: "2025-08-23",
+    date: "2026-08-23",
     time: "18:00",
     location: "Plaza de la iglesia",
     provisional: false,
@@ -418,7 +418,7 @@ export const fiestas: Fiesta[] = [
   {
     title: "Toro embolado (Ganadería EL CID)",
     description: "2º Día de toros",
-    date: "2025-08-23",
+    date: "2026-08-23",
     time: "24:00",
     location: "Plaza de la iglesia",
     provisional: false,
@@ -426,7 +426,7 @@ export const fiestas: Fiesta[] = [
   {
     title: "Trashumancia de “MANSETS”",
     description: "3º Día de toros",
-    date: "2025-08-24",
+    date: "2026-08-24",
     time: "12:30",
     location: "Plaza de la iglesia",
     provisional: false,
@@ -434,7 +434,7 @@ export const fiestas: Fiesta[] = [
   {
     title: "Entrada de toros y prueba de ganado LA MORADA",
     description: "3º Día de toros",
-    date: "2025-08-24",
+    date: "2026-08-24",
     time: "14:00",
     location: "Plaza de la iglesia",
     provisional: false,
@@ -442,18 +442,18 @@ export const fiestas: Fiesta[] = [
   {
     title: "Suelta de vaquillas y toro de la merienda (Ganadería LA MORADA)",
     description: "3º Día de toros",
-    date: "2025-08-24",
+    date: "2026-08-24",
     time: "18:00",
     location: "Plaza de la iglesia",
     provisional: false,
   }, */
-    // // { title: "Prueva de evento", img: "", description: "Ven a vivir una prueba", date: "2025-09-05", time: "12:25", location: "Plaza del ayuntamiento" },
-    // { title: "fffff", img: "", description: "sss", date: "2025-09-05", time: "10:27", location: "fff" },
+    // // { title: "Prueva de evento", img: "", description: "Ven a vivir una prueba", date: "2026-09-05", time: "12:25", location: "Plaza del ayuntamiento" },
+    // { title: "fffff", img: "", description: "sss", date: "2026-09-05", time: "10:27", location: "fff" },
     // {
 //     title: "s",
 //     img: "",
 //     description: "szz",
-//     date: "2025-09-12",
+//     date: "2026-09-12",
 //     time: "13:37",
 //     location: "ddd"
 //   },
@@ -461,7 +461,7 @@ export const fiestas: Fiesta[] = [
 //     title: "wwwww",
 //     img: "",
 //     description: "www",
-//     date: "2025-09-12",
+//     date: "2026-09-12",
 //     time: "14:14",
 //     location: "www"
 //   }

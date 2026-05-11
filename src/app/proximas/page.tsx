@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import BookPageLayout from "@/components/BookPageLayout";
 
 const MADRID_TZ = "Europe/Madrid";
 
@@ -13,6 +14,13 @@ type Event = {
   time: string;
   tags?: string[];
   startsAt?: string;
+};
+
+type Section = {
+  key: string;
+  label: string;
+  date: Date;
+  events: Event[];
 };
 
 function formatSpanishLong(date: Date): string {
@@ -60,15 +68,17 @@ function hourMinuteMadrid(date: Date): { hour: number; minute: number } {
 
 function getSecciones(eventos: Event[]): { label: string; date: Date; key: string }[] {
   const todayKey = dateKeyMadrid(new Date());
-
-  const futuras = eventos
-    .filter(e => e.startsAt && dateKeyMadrid(new Date(e.startsAt)) >= todayKey)
+  const conFecha = eventos.filter((e) => e.startsAt);
+  const futuras = conFecha
+    .filter((e) => dateKeyMadrid(new Date(e.startsAt!)) >= todayKey)
     .sort((a, b) => new Date(a.startsAt!).getTime() - new Date(b.startsAt!).getTime());
+  const base = futuras.length > 0
+    ? futuras
+    : conFecha.sort((a, b) => new Date(a.startsAt!).getTime() - new Date(b.startsAt!).getTime());
 
   const seen = new Set<string>();
   const result: { label: string; date: Date; key: string }[] = [];
-
-  for (const e of futuras) {
+  for (const e of base) {
     const key = dateKeyMadrid(new Date(e.startsAt!));
     if (!seen.has(key)) {
       seen.add(key);
@@ -76,12 +86,11 @@ function getSecciones(eventos: Event[]): { label: string; date: Date; key: strin
       if (result.length >= 5) break;
     }
   }
-
   return result;
 }
 
 function getEventosPorFecha(eventos: Event[], dateKey: string): Event[] {
-  const byDate = eventos.filter(e => e.startsAt && dateKeyMadrid(new Date(e.startsAt)) === dateKey);
+  const byDate = eventos.filter((e) => e.startsAt && dateKeyMadrid(new Date(e.startsAt)) === dateKey);
   const parseTime = (d: Date) => {
     const { hour: hh, minute: mm } = hourMinuteMadrid(d);
     let minutes = hh * 60 + mm;
@@ -91,11 +100,27 @@ function getEventosPorFecha(eventos: Event[], dateKey: string): Event[] {
   return byDate.sort((a, b) => parseTime(new Date(a.startsAt!)) - parseTime(new Date(b.startsAt!)));
 }
 
-function getFranjaHorariaLabel(date: Date): string {
-  const { hour: hh } = hourMinuteMadrid(date);
-  if (hh >= 6 && hh < 14) return "de la mañana";
-  if (hh >= 14 && hh < 21) return "de la tarde";
-  return "de la noche";
+function paginateSections(sections: Section[], maxUnits: number): Section[][] {
+  const pages: Section[][] = [];
+  let current: Section[] = [];
+  let units = 0;
+
+  for (const section of sections) {
+    const sectionUnits = 3 + section.events.length * 2;
+    if (current.length > 0 && units + sectionUnits > maxUnits) {
+      pages.push(current);
+      current = [];
+      units = 0;
+    }
+    current.push(section);
+    units += sectionUnits;
+  }
+
+  if (current.length > 0) {
+    pages.push(current);
+  }
+
+  return pages;
 }
 
 export default function ProximasPage() {
@@ -114,81 +139,80 @@ export default function ProximasPage() {
         setAllEvents(list);
         setLoading(false);
       })
-      .catch(() => setAllEvents([]));
+      .catch(() => { setAllEvents([]); setLoading(false); });
   }, []);
 
   const secciones = getSecciones(allEvents);
+  const sectionsWithEvents: Section[] = secciones.map((sec) => ({
+    ...sec,
+    events: getEventosPorFecha(allEvents, sec.key),
+  }));
+  const pagedSections = paginateSections(sectionsWithEvents, 14);
+  const hasProvisional = allEvents.some((f) => f.provisional);
 
   return (
-    <main className="min-h-screen bg-[#FFF5BA] text-[#0C2335]">
-      <div className="mx-auto max-w-sm px-1 pt-10 pb-24">
-        <h1 className="font-serif text-[36px] leading-[1.05] tracking-tight">
-          Descubre las <strong>proximas</strong> fiestas de <strong>MATET</strong>
-        </h1>
-
-        <div className="mt-5 border-t border-[#0C2335]" />
-        {loading ? (
-          <div className="flex items-center justify-center py-8">
-            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#0C2335]"></div>
-          </div>
-        ) : secciones.length === 0 ? (
-          <div className="py-2 text-[12px] italic">Sin próximas fiestas</div>
-        ) : (
-          <>
-            {secciones.map((sec) => (
-              <div key={sec.key}>
-                <div className="text-lg uppercase tracking-[0.18em] py-2 cursor-pointer">
-                  <span className="border-b border-transparent">{sec.label}</span>
-                </div>
-                <div className="p-2 text-base">
-                  {getEventosPorFecha(allEvents, sec.key).length === 0 ? (
-                    <div className="italic">Sin eventos para este día</div>
-                  ) : (
-                    <ul className="space-y-1">
-                      {getEventosPorFecha(allEvents, sec.key).map((ev) => (
-                        <li key={ev.id} className="text-lg">
-                          {(() => {
-                            const d = new Date(ev.startsAt!);
-                            const hora = formatHHMMMadrid(d);
-                            return (
-                              <>
-                                A las {hora} {getFranjaHorariaLabel(d)}
-                              </>
-                            );
-                          })()}
-                          {ev.provisional && " *"} - {ev.title}
-                          {ev.location ? <span> ({ev.location})</span> : null}
-                        </li>
-                      ))}
+    <BookPageLayout
+      title="Próximas"
+      kicker="Lo que viene"
+      page="01"
+      accent="#A61F24"
+      pages={
+        loading
+          ? [
+              <div key="loading" className="flex items-center justify-center py-12">
+                <div className="h-5 w-5 animate-spin rounded-full border-b-2 border-[#8c7259]/60" />
+              </div>,
+            ]
+          : secciones.length === 0
+          ? [<p key="empty" className="py-4 text-[12px] italic text-[#8c7259]/75">Sin próximas fiestas</p>]
+          : pagedSections.map((pageSections, pageIndex) => (
+              <React.Fragment key={pageIndex}>
+                {pageSections.map((sec) => (
+                  <div key={sec.key}>
+                    <div className="border-b border-[#9a8366]/24 py-3">
+                      <p className="mb-0.5 text-[7px] uppercase tracking-[0.26em] text-[#A61F24]/72">
+                        {sec.date.toLocaleDateString("es-ES", { month: "long", year: "numeric", timeZone: MADRID_TZ })}
+                      </p>
+                      <p className="font-serif text-[1.05rem] font-semibold leading-snug text-[#3a2418]">
+                        {sec.label}
+                      </p>
+                    </div>
+                    <ul className="mb-1">
+                      {sec.events.map((ev) => {
+                        const d = new Date(ev.startsAt!);
+                        return (
+                          <li key={ev.id} className="flex gap-3 border-b border-[#9a8366]/15 py-2.5 last:border-0">
+                            <span className="w-10 shrink-0 pt-px font-serif text-[13px] tabular-nums text-[#A61F24]/82">
+                              {formatHHMMMadrid(d)}
+                            </span>
+                            <span className="text-[13px] leading-snug text-[#3a2418]">
+                              {ev.title}
+                              {ev.location && (
+                                <span className="text-[#8c7259]/85"> · {ev.location}</span>
+                              )}
+                              {ev.provisional && (
+                                <span className="text-[#8c7259]/80"> *</span>
+                              )}
+                            </span>
+                          </li>
+                        );
+                      })}
                     </ul>
-                  )}
-                </div>
-                <div className="border-t border-[#0C2335]" />
-              </div>
-            ))}
-            {secciones.length > 0 && secciones.length < 5 && (
-              <>
-                <div className="border-t border-[#0C2335]" />
-                <div className="text-lg uppercase tracking-[0.18em] py-2">
-                  <span className="border-b border-transparent">¡Próximamente más! 🚀</span>
-                </div>
-                <div className="border-t border-[#0C2335]" />
-              </>
-            )}
-            {allEvents.some(f => f.provisional) && !loading && (
-              <p className="mt-4 text-sm italic">
-                *La hora es provisional y puede variar.
-              </p>
-            )}
-          </>
-        )}
-
-        <div className="mt-8">
-          <p className="font-serif text-[28px] leading-tight">Matet</p>
-          <p className="font-serif text-[28px] leading-tight">es su gente</p>
-          <p className="mt-2 text-[12px]">@comision2026</p>
-        </div>
-      </div>
-    </main>
+                  </div>
+                ))}
+                {pageIndex === pagedSections.length - 1 && secciones.length > 0 && secciones.length < 5 && (
+                  <p className="mt-4 text-[11px] italic text-[#8c7259]/80">Próximamente más eventos</p>
+                )}
+                {pageIndex === pagedSections.length - 1 && hasProvisional && (
+                  <p className="mt-6 text-[10px] italic text-[#8c7259]/75">
+                    * La hora es provisional y puede variar.
+                  </p>
+                )}
+              </React.Fragment>
+            ))
+      }
+    >
+      <div />
+    </BookPageLayout>
   );
 }
