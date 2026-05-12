@@ -10,6 +10,7 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-display: var(--font-bebas-neue);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -23,4 +24,53 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+@keyframes reveal-up {
+  from {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes reveal-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Scroll-triggered: element invisible until observed */
+[data-reveal] {
+  opacity: 0;
+}
+
+[data-reveal].revealed {
+  animation: reveal-up 0.7s cubic-bezier(0.22, 1, 0.36, 1) var(--reveal-delay, 0s) both;
+}
+
+/* Render-triggered: fires as soon as element is added to DOM */
+.animate-in {
+  animation: reveal-up 0.55s cubic-bezier(0.22, 1, 0.36, 1) var(--reveal-delay, 0s) both;
+}
+
+.animate-in-fade {
+  animation: reveal-fade 0.5s ease-out var(--reveal-delay, 0s) both;
+}
+
+@keyframes marquee-scroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+.marquee-inner {
+  display: inline-flex;
+  white-space: nowrap;
+  animation: marquee-scroll 80s linear infinite;
+}
+
+.marquee-inner:hover {
+  animation-play-state: paused;
 }

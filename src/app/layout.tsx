@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Bebas_Neue, Dancing_Script } from "next/font/google";
 import "./globals.css";
 import Footer from "@/components/footer";
 import { Analytics } from "@vercel/analytics/next";
@@ -12,6 +12,18 @@ const geistSans = Geist({
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+});
+
+const bebasNeue = Bebas_Neue({
+  variable: "--font-bebas-neue",
+  weight: "400",
+  subsets: ["latin"],
+});
+
+const dancingScript = Dancing_Script({
+  variable: "--font-dancing",
+  subsets: ["latin"],
+  weight: ["400", "700"],
 });
 
 export const metadata: Metadata = {
@@ -43,7 +55,7 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}
+        className={`${geistSans.variable} ${geistMono.variable} ${bebasNeue.variable} ${dancingScript.variable} antialiased min-h-screen flex flex-col`}
       >
         <main className="flex-1">{children}</main>
         <Footer />

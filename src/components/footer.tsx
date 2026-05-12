@@ -12,16 +12,16 @@ export default function Footer() {
     hasSeg("todas") ||
     hasSeg("historia");
 
-  let bgColor = isEditorial ? "#0b0808" : "#E7DAD1";
+  let bgColor = isEditorial ? "#F0EAD6" : "#E7DAD1";
   if (!isEditorial && (hasSeg("quehaceres") || hasSeg("calendar"))) {
     bgColor = "#D9E3F0";
   }
-  const textColor = isEditorial ? "#dbcab7" : "#0C2335";
+  const textColor = isEditorial ? "#1B4332" : "#0C2335";
   const year = new Date().getFullYear();
 
   return (
     <footer
-      className={isEditorial ? "border-t border-white/10" : "border-t border-[#0C2335]/30"}
+      className={isEditorial ? "border-t-2 border-[#1B4332]" : "border-t border-[#0C2335]/30"}
       style={{ backgroundColor: bgColor }}
     >
       <div className="mx-auto max-w-sm px-1 py-6" style={{ color: textColor }}>

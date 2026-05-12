@@ -1,8 +1,7 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
-import React from "react";
+import React, { useEffect } from "react";
 
 type ArchivePageLayoutProps = {
   title: string;
@@ -11,6 +10,7 @@ type ArchivePageLayoutProps = {
   accent: string;
   intro?: string;
   children: React.ReactNode;
+  contentWidthClassName?: string;
 };
 
 export default function ArchivePageLayout({
@@ -20,67 +20,107 @@ export default function ArchivePageLayout({
   accent,
   intro,
   children,
+  contentWidthClassName,
 }: ArchivePageLayoutProps) {
-  return (
-    <main className="min-h-[100svh] bg-[#0b0808] text-[#f3eadc]">
-      <div className="pointer-events-none fixed inset-0">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(166,31,36,0.14),transparent_32%),radial-gradient(circle_at_80%_20%,rgba(52,93,184,0.14),transparent_28%),linear-gradient(180deg,#0b0808_0%,#120d0c_48%,#0b0808_100%)]" />
-        <div className="absolute inset-0 opacity-[0.12]">
-          <Image src="/programa-collage.png" alt="" fill className="object-cover" />
-        </div>
-      </div>
+  useEffect(() => {
+    const els = document.querySelectorAll("[data-reveal]:not(.revealed)");
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("revealed");
+            io.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.06, rootMargin: "0px 0px -30px 0px" }
+    );
+    els.forEach((el) => io.observe(el));
+    return () => io.disconnect();
+  }, []);
 
-      <header className="sticky top-0 z-30 border-b border-white/10 bg-[#0b0808]/80 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4 sm:px-8">
-          <div>
-            <p className="text-[10px] uppercase tracking-[0.34em] text-[#c7b098]">Matet en fiestas</p>
-            <h1 className="mt-1 text-lg font-semibold sm:text-xl">{title}</h1>
-          </div>
-          <div className="flex items-center gap-5 text-[10px] uppercase tracking-[0.28em] text-[#c7b098]">
-            <Link href="/" className="transition-opacity hover:opacity-100 opacity-75">
-              Inicio
-            </Link>
-            <Link href="/historia" className="transition-opacity hover:opacity-100 opacity-75">
-              Historia
-            </Link>
-          </div>
+  return (
+    <main className="min-h-[100svh] bg-[#F0EAD6] text-[#1B4332]">
+
+      {/* STICKY HEADER */}
+      <header className="sticky top-0 z-30 bg-[#F0EAD6] border-b-2 border-[#1B4332]">
+        <div className="flex items-center justify-between px-5 py-3 sm:px-8">
+          <Link
+            href="/"
+            className="text-[10px] uppercase tracking-[0.45em] font-medium hover:opacity-50 transition-opacity"
+          >
+            ← Inicio
+          </Link>
+          <p className="text-[10px] uppercase tracking-[0.45em] font-medium hidden sm:block">
+            Matet en fiestas&nbsp;&bull;&nbsp;{chapter}
+          </p>
+          <Link
+            href="/historia"
+            className="text-[10px] uppercase tracking-[0.45em] font-medium hover:opacity-50 transition-opacity hidden sm:block"
+          >
+            Historia
+          </Link>
         </div>
       </header>
 
-      <div className="relative z-10 mx-auto max-w-7xl px-5 pb-20 pt-8 sm:px-8 sm:pt-12">
-        <section className="grid gap-8 border-b border-white/10 pb-10 lg:grid-cols-[minmax(0,1fr)_18rem] lg:items-end">
-          <div>
+      {/* HERO */}
+      <section className="border-b-2 border-[#1B4332]">
+        <div className="grid lg:grid-cols-[1fr_minmax(260px,0.55fr)]">
+          {/* Left: chapter + title + kicker */}
+          <div className="px-5 py-14 sm:px-8 sm:py-20 border-b-2 border-[#1B4332] lg:border-b-0 lg:border-r-2">
             <p
-              className="text-[11px] uppercase tracking-[0.34em]"
+              className="text-[10px] uppercase tracking-[0.5em] font-medium"
               style={{ color: accent }}
+              data-reveal
             >
               {chapter}
             </p>
-            <h2 className="mt-3 max-w-4xl text-4xl font-semibold uppercase leading-[0.92] sm:text-6xl lg:text-7xl">
+            <h1
+              className="text-[4.5rem] sm:text-[7rem] lg:text-[9rem] uppercase leading-[0.84] mt-3"
+              style={
+                {
+                  fontFamily: "var(--font-bebas-neue)",
+                  "--reveal-delay": "0.07s",
+                } as React.CSSProperties
+              }
+              data-reveal
+            >
               {title}
-            </h2>
-            <p className="mt-3 text-sm uppercase tracking-[0.26em] text-[#c7b098]">
+            </h1>
+            <p
+              className="mt-4 text-[1.6rem] sm:text-[2rem]"
+              style={
+                {
+                  fontFamily: "var(--font-dancing)",
+                  color: accent,
+                  opacity: 0.85,
+                  "--reveal-delay": "0.14s",
+                } as React.CSSProperties
+              }
+              data-reveal
+            >
               {kicker}
             </p>
-            {intro && (
-              <p className="mt-6 max-w-2xl text-[15px] leading-7 text-[#dbcab7]">
+          </div>
+
+          {/* Right: intro */}
+          {intro && (
+            <div
+              className="px-5 py-14 sm:px-8 sm:py-20 flex items-end"
+              data-reveal
+              style={{ "--reveal-delay": "0.1s" } as React.CSSProperties}
+            >
+              <p className="text-[15px] leading-7 max-w-sm" style={{ opacity: 0.68 }}>
                 {intro}
               </p>
-            )}
-          </div>
+            </div>
+          )}
+        </div>
+      </section>
 
-          <div className="rounded-[1.5rem] border border-white/10 bg-white/5 p-5">
-            <p className="text-[10px] uppercase tracking-[0.28em] text-[#c7b098]">
-              Archivo vivo
-            </p>
-            <p className="mt-4 text-sm leading-7 text-[#dbcab7]">
-              Las fiestas se cuentan mejor con capas: programa, carteles, horas,
-              recuerdos y la manera en que el pueblo se junta.
-            </p>
-          </div>
-        </section>
-
-        <section className="mt-10">{children}</section>
+      {/* CONTENT */}
+      <div className={`mx-auto w-full px-5 py-12 sm:px-8 sm:py-16 ${contentWidthClassName ?? "max-w-5xl"}`}>
+        {children}
       </div>
     </main>
   );

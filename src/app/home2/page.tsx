@@ -6,39 +6,42 @@ import React, { useEffect, useMemo, useState } from "react";
 import { initGA, trackEvent } from "@/lib/analytics";
 
 const MADRID_TZ = "Europe/Madrid";
-const COVER_YEARS = [1976, 1982, 1991, 1998, 2004, 2013, 2018, 2022, 2023, 2024];
 
 const CHAPTERS = [
   {
     id: "proximas",
-    chapter: "Cap. 01",
+    chapter: "CAP.01",
     title: "Lo que viene",
     href: "/proximas",
     accent: "#A61F24",
+    coverYear: 1998,
     description: "Una lectura rápida de los próximos días para saber qué toca y cuándo moverse.",
   },
   {
     id: "noche",
-    chapter: "Cap. 02",
+    chapter: "CAP.02",
     title: "Noches de plaza",
     href: "/noche",
-    accent: "#345DB8",
+    accent: "#F0EAD6",
+    coverYear: 2013,
     description: "Verbenas, discomóviles y ese tramo en el que el pueblo cambia de ritmo.",
   },
   {
     id: "peques",
-    chapter: "Cap. 03",
+    chapter: "CAP.03",
     title: "Familia y peques",
     href: "/peques",
-    accent: "#C97E62",
+    accent: "#A61F24",
+    coverYear: 2022,
     description: "Actos abiertos, juegos, pasacalles y tiempo de fiesta para todas las edades.",
   },
   {
     id: "todas",
-    chapter: "Cap. 04",
+    chapter: "CAP.04",
     title: "Programa completo",
     href: "/todas",
-    accent: "#E0C28F",
+    accent: "#F0EAD6",
+    coverYear: 2024,
     description: "La visión completa del calendario, sin perderse ningún tramo del programa.",
   },
 ];
@@ -77,24 +80,24 @@ function formatDayLabel(dateString: string) {
     day: "numeric",
     month: "long",
   }).format(new Date(dateString));
-  return formatted.replace(", ", " ").replace(/^./, (value) => value.toUpperCase());
+  return formatted.replace(", ", " ").replace(/^./, (v) => v.toUpperCase());
 }
 
-function pickUpcoming(events: ApiEvent[], count: number, filter?: (event: ApiEvent) => boolean) {
+function pickUpcoming(events: ApiEvent[], count: number, filter?: (e: ApiEvent) => boolean) {
   const today = dateKeyMadrid(new Date());
   const filtered = events
-    .filter((event) => event.startsAt && (!filter || filter(event)))
+    .filter((e) => e.startsAt && (!filter || filter(e)))
     .sort((a, b) => new Date(a.startsAt!).getTime() - new Date(b.startsAt!).getTime());
-  const future = filtered.filter((event) => dateKeyMadrid(new Date(event.startsAt!)) >= today);
+  const future = filtered.filter((e) => dateKeyMadrid(new Date(e.startsAt!)) >= today);
   const base = future.length > 0 ? future : filtered;
   return base.slice(0, count);
 }
 
-function isFamilyTag(event: ApiEvent) {
+function isFamilyTag(e: ApiEvent) {
   return (
-    event.tags?.includes("familia") ||
-    event.tags?.includes("todos los públicos") ||
-    event.tags?.includes("todos los publicos") ||
+    e.tags?.includes("familia") ||
+    e.tags?.includes("todos los públicos") ||
+    e.tags?.includes("todos los publicos") ||
     false
   );
 }
@@ -110,9 +113,27 @@ export default function Home2Page() {
     return () => trackEvent("time_on_page", { seconds: (Date.now() - startedAt) / 1000 });
   }, []);
 
+  // Scroll-triggered reveal for static elements
+  useEffect(() => {
+    const els = document.querySelectorAll("[data-reveal]:not(.revealed)");
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("revealed");
+            io.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.06, rootMargin: "0px 0px -30px 0px" }
+    );
+    els.forEach((el) => io.observe(el));
+    return () => io.disconnect();
+  }, []);
+
   useEffect(() => {
     fetch("/api/events")
-      .then((response) => response.json())
+      .then((r) => r.json())
       .then((json) => {
         const nextEvents: ApiEvent[] = Array.isArray(json?.events)
           ? json.events
@@ -131,7 +152,7 @@ export default function Home2Page() {
   const chapterPreviews = useMemo(
     () => ({
       proximas: pickUpcoming(events, 3),
-      noche: pickUpcoming(events, 3, (event) => event.tags?.includes("noche") ?? false),
+      noche: pickUpcoming(events, 3, (e) => e.tags?.includes("noche") ?? false),
       peques: pickUpcoming(events, 3, isFamilyTag),
       todas: pickUpcoming(events, 4),
     }),
@@ -139,217 +160,312 @@ export default function Home2Page() {
   );
 
   return (
-    <main className="min-h-[100svh] bg-[#0b0808] text-[#f3eadc]">
-      <div className="pointer-events-none fixed inset-0">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(166,31,36,0.16),transparent_28%),radial-gradient(circle_at_80%_20%,rgba(52,93,184,0.15),transparent_26%),linear-gradient(180deg,#0b0808_0%,#120d0c_45%,#0b0808_100%)]" />
-        <div className="absolute inset-0 opacity-[0.1]">
-          <Image src="/programa-collage.png" alt="" fill className="object-cover" />
-        </div>
-      </div>
+    <main className="min-h-[100svh] bg-[#F0EAD6] text-[#1B4332]">
 
-      <div className="relative z-10">
-        <header className="sticky top-0 z-30 border-b border-white/10 bg-[#0b0808]/75 backdrop-blur-xl">
-          <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4 sm:px-8">
-            <div>
-              <p className="text-[10px] uppercase tracking-[0.34em] text-[#c7b098]">Matet en fiestas</p>
-              <p className="mt-1 text-sm text-[#f3eadc]/80">Programa, memoria y plaza</p>
-            </div>
-            <nav className="hidden items-center gap-6 text-[10px] uppercase tracking-[0.3em] text-[#c7b098] md:flex">
-              {CHAPTERS.map((chapter) => (
-                <a key={chapter.id} href={`#${chapter.id}`} className="transition-opacity hover:opacity-100 opacity-75">
-                  {chapter.title}
-                </a>
-              ))}
-              <Link href="/historia" className="transition-opacity hover:opacity-100 opacity-75">
-                Historia
-              </Link>
-            </nav>
+      {/* MARQUEE HEADER — himno de Matet */}
+      <header className="sticky top-0 z-30 bg-[#F0EAD6] border-b-2 border-[#1B4332] overflow-hidden">
+        <div className="py-[10px] overflow-hidden">
+          <div className="marquee-inner">
+            {[0, 1].map((copy) => (
+              <span
+                key={copy}
+                aria-hidden={copy === 1 ? true : undefined}
+                className="text-[10px] uppercase font-medium"
+                style={{ letterSpacing: "0.32em", paddingRight: "6rem" }}
+              >
+                MATETANOS CANTEMOS GOZOSOS&nbsp;&nbsp;·&nbsp;&nbsp;LAS GLORIAS DEL PUEBLO, QUE SON NUESTRO HONOR&nbsp;&nbsp;·&nbsp;&nbsp;Y COMO HIJOS ASAZ GENEROSOS&nbsp;&nbsp;·&nbsp;&nbsp;LE HAGAMOS OFRENDA DEL MÁS GRATO AMOR&nbsp;&nbsp;·&nbsp;&nbsp;NUESTRO SANTO LEMA SEA REPETIR: ¡VIVA, VIVA MATET, QUE ES MI PUEBLO, DONDE YO HE NACIDO Y QUIERO MORIR!&nbsp;&nbsp;·&nbsp;&nbsp;TU FE RECIA, CONSTANTE Y BRAVÍA&nbsp;&nbsp;·&nbsp;&nbsp;DEL CIELO TE TRAJO FAVOR SIN IGUAL&nbsp;&nbsp;·&nbsp;&nbsp;Y EL SABER Y EL TRABAJO APORFÍA&nbsp;&nbsp;·&nbsp;&nbsp;FUERON DE TU VIDA SUPREMO IDEAL&nbsp;&nbsp;·&nbsp;&nbsp;ELLOS SON TU GLORIOSA CORONA&nbsp;&nbsp;·&nbsp;&nbsp;TU MAYOR ELOGIO, TU MAYOR BLASÓN&nbsp;&nbsp;·&nbsp;&nbsp;PORQUE EN ELLOS LA FAMA PREGONEN&nbsp;&nbsp;·&nbsp;&nbsp;TU NOMBRE BENDITO QUE ES UNA ORACIÓN
+              </span>
+            ))}
           </div>
-        </header>
+        </div>
+      </header>
 
-        <section className="mx-auto grid min-h-[100svh] max-w-7xl gap-10 px-5 pb-18 pt-10 sm:px-8 lg:grid-cols-[minmax(0,1.15fr)_minmax(280px,0.85fr)] lg:items-end lg:pt-16">
-          <div>
-            <p className="text-[11px] uppercase tracking-[0.34em] text-[#c7b098]">
-              Archivo visual de las fiestas del pueblo
-            </p>
-            <h1 className="mt-5 max-w-5xl text-[3.1rem] font-semibold uppercase leading-[0.86] sm:text-[5.2rem] lg:text-[7.4rem]">
-              Matet
-              <span className="block text-[#a61f24]">en fiestas</span>
+      {/* HERO */}
+      <section className="border-b-2 border-[#1B4332]">
+        <div className="grid lg:grid-cols-2">
+          <div className="border-b-2 border-[#1B4332] lg:border-b-0 lg:border-r-2 px-5 py-14 sm:px-8 sm:py-20 lg:py-28">
+            <h1
+              className="text-[5.5rem] sm:text-[9rem] lg:text-[13rem] uppercase leading-[0.82]"
+              style={{ fontFamily: "var(--font-bebas-neue)" }}
+              data-reveal
+            >
+              Fiestas<br />de<br />Matet
             </h1>
-            <p className="mt-6 max-w-2xl text-[15px] leading-7 text-[#dbcab7] sm:text-[17px]">
-              Una portada nueva para leer las fiestas como se leen los recuerdos:
-              con carteles, portadas, horas, verbenas, fotos y ese desorden bonito
-              que deja el verano cuando el pueblo se pone en marcha.
-            </p>
-
-            <div className="mt-10 flex flex-wrap gap-4">
+          </div>
+          <div className="px-5 py-14 sm:px-8 sm:py-20 lg:py-28 flex flex-col justify-between gap-10">
+            <div>
+              <p
+                className="text-[10px] uppercase tracking-[0.5em] text-[#1B4332]/40"
+                data-reveal
+                style={{ "--reveal-delay": "0.1s" } as React.CSSProperties}
+              >
+                Archivo visual del pueblo&nbsp;&bull;&nbsp;Desde 1976
+              </p>
+              <p
+                className="mt-6 text-[15px] sm:text-base leading-7 max-w-sm text-[#1B4332]/80"
+                data-reveal
+                style={{ "--reveal-delay": "0.18s" } as React.CSSProperties}
+              >
+                Una portada nueva para leer las fiestas como se leen los recuerdos:
+                con carteles, portadas, horas, verbenas y ese desorden bonito que
+                deja el verano cuando el pueblo se pone en marcha.
+              </p>
+            </div>
+            <div
+              className="flex flex-wrap gap-3"
+              data-reveal
+              style={{ "--reveal-delay": "0.26s" } as React.CSSProperties}
+            >
               <a
                 href="#proximas"
-                className="rounded-full border border-white/15 bg-white/6 px-5 py-3 text-[11px] uppercase tracking-[0.28em] text-[#f3eadc] transition hover:bg-white/12"
+                className="border-2 border-[#1B4332] bg-[#1B4332] text-[#F0EAD6] px-6 py-3 text-[11px] uppercase tracking-[0.32em] font-medium hover:bg-transparent hover:text-[#1B4332] transition"
               >
                 Entrar al programa
               </a>
               <Link
                 href="/historia"
-                className="rounded-full border border-[#a61f24]/40 px-5 py-3 text-[11px] uppercase tracking-[0.28em] text-[#f3eadc] transition hover:border-[#a61f24]/70 hover:bg-[#a61f24]/10"
+                className="border-2 border-[#A61F24] text-[#A61F24] px-6 py-3 text-[11px] uppercase tracking-[0.32em] font-medium hover:bg-[#A61F24] hover:text-white transition"
               >
                 Ver archivo histórico
               </Link>
             </div>
           </div>
+        </div>
+      </section>
 
-          <div className="relative min-h-[28rem] lg:min-h-[38rem]">
-            <div className="absolute inset-x-2 top-0 h-[56%] overflow-hidden rounded-[2rem] border border-white/10">
-              <Image src="/matet-cover.jpg" alt="Vista de Matet" fill className="object-cover" />
-              <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(6,4,4,0.06),rgba(6,4,4,0.72)_82%,rgba(6,4,4,0.92)_100%)]" />
-              <div className="absolute bottom-5 left-5 right-5">
-                <p className="text-[10px] uppercase tracking-[0.3em] text-[#f3eadc]/72">Agosto, septiembre, octubre</p>
-                <p className="mt-2 max-w-xs text-lg font-medium leading-tight">
-                  Del anuncio al baile, del cartel al programa completo.
+      {/* CHAPTER GRID */}
+      <section className="border-b-2 border-[#1B4332]">
+        <div className="bg-[#1B4332] grid grid-cols-2 lg:grid-cols-4 gap-[2px]">
+          {CHAPTERS.map((ch, idx) => (
+            <Link
+              key={ch.id}
+              href={ch.href}
+              className="bg-[#A61F24] p-5 sm:p-7 hover:bg-[#8B1A1E] transition-colors flex flex-col group"
+              data-reveal
+              style={{ "--reveal-delay": `${idx * 0.09}s` } as React.CSSProperties}
+            >
+              <p className="text-[10px] uppercase tracking-[0.45em] text-white/50">
+                {ch.chapter}
+              </p>
+              <h2
+                className="text-[2rem] sm:text-[2.8rem] lg:text-[3.5rem] uppercase leading-[0.88] text-white mt-3 flex-1"
+                style={{ fontFamily: "var(--font-bebas-neue)" }}
+              >
+                {ch.title}
+              </h2>
+              <p className="text-[12px] text-white/65 mt-3 leading-5 hidden sm:block">
+                {ch.description}
+              </p>
+              <div className="mt-5 relative aspect-[3/4] w-16 sm:w-24 overflow-hidden border border-white/20">
+                <Image
+                  src={encodeURI(`/LIBROS DE FIESTAS/PORTADAS/Portada ${ch.coverYear}.png`)}
+                  alt={`Portada ${ch.coverYear}`}
+                  fill
+                  className="object-cover grayscale opacity-70 group-hover:opacity-95 transition-opacity"
+                  unoptimized
+                />
+              </div>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      {/* CONTENT SECTIONS */}
+      {CHAPTERS.map((chapter, index) => {
+        const preview =
+          chapter.id === "proximas"
+            ? chapterPreviews.proximas
+            : chapter.id === "noche"
+            ? chapterPreviews.noche
+            : chapter.id === "peques"
+            ? chapterPreviews.peques
+            : chapterPreviews.todas;
+
+        const isDark = index % 2 !== 0;
+        const bg = isDark ? "#1B4332" : "#F0EAD6";
+        const fg = isDark ? "#F0EAD6" : "#1B4332";
+
+        return (
+          <section
+            key={chapter.id}
+            id={chapter.id}
+            className="border-b-2 border-[#1B4332]"
+            style={{ backgroundColor: bg, color: fg }}
+          >
+            <div className="grid lg:grid-cols-[1fr_1.5fr]">
+              {/* Left: chapter label + title + link */}
+              <div className="px-5 py-12 sm:px-8 sm:py-16 border-b-2 border-[#1B4332] lg:border-b-0 lg:border-r-2 flex flex-col justify-between">
+                <div data-reveal>
+                  <p
+                    className="text-[10px] uppercase tracking-[0.45em]"
+                    style={{ opacity: 0.38 }}
+                  >
+                    {chapter.chapter}
+                  </p>
+                  <h2
+                    className="text-[3.2rem] sm:text-[4.5rem] lg:text-[5.5rem] uppercase leading-[0.86] mt-3"
+                    style={{ fontFamily: "var(--font-bebas-neue)" }}
+                  >
+                    {chapter.title}
+                  </h2>
+                  <p
+                    className="mt-5 text-[14px] leading-7 max-w-xs"
+                    style={{ opacity: 0.6 }}
+                  >
+                    {chapter.description}
+                  </p>
+                </div>
+                <Link
+                  href={chapter.href}
+                  className={`mt-10 self-start border-2 px-5 py-3 text-[11px] uppercase tracking-[0.32em] font-medium transition ${
+                    isDark
+                      ? "border-[#F0EAD6]/50 text-[#F0EAD6] hover:bg-[#F0EAD6] hover:text-[#1B4332]"
+                      : "border-[#1B4332] text-[#1B4332] hover:bg-[#1B4332] hover:text-[#F0EAD6]"
+                  }`}
+                  data-reveal
+                  style={{ "--reveal-delay": "0.12s" } as React.CSSProperties}
+                >
+                  Abrir sección →
+                </Link>
+              </div>
+
+              {/* Right: events list */}
+              <div className="px-5 py-12 sm:px-8 sm:py-16">
+                <p
+                  className="text-[10px] uppercase tracking-[0.45em] mb-8"
+                  style={{ opacity: 0.38 }}
+                >
+                  Próximos actos
                 </p>
+                {loading ? (
+                  <div className="flex items-center py-8">
+                    <div
+                      className="h-4 w-4 animate-spin rounded-full border-b-2"
+                      style={{ borderColor: fg }}
+                    />
+                  </div>
+                ) : preview.length === 0 ? (
+                  <p className="text-sm" style={{ opacity: 0.45 }}>
+                    Todavía no hay eventos en este bloque.
+                  </p>
+                ) : (
+                  <div>
+                    {preview.map((event, i) => (
+                      <div
+                        key={event.id}
+                        className="animate-in py-5 grid sm:grid-cols-[6.5rem_1fr] gap-4"
+                        style={{
+                          borderBottom:
+                            i < preview.length - 1
+                              ? `2px solid ${isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.10)"}`
+                              : "none",
+                          "--reveal-delay": `${i * 0.07}s`,
+                        } as React.CSSProperties}
+                      >
+                        <div>
+                          {event.startsAt && (
+                            <>
+                              <p
+                                className="text-[10px] uppercase tracking-[0.3em]"
+                                style={{ opacity: 0.4 }}
+                              >
+                                {formatDayLabel(event.startsAt)
+                                  .split(" ")
+                                  .slice(0, 2)
+                                  .join(" ")}
+                              </p>
+                              <p
+                                className="mt-2 text-4xl leading-none"
+                                style={{
+                                  fontFamily: "var(--font-bebas-neue)",
+                                  color: chapter.accent,
+                                }}
+                              >
+                                {formatHour(event.startsAt)}
+                              </p>
+                            </>
+                          )}
+                        </div>
+                        <div>
+                          <p className="text-base font-semibold leading-tight">
+                            {event.title}
+                          </p>
+                          {event.location && (
+                            <p
+                              className="mt-1.5 text-[13px]"
+                              style={{ opacity: 0.5 }}
+                            >
+                              {event.location}
+                            </p>
+                          )}
+                          {event.provisional && (
+                            <p
+                              className="mt-1 text-[10px] uppercase tracking-[0.3em]"
+                              style={{ opacity: 0.38 }}
+                            >
+                              Provisional
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
+          </section>
+        );
+      })}
 
-            <div className="absolute bottom-0 left-0 grid w-[88%] grid-cols-3 gap-3 rounded-[1.8rem] border border-white/10 bg-[#120d0c]/90 p-4 shadow-2xl backdrop-blur-sm">
-              {COVER_YEARS.map((year, index) => (
+      {/* HISTORIA / ARCHIVO */}
+      <section className="bg-[#A61F24] border-b-2 border-[#1B4332]">
+        <div className="grid lg:grid-cols-2">
+          <div className="px-5 py-16 sm:px-8 sm:py-24 border-b-2 border-[#1B4332] lg:border-b-0 lg:border-r-2" data-reveal>
+            <p className="text-[10px] uppercase tracking-[0.45em] text-white/45">
+              Aspecto&nbsp;&bull;&nbsp;Archivo
+            </p>
+            <h2
+              className="text-[3.8rem] sm:text-[6rem] lg:text-[8rem] uppercase leading-[0.86] text-white mt-4"
+              style={{ fontFamily: "var(--font-bebas-neue)" }}
+            >
+              Historia del pueblo
+            </h2>
+          </div>
+          <div
+            className="px-5 py-16 sm:px-8 sm:py-24 flex flex-col justify-between"
+            data-reveal
+            style={{ "--reveal-delay": "0.1s" } as React.CSSProperties}
+          >
+            <p className="text-[15px] leading-7 text-white/75 max-w-sm">
+              Portadas, carteles y programas desde 1976. Un archivo visual de
+              cómo el pueblo ha vivido sus fiestas a lo largo de los años.
+            </p>
+            <div className="mt-8 flex gap-3">
+              {[2004, 2013, 2024].map((year, i) => (
                 <div
                   key={year}
-                  className={`relative overflow-hidden rounded-[1rem] border border-white/10 bg-white/5 ${
-                    index === 0 ? "col-span-2 aspect-[1.7/1.05]" : "aspect-[0.8/1]"
-                  }`}
+                  className="animate-in relative aspect-[3/4] w-20 overflow-hidden border border-white/20"
+                  style={{ "--reveal-delay": `${i * 0.08}s` } as React.CSSProperties}
                 >
                   <Image
                     src={encodeURI(`/LIBROS DE FIESTAS/PORTADAS/Portada ${year}.png`)}
-                    alt={`Portada de ${year}`}
+                    alt={`Portada ${year}`}
                     fill
-                    className="object-cover"
+                    className="object-cover grayscale opacity-75"
                     unoptimized
                   />
-                  <div className="absolute inset-0 bg-[linear-gradient(180deg,transparent_30%,rgba(11,8,8,0.88)_100%)]" />
-                  <span className="absolute bottom-3 left-3 font-serif text-sm">{year}</span>
                 </div>
               ))}
             </div>
+            <Link
+              href="/historia"
+              className="mt-10 self-start border-2 border-white text-white px-6 py-3 text-[11px] uppercase tracking-[0.32em] font-medium hover:bg-white hover:text-[#A61F24] transition"
+            >
+              Ver archivo →
+            </Link>
           </div>
-        </section>
-
-        <section className="mx-auto max-w-7xl px-5 py-8 sm:px-8 lg:py-12">
-          <div className="grid gap-4 rounded-[2rem] border border-white/10 bg-white/5 p-5 md:grid-cols-3 md:p-7">
-            <div>
-              <p className="text-[11px] uppercase tracking-[0.32em] text-[#c7b098]">El tono</p>
-              <p className="mt-3 text-sm leading-7 text-[#dbcab7]">
-                Oscuro, gráfico y con peso editorial. Menos folleto, más archivo vivo.
-              </p>
-            </div>
-            <div>
-              <p className="text-[11px] uppercase tracking-[0.32em] text-[#c7b098]">El ritmo</p>
-              <p className="mt-3 text-sm leading-7 text-[#dbcab7]">
-                Scroll narrativo, bloques grandes y cortes visuales con portadas, carteles y plaza.
-              </p>
-            </div>
-            <div>
-              <p className="text-[11px] uppercase tracking-[0.32em] text-[#c7b098]">La materia</p>
-              <p className="mt-3 text-sm leading-7 text-[#dbcab7]">
-                Programa real, memoria del pueblo y piezas del archivo de fiestas desde 1976.
-              </p>
-            </div>
-          </div>
-        </section>
-
-        <section className="mx-auto grid max-w-7xl gap-12 px-5 pb-20 pt-8 sm:px-8 lg:grid-cols-[14rem_minmax(0,1fr)]">
-          <aside className="hidden lg:block">
-            <div className="sticky top-24 space-y-4">
-              <p className="text-[10px] uppercase tracking-[0.3em] text-[#c7b098]">Capítulos</p>
-              {CHAPTERS.map((chapter) => (
-                <a key={chapter.id} href={`#${chapter.id}`} className="block border-l border-white/10 pl-4 py-1">
-                  <span className="block text-[10px] uppercase tracking-[0.28em]" style={{ color: chapter.accent }}>
-                    {chapter.chapter}
-                  </span>
-                  <span className="mt-1 block text-sm text-[#f3eadc]">{chapter.title}</span>
-                </a>
-              ))}
-            </div>
-          </aside>
-
-          <div className="space-y-12">
-            {CHAPTERS.map((chapter, index) => {
-              const preview =
-                chapter.id === "proximas"
-                  ? chapterPreviews.proximas
-                  : chapter.id === "noche"
-                  ? chapterPreviews.noche
-                  : chapter.id === "peques"
-                  ? chapterPreviews.peques
-                  : chapterPreviews.todas;
-
-              return (
-                <section
-                  id={chapter.id}
-                  key={chapter.id}
-                  className="grid gap-6 border-t border-white/10 pt-8 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]"
-                >
-                  <div>
-                    <p className="text-[11px] uppercase tracking-[0.34em]" style={{ color: chapter.accent }}>
-                      {chapter.chapter}
-                    </p>
-                    <h2 className="mt-3 text-4xl font-semibold uppercase leading-[0.9] sm:text-5xl">
-                      {chapter.title}
-                    </h2>
-                    <p className="mt-4 max-w-sm text-[15px] leading-7 text-[#dbcab7]">
-                      {chapter.description}
-                    </p>
-                    <Link
-                      href={chapter.href}
-                      className="mt-8 inline-flex rounded-full border px-5 py-3 text-[11px] uppercase tracking-[0.28em] transition"
-                      style={{ borderColor: `${chapter.accent}66`, color: "#f3eadc" }}
-                    >
-                      Abrir sección
-                    </Link>
-                  </div>
-
-                  <div className="rounded-[2rem] border border-white/10 bg-white/5 p-5">
-                    {loading ? (
-                      <div className="flex items-center justify-center py-12">
-                        <div className="h-5 w-5 animate-spin rounded-full border-b-2 border-[#c7b098]" />
-                      </div>
-                    ) : preview.length === 0 ? (
-                      <p className="text-sm text-[#dbcab7]">Todavía no hay eventos cargados en este bloque.</p>
-                    ) : (
-                      <div className="space-y-4">
-                        {preview.map((event, itemIndex) => (
-                          <div
-                            key={event.id}
-                            className="grid gap-3 border-b border-white/10 pb-4 last:border-b-0 last:pb-0 sm:grid-cols-[5.5rem_minmax(0,1fr)]"
-                          >
-                            <div>
-                              <p className="text-[10px] uppercase tracking-[0.3em] text-[#c7b098]">
-                                {event.startsAt ? formatDayLabel(event.startsAt) : `Pista ${itemIndex + 1 + index}`}
-                              </p>
-                              {event.startsAt && (
-                                <p className="mt-2 text-2xl font-semibold" style={{ color: chapter.accent }}>
-                                  {formatHour(event.startsAt)}
-                                </p>
-                              )}
-                            </div>
-                            <div>
-                              <p className="text-xl font-medium leading-tight">{event.title}</p>
-                              {event.location && (
-                                <p className="mt-2 text-sm leading-7 text-[#dbcab7]">
-                                  {event.location}
-                                </p>
-                              )}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </section>
-              );
-            })}
-          </div>
-        </section>
-      </div>
+        </div>
+      </section>
     </main>
   );
 }
