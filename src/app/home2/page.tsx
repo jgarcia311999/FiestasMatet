@@ -10,37 +10,45 @@ const MADRID_TZ = "Europe/Madrid";
 const CHAPTERS = [
   {
     id: "proximas",
-    chapter: "CAP.01",
     title: "Lo que viene",
     href: "/proximas",
-    accent: "#A61F24",
+    accent: "#F0EAD6",
+    cardBg: "#1B4332",
+    cardHover: "#295941",
+    cardFg: "#F0EAD6",
     coverYear: 1998,
     description: "Una lectura rápida de los próximos días para saber qué toca y cuándo moverse.",
   },
   {
     id: "noche",
-    chapter: "CAP.02",
     title: "Noches de plaza",
     href: "/noche",
-    accent: "#F0EAD6",
+    accent: "#1B4332",
+    cardBg: "#E5DDC4",
+    cardHover: "#DDD2B1",
+    cardFg: "#1B4332",
     coverYear: 2013,
     description: "Verbenas, discomóviles y ese tramo en el que el pueblo cambia de ritmo.",
   },
   {
     id: "peques",
-    chapter: "CAP.03",
     title: "Familia y peques",
     href: "/peques",
-    accent: "#A61F24",
+    accent: "#F0EAD6",
+    cardBg: "#1B4332",
+    cardHover: "#295941",
+    cardFg: "#F0EAD6",
     coverYear: 2022,
     description: "Actos abiertos, juegos, pasacalles y tiempo de fiesta para todas las edades.",
   },
   {
     id: "todas",
-    chapter: "CAP.04",
     title: "Programa completo",
     href: "/todas",
-    accent: "#F0EAD6",
+    accent: "#1B4332",
+    cardBg: "#E5DDC4",
+    cardHover: "#DDD2B1",
+    cardFg: "#1B4332",
     coverYear: 2024,
     description: "La visión completa del calendario, sin perderse ningún tramo del programa.",
   },
@@ -183,16 +191,22 @@ export default function Home2Page() {
       {/* HERO */}
       <section className="border-b-2 border-[#1B4332]">
         <div className="grid lg:grid-cols-2">
-          <div className="border-b-2 border-[#1B4332] lg:border-b-0 lg:border-r-2 px-5 py-14 sm:px-8 sm:py-20 lg:py-28">
+          <div className="border-b-2 border-[#1B4332] lg:border-b-0 lg:border-r-2 px-5 py-14 sm:px-8 sm:py-20 lg:py-24">
+            <p
+              className="text-[10px] uppercase tracking-[0.5em] text-[#1B4332]/40"
+              data-reveal
+            >
+              Fiestas Matet 2026
+            </p>
             <h1
-              className="text-[5.5rem] sm:text-[9rem] lg:text-[13rem] uppercase leading-[0.82]"
+              className="mt-4 text-[5.5rem] sm:text-[9rem] lg:text-[12rem] uppercase leading-[0.82]"
               style={{ fontFamily: "var(--font-bebas-neue)" }}
               data-reveal
             >
               Fiestas<br />de<br />Matet
             </h1>
           </div>
-          <div className="px-5 py-14 sm:px-8 sm:py-20 lg:py-28 flex flex-col justify-between gap-10">
+          <div className="px-5 py-14 sm:px-8 sm:py-20 lg:py-24 flex flex-col justify-between gap-10">
             <div>
               <p
                 className="text-[10px] uppercase tracking-[0.5em] text-[#1B4332]/40"
@@ -206,9 +220,9 @@ export default function Home2Page() {
                 data-reveal
                 style={{ "--reveal-delay": "0.18s" } as React.CSSProperties}
               >
-                Una portada nueva para leer las fiestas como se leen los recuerdos:
-                con carteles, portadas, horas, verbenas y ese desorden bonito que
-                deja el verano cuando el pueblo se pone en marcha.
+                Una portada para leer el programa de fiestas con rapidez,
+                entrar a cada bloque por ambiente y mantener cerca el archivo
+                histórico del pueblo.
               </p>
             </div>
             <div
@@ -224,7 +238,7 @@ export default function Home2Page() {
               </a>
               <Link
                 href="/historia"
-                className="border-2 border-[#A61F24] text-[#A61F24] px-6 py-3 text-[11px] uppercase tracking-[0.32em] font-medium hover:bg-[#A61F24] hover:text-white transition"
+                className="border-2 border-[#1B4332]/25 text-[#1B4332] px-6 py-3 text-[11px] uppercase tracking-[0.32em] font-medium hover:border-[#1B4332] transition"
               >
                 Ver archivo histórico
               </Link>
@@ -233,42 +247,7 @@ export default function Home2Page() {
         </div>
       </section>
 
-      {/* CHAPTER GRID */}
-      <section className="border-b-2 border-[#1B4332]">
-        <div className="bg-[#1B4332] grid grid-cols-2 lg:grid-cols-4 gap-[2px]">
-          {CHAPTERS.map((ch, idx) => (
-            <Link
-              key={ch.id}
-              href={ch.href}
-              className="bg-[#A61F24] p-5 sm:p-7 hover:bg-[#8B1A1E] transition-colors flex flex-col group"
-              data-reveal
-              style={{ "--reveal-delay": `${idx * 0.09}s` } as React.CSSProperties}
-            >
-              <p className="text-[10px] uppercase tracking-[0.45em] text-white/50">
-                {ch.chapter}
-              </p>
-              <h2
-                className="text-[2rem] sm:text-[2.8rem] lg:text-[3.5rem] uppercase leading-[0.88] text-white mt-3 flex-1"
-                style={{ fontFamily: "var(--font-bebas-neue)" }}
-              >
-                {ch.title}
-              </h2>
-              <p className="text-[12px] text-white/65 mt-3 leading-5 hidden sm:block">
-                {ch.description}
-              </p>
-              <div className="mt-5 relative aspect-[3/4] w-16 sm:w-24 overflow-hidden border border-white/20">
-                <Image
-                  src={encodeURI(`/LIBROS DE FIESTAS/PORTADAS/Portada ${ch.coverYear}.png`)}
-                  alt={`Portada ${ch.coverYear}`}
-                  fill
-                  className="object-cover grayscale opacity-70 group-hover:opacity-95 transition-opacity"
-                  unoptimized
-                />
-              </div>
-            </Link>
-          ))}
-        </div>
-      </section>
+      
 
       {/* CONTENT SECTIONS */}
       {CHAPTERS.map((chapter, index) => {
@@ -281,7 +260,7 @@ export default function Home2Page() {
             ? chapterPreviews.peques
             : chapterPreviews.todas;
 
-        const isDark = index % 2 !== 0;
+        const isDark = index % 2 === 0;
         const bg = isDark ? "#1B4332" : "#F0EAD6";
         const fg = isDark ? "#F0EAD6" : "#1B4332";
 
@@ -293,17 +272,11 @@ export default function Home2Page() {
             style={{ backgroundColor: bg, color: fg }}
           >
             <div className="grid lg:grid-cols-[1fr_1.5fr]">
-              {/* Left: chapter label + title + link */}
+              {/* Left: title + link */}
               <div className="px-5 py-12 sm:px-8 sm:py-16 border-b-2 border-[#1B4332] lg:border-b-0 lg:border-r-2 flex flex-col justify-between">
                 <div data-reveal>
-                  <p
-                    className="text-[10px] uppercase tracking-[0.45em]"
-                    style={{ opacity: 0.38 }}
-                  >
-                    {chapter.chapter}
-                  </p>
                   <h2
-                    className="text-[3.2rem] sm:text-[4.5rem] lg:text-[5.5rem] uppercase leading-[0.86] mt-3"
+                    className="text-[3.2rem] sm:text-[4.5rem] lg:text-[5.5rem] uppercase leading-[0.86]"
                     style={{ fontFamily: "var(--font-bebas-neue)" }}
                   >
                     {chapter.title}

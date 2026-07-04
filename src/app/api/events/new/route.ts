@@ -64,6 +64,7 @@ export async function POST(req: Request) {
         // img and description removed
         startsAt: startsAtValue,
         location: body.location ?? "",
+        visible: false,
         provisional: body.provisional ?? false,
         attendees: body.attendees ?? [],
         tags: body.tags ?? [],
@@ -74,6 +75,7 @@ export async function POST(req: Request) {
         // img and description removed
         startsAt: events.startsAt,
         location: events.location,
+        visible: events.visible,
         provisional: events.provisional,
         attendees: events.attendees,
         tags: events.tags,

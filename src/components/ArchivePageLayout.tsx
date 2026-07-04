@@ -6,7 +6,6 @@ import React, { useEffect } from "react";
 type ArchivePageLayoutProps = {
   title: string;
   kicker: string;
-  chapter: string;
   accent: string;
   intro?: string;
   children: React.ReactNode;
@@ -16,7 +15,6 @@ type ArchivePageLayoutProps = {
 export default function ArchivePageLayout({
   title,
   kicker,
-  chapter,
   accent,
   intro,
   children,
@@ -52,7 +50,7 @@ export default function ArchivePageLayout({
             ← Inicio
           </Link>
           <p className="text-[10px] uppercase tracking-[0.45em] font-medium hidden sm:block">
-            Matet en fiestas&nbsp;&bull;&nbsp;{chapter}
+            Matet en fiestas
           </p>
           <Link
             href="/historia"
@@ -66,17 +64,10 @@ export default function ArchivePageLayout({
       {/* HERO */}
       <section className="border-b-2 border-[#1B4332]">
         <div className="grid lg:grid-cols-[1fr_minmax(260px,0.55fr)]">
-          {/* Left: chapter + title + kicker */}
+          {/* Left: title + kicker */}
           <div className="px-5 py-14 sm:px-8 sm:py-20 border-b-2 border-[#1B4332] lg:border-b-0 lg:border-r-2">
-            <p
-              className="text-[10px] uppercase tracking-[0.5em] font-medium"
-              style={{ color: accent }}
-              data-reveal
-            >
-              {chapter}
-            </p>
             <h1
-              className="text-[4.5rem] sm:text-[7rem] lg:text-[9rem] uppercase leading-[0.84] mt-3"
+              className="text-[4.5rem] sm:text-[7rem] lg:text-[9rem] uppercase leading-[0.84]"
               style={
                 {
                   fontFamily: "var(--font-bebas-neue)",

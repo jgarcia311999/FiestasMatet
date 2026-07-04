@@ -30,35 +30,47 @@ export function initGA() {
 
 // Session ID único
 function getSessionId() {
-  let id = localStorage.getItem("session_id");
-  if (!id) {
-    id = crypto.randomUUID();
-    localStorage.setItem("session_id", id);
+  try {
+    let id = window.localStorage.getItem("session_id");
+    if (!id) {
+      if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+        id = crypto.randomUUID();
+      } else {
+        id = `session-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+      }
+      window.localStorage.setItem("session_id", id);
+    }
+    return id;
+  } catch {
+    return `session-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
   }
-  return id;
 }
 
 // Función general para enviar eventos
 export function trackEvent(name: string, params: Record<string, unknown> = {}) {
   if (typeof window === "undefined") return;
+  if (typeof window.gtag !== "function") return;
 
-  const url = window.location.pathname;
-  const referrer = document.referrer || null;
+  try {
+    const url = window.location.pathname;
+    const referrer = document.referrer || null;
 
-  // Captura utm_* si están en la URL
-  const searchParams = new URLSearchParams(window.location.search);
-  const utm: Record<string, string> = {};
-  ["utm_source", "utm_medium", "utm_campaign"].forEach((key) => {
-    if (searchParams.has(key)) {
-      utm[key] = searchParams.get(key)!;
-    }
-  });
+    const searchParams = new URLSearchParams(window.location.search);
+    const utm: Record<string, string> = {};
+    ["utm_source", "utm_medium", "utm_campaign"].forEach((key) => {
+      if (searchParams.has(key)) {
+        utm[key] = searchParams.get(key)!;
+      }
+    });
 
-  window.gtag("event", name, {
-    session_id: getSessionId(),
-    url,
-    referrer,
-    ...utm,
-    ...params,
-  });
+    window.gtag("event", name, {
+      session_id: getSessionId(),
+      url,
+      referrer,
+      ...utm,
+      ...params,
+    });
+  } catch {
+    // Analytics nunca debe romper la experiencia pública.
+  }
 }

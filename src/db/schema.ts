@@ -1,4 +1,4 @@
-import { pgTable, serial, text, varchar, timestamp, boolean, integer, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, serial, text, varchar, timestamp, boolean, jsonb } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
 /* USERS */
@@ -17,6 +17,7 @@ export const events = pgTable("events", {
   // Combina date + time en un solo campo timestamp (UTC)
   startsAt: timestamp("starts_at", { withTimezone: true }).notNull(),
   location: varchar("location", { length: 200 }).notNull(),
+  visible: boolean("visible").default(false).notNull(),
   provisional: boolean("provisional").default(false).notNull(),
   // Lista de asistentes (nombres) tal y como la manejas ahora
   attendees: jsonb("attendees"), // $type<string[]>() si quieres tipado más estricto en consultas
@@ -49,6 +50,6 @@ export const ideaItemsRelations = relations(ideaItems, ({ one }) => ({
   }),
 }));
 
-export const usersRelations = relations(users, ({ many }) => ({
+export const usersRelations = relations(users, () => ({
   // si en el futuro asignas ownerId/authorId, lo añadimos aquí
 }));

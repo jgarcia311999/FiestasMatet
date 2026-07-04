@@ -98,7 +98,6 @@ export default function TodasPage() {
     <ArchivePageLayout
       title="Todas"
       kicker="El programa completo"
-      chapter="CAP.04"
       accent={INK}
       intro="La versión íntegra del programa, planteada como una cronología visual para entrar, salir y volver sin perder el hilo."
     >

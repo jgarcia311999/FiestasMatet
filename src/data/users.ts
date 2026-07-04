@@ -1,17 +1,4 @@
 export const USERS = [
   "Jesus",
-  "Carla",
-  "Ana",
-  "Luca",
-  "Victor",
-  "Juanjo",
-  "Leti",
-  "Martina",
-  "Miguel",
-  "Natalia",
-  "Nuria",
-  "Adria",
-  "Javi",
-  "Jaime",
-  "Pablo",
+  "Admin",
 ];

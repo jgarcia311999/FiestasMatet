@@ -106,8 +106,7 @@ export default function ProximasPage() {
   return (
     <ArchivePageLayout
       title="Próximas"
-      kicker="Lo que viene primero"
-      chapter="CAP.01"
+      kicker="Nuestras proximas fiestas"
       accent={RED}
       intro="Una lectura directa del calendario para entrar a la fiesta por las fechas que vienen primero."
     >

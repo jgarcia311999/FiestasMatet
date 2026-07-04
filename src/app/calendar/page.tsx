@@ -139,14 +139,12 @@ function getFranjaHorariaLabel(time: string): string {
 
 export default function CalendarPage() {
   const today = startOfTodayLocal();
-  const [showAll, setShowAll] = useState(false);
   const [year, setYear] = useState(today.getFullYear());
   const [month, setMonth] = useState(today.getMonth()); // 0-11
   const [selected, setSelected] = useState<string | null>(ymd(today));
 
   const [fiestasData, setFiestasData] = useState<Fiesta[]>([]);
 
-  const secciones = getSecciones(fiestasData, showAll);
   const grid = useMonthGrid(year, month);
   const eventsByDate = useMemo(() => {
     const map = new Map<string, Fiesta[]>();
@@ -167,13 +165,12 @@ export default function CalendarPage() {
         const listRaw = Array.isArray(json?.events) ? json.events : Array.isArray(json) ? json : [];
         const normalized: Fiesta[] = (listRaw as unknown[]).map(fromApi);
         setFiestasData(normalized.filter((f: Fiesta) => !!f.date && !!f.time && !!f.title));
-      } catch (e) {
+      } catch {
         setFiestasData([]);
       }
     })();
   }, []);
 
-  const selectedEvents = selected ? getEventosPorFecha(fiestasData, selected) : [];
   const listAnchorRef = useRef<HTMLDivElement>(null);
 
   function prevMonth() {
@@ -293,7 +290,7 @@ export default function CalendarPage() {
           const filtered = selected ? [selected] : [];
           const secciones = filtered.length
             ? filtered.map((key) => ({ key, date: parseISODateLocal(key), label: formatSpanishLong(parseISODateLocal(key)) }))
-            : getSecciones(fiestasData, showAll);
+            : getSecciones(fiestasData, false);
 
           return secciones.length === 0 ? (
             <div className="py-2 text-[12px] italic">Sin fiestas</div>

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { db } from "@/db/client";
 import { events } from "@/db/schema";
-import { eq, sql } from "drizzle-orm";
+import { sql } from "drizzle-orm";
 import { DateTime } from "luxon";
 
 const TZ = "Europe/Madrid";
@@ -23,6 +23,7 @@ const PatchSchema = z.object({
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
   time: z.string().regex(/^\d{2}:\d{2}$/).optional(),
   location: z.string().optional(),
+  visible: z.boolean().optional(),
   provisional: z.boolean().optional(),
   tags: z.array(z.string()).optional(),
 });
@@ -74,6 +75,7 @@ export async function POST(req: Request) {
     if (patch.img !== undefined) updateSet.img = patch.img;
     if (patch.description !== undefined) updateSet.description = patch.description;
     if (patch.location !== undefined) updateSet.location = patch.location;
+    if (patch.visible !== undefined) updateSet.visible = patch.visible;
     if (patch.provisional !== undefined) updateSet.provisional = patch.provisional;
     if (patch.tags !== undefined) updateSet.tags = patch.tags;
 
@@ -94,6 +96,7 @@ export async function POST(req: Request) {
         title: events.title,
         startsAt: events.startsAt,
         location: events.location,
+        visible: events.visible,
         provisional: events.provisional,
         attendees: events.attendees,
         tags: events.tags,

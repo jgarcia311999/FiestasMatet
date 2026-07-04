@@ -1,13 +1,12 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
-import { getCookie } from "cookies-next";
-import Link from "next/link";
+import { useEffect, useMemo, useRef, useState } from "react";
 
-export type EventApi = {
+type EventApi = {
   id?: number | string;
   title?: string;
   location?: string;
+  visible?: boolean;
   provisional?: boolean;
   attendees?: string[] | null;
   startsAt?: string | null;
@@ -16,18 +15,42 @@ export type EventApi = {
   tags?: string[];
 };
 
-type LocalFiesta = {
+type EventForm = {
+  title: string;
+  date: string;
+  time: string;
+  location: string;
+  provisional: boolean;
+  tags: string[];
+};
+
+type LocalEvent = {
   id?: number | string;
-  title?: string;
-  location?: string;
-  provisional?: boolean;
-  attendees?: string[];
-  date?: string;
-  time?: string;
-  tags?: string[];
+  title: string;
+  location: string;
+  visible: boolean;
+  provisional: boolean;
+  date: string;
+  time: string;
+  tags: string[];
+};
+
+type EventGroup = {
+  date: string;
+  label: string;
+  items: LocalEvent[];
 };
 
 const TZ = "Europe/Madrid";
+const TAG_OPTIONS = ["noche", "familia", "todos los publicos", "comida/cena", "toros"];
+const EMPTY_FORM: EventForm = {
+  title: "",
+  date: "",
+  time: "",
+  location: "",
+  provisional: false,
+  tags: [],
+};
 
 function toYMD(date: Date, tz: string) {
   return new Intl.DateTimeFormat("en-CA", {
@@ -49,83 +72,125 @@ function toHM(date: Date, tz: string) {
     .replace(/^([0-9]{2}):([0-9]{2}).*$/, "$1:$2");
 }
 
-function formatHHMMMadrid(date: Date): string {
-  return new Intl.DateTimeFormat("es-ES", {
+function toDisplayDate(dateKey: string) {
+  const [year, month, day] = dateKey.split("-").map(Number);
+  const date = new Date(Date.UTC(year, month - 1, day, 12, 0, 0));
+  const label = new Intl.DateTimeFormat("es-ES", {
     timeZone: TZ,
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
+    weekday: "long",
+    day: "numeric",
+    month: "long",
   }).format(date);
+
+  return label.charAt(0).toUpperCase() + label.slice(1);
 }
 
-function fromApi(ev: EventApi): LocalFiesta {
-  // Si ya vienen date/time, las usamos; si no, derivamos de startsAt SIN aplicar zonas
-  let date = ev.date ?? undefined;
-  let time = ev.time ?? undefined;
-  if ((!date || !time) && ev.startsAt) {
-    const s = String(ev.startsAt).trim();
-    // Intenta extraer YYYY-MM-DD y HH:MM de forma textual (soporta " ", "T" y sufijos Z/±HH:MM)
-    const m = s.match(/^(\d{4}-\d{2}-\d{2})[ T](\d{2}:\d{2})(?::\d{2})?(?:Z|[+-]\d{2}:\d{2})?$/);
-    if (m) {
-      date = date ?? m[1];
-      time = time ?? m[2];
+function compareEventsAsc(a: LocalEvent, b: LocalEvent) {
+  if (a.date !== b.date) return a.date.localeCompare(b.date);
+  if (a.time !== b.time) return a.time.localeCompare(b.time);
+  return a.title.localeCompare(b.title);
+}
+
+function compareEventsDesc(a: LocalEvent, b: LocalEvent) {
+  if (a.date !== b.date) return b.date.localeCompare(a.date);
+  if (a.time !== b.time) return b.time.localeCompare(a.time);
+  return a.title.localeCompare(b.title);
+}
+
+function normalizeTag(tag: string) {
+  return tag.trim().toLowerCase();
+}
+
+function fromApi(event: EventApi): LocalEvent | null {
+  let date = event.date ?? "";
+  let time = event.time ?? "";
+
+  if ((!date || !time) && event.startsAt) {
+    const raw = String(event.startsAt).trim();
+    const match = raw.match(/^(\d{4}-\d{2}-\d{2})[ T](\d{2}:\d{2})(?::\d{2})?(?:Z|[+-]\d{2}:\d{2})?$/);
+    if (match) {
+      date = date || match[1];
+      time = time || match[2];
     } else {
-      // Fallback: si no coincide el patrón, intenta parsear como Date y formatear en zona Madrid
-      const d = new Date(s);
-      if (!Number.isNaN(d.getTime())) {
-        date = date ?? toYMD(d, TZ);
-        time = time ?? toHM(d, TZ);
+      const parsed = new Date(raw);
+      if (!Number.isNaN(parsed.getTime())) {
+        date = date || toYMD(parsed, TZ);
+        time = time || toHM(parsed, TZ);
       }
     }
   }
+
+  if (!date || !time) return null;
+
   return {
-  id: ev.id,
-  title: ev.title ?? "",
-  location: ev.location ?? "",
-  provisional: ev.provisional ?? false,
-  attendees: Array.isArray(ev.attendees) ? (ev.attendees as string[]) : [],
-  date,
-  time,
-  tags: Array.isArray(ev.tags) ? ev.tags : [],
-};
+    id: event.id,
+    title: event.title?.trim() || "Sin titulo",
+    location: event.location?.trim() || "",
+    visible: !!event.visible,
+    provisional: !!event.provisional,
+    date,
+    time,
+    tags: Array.isArray(event.tags) ? event.tags.map(normalizeTag) : [],
+  };
+}
+
+function groupEvents(events: LocalEvent[], todayKey: string) {
+  const past = events.filter((event) => event.date < todayKey).sort(compareEventsDesc);
+  const today = events.filter((event) => event.date === todayKey).sort(compareEventsAsc);
+  const future = events.filter((event) => event.date > todayKey).sort(compareEventsAsc);
+
+  const toGroups = (rows: LocalEvent[], descending: boolean): EventGroup[] => {
+    const order = descending ? [...rows] : [...rows];
+    const map = new Map<string, LocalEvent[]>();
+    for (const row of order) {
+      if (!map.has(row.date)) map.set(row.date, []);
+      map.get(row.date)?.push(row);
+    }
+
+    return Array.from(map.entries()).map(([date, items]) => ({
+      date,
+      label: toDisplayDate(date),
+      items: descending ? items.sort(compareEventsAsc) : items.sort(compareEventsAsc),
+    }));
+  };
+
+  return {
+    previous: toGroups(past, true),
+    today: toGroups(today, false),
+    next: toGroups(future, false),
+  };
 }
 
 export default function HorariosPage() {
-  const [items, setItems] = useState<LocalFiesta[]>([]);
+  const [items, setItems] = useState<LocalEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  // Aviso post-guardado: lectura ligera de query param sin hooks de Next
-  const [savingNotice, setSavingNotice] = useState(false);
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const sp = new URLSearchParams(window.location.search);
-    if (sp.has("justSaved")) {
-      setSavingNotice(true);
-      // Limpia la query de la URL sin recargar la página
-      const url = window.location.pathname + window.location.hash;
-      window.history.replaceState({}, "", url);
-      // Oculta el aviso tras 3s
-      const t = window.setTimeout(() => setSavingNotice(false), 3000);
-      return () => window.clearTimeout(t);
-    }
-  }, []);
-  // Fecha de corte: mostrar desde hace 2 días (calendario) en zona Europe/Madrid
-  function ymdInTZ(d: Date, tz: string) { return toYMD(d, tz); }
-  const twoDaysAgoYMD = ymdInTZ(new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), TZ);
-  // --- Cargar datos desde la API ---
+  const [filterDate, setFilterDate] = useState("");
+  const [editorOpen, setEditorOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [togglingVisibility, setTogglingVisibility] = useState(false);
+  const [deletingId, setDeletingId] = useState<number | string | null>(null);
+  const [editingId, setEditingId] = useState<number | string | null>(null);
+  const [form, setForm] = useState<EventForm>(EMPTY_FORM);
+  const todayRef = useRef<HTMLDivElement | null>(null);
+  const didAutoFocusToday = useRef(false);
+
+  const todayKey = useMemo(() => toYMD(new Date(), TZ), []);
+
   async function fetchEvents() {
     try {
       setError(null);
-      const res = await fetch("/api/events", { cache: "no-store" });
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data?.error || "No se pudieron cargar los eventos");
+      const response = await fetch("/api/events?includeHidden=1", { cache: "no-store" });
+      const json = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(json?.error || "No se pudieron cargar los eventos");
       }
-      const data = await res.json();
-      const list: EventApi[] = Array.isArray(data?.events) ? data.events : Array.isArray(data) ? data : [];
-      setItems(list.map(fromApi));
-    } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : "Error inesperado");
+
+      const rows: EventApi[] = Array.isArray(json?.events) ? json.events : Array.isArray(json) ? json : [];
+      const normalized = rows.map(fromApi).filter((event): event is LocalEvent => event !== null);
+      setItems(normalized);
+    } catch (fetchError: unknown) {
+      setError(fetchError instanceof Error ? fetchError.message : "Error inesperado");
     } finally {
       setLoading(false);
     }
@@ -134,621 +199,490 @@ export default function HorariosPage() {
   useEffect(() => {
     fetchEvents();
   }, []);
-  // Filtramos: mostrar eventos futuros y los de hace hasta 2 días (no 48h, días naturales)
-  // Luego ordenamos por fecha (YYYY-MM-DD) y hora (HH:MM), vacíos al final
-  const eventosOrdenados = items
-    .filter((ev) => {
-      // Exigimos fecha para poder comparar; si no hay fecha, no se muestra
-      if (!ev.date) return false;
-      return ev.date >= twoDaysAgoYMD; // incluye hoy y futuros, y los de los últimos 2 días naturales
-    })
-    .sort((a, b) => {
-      const ad = a.date || "";
-      const bd = b.date || "";
-      if (ad && bd && ad !== bd) return ad.localeCompare(bd);
-      if (!ad && bd) return 1;
-      if (ad && !bd) return -1;
-      const at = a.time || "";
-      const bt = b.time || "";
-      if (at && bt && at !== bt) return at.localeCompare(bt);
-      if (!at && bt) return 1;
-      if (at && !bt) return -1;
-      return (a.title || "").localeCompare(b.title || "");
+
+  useEffect(() => {
+    if (filterDate) return;
+    if (didAutoFocusToday.current) return;
+    if (!todayRef.current) return;
+
+    todayRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    didAutoFocusToday.current = true;
+  }, [filterDate, items]);
+
+  const visibleItems = useMemo(() => {
+    if (!filterDate) return items;
+    return items.filter((event) => event.date === filterDate).sort(compareEventsAsc);
+  }, [filterDate, items]);
+  const allEventsVisible = items.length > 0 && items.every((event) => event.visible);
+
+  const grouped = useMemo(() => groupEvents(visibleItems, todayKey), [todayKey, visibleItems]);
+  const filteredGroups = useMemo(() => {
+    if (!filterDate) return [];
+    return groupEvents(visibleItems, filterDate).today;
+  }, [filterDate, visibleItems]);
+
+  function resetForm() {
+    setForm(EMPTY_FORM);
+    setEditingId(null);
+    setEditorOpen(false);
+  }
+
+  function openCreate() {
+    setForm({
+      ...EMPTY_FORM,
+      date: filterDate || todayKey,
     });
-
-  const [openIndex, setOpenIndex] = useState<number | null>(null);
-  const [removed, setRemoved] = useState<Record<string, true>>({});
-  const makeKey = (e: { title?: string; date?: string; time?: string }) => `${e.title || ""}|${e.date || ""}|${e.time || ""}`;
-
-  // --- Selección múltiple para borrar ---
-  const [selectMode, setSelectMode] = useState(false);
-  const [selected, setSelected] = useState<Record<string, boolean>>({});
-  const selectedCount = Object.values(selected).filter(Boolean).length;
-  const [bulkDeleting, setBulkDeleting] = useState(false);
-
-  function toggleSelect(key: string) {
-    setSelected(prev => ({ ...prev, [key]: !prev[key] }));
-  }
-  function clearSelection() {
-    setSelected({});
+    setEditingId(null);
+    setEditorOpen(true);
   }
 
-  // --- Borrado múltiple (secuencial para evitar conflictos de escritura) ---
-  async function handleBulkDelete() {
-    if (selectedCount === 0 || bulkDeleting) return;
-    if (!confirm(`¿Borrar ${selectedCount} evento(s)?`)) return;
-
-    setBulkDeleting(true);
-
-    const keys = Object.entries(selected).filter(([, v]) => v).map(([k]) => k);
-
-    // Optimista: ocultar todos en UI
-    setRemoved(prev => {
-      const copy = { ...prev };
-      for (const k of keys) copy[k] = true;
-      return copy;
+  function openEdit(event: LocalEvent) {
+    setForm({
+      title: event.title,
+      date: event.date,
+      time: event.time,
+      location: event.location,
+      provisional: event.provisional,
+      tags: event.tags,
     });
-
-    // Construimos payloads con los items actuales (clave basada en title|date|time)
-    const payloads = items
-      .map(it => ({ title: it.title || "", date: it.date || "", time: it.time || "" }))
-      .filter(p => keys.includes(`${p.title}|${p.date}|${p.time}`));
-
-    const failed: { key: string; title: string }[] = [];
-
-    // Ejecutar en serie para evitar colisiones en la edición del fichero remoto/DB
-    for (const p of payloads) {
-      const key = `${p.title}|${p.date}|${p.time}`;
-      try {
-        const res = await fetch("/api/events/delete", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(p),
-        });
-        if (!res.ok) {
-          failed.push({ key, title: p.title });
-        }
-      } catch {
-        failed.push({ key, title: p.title });
-      }
-    }
-
-    if (failed.length) {
-      // Revertimos los que no se pudieron borrar
-      setRemoved(prev => {
-        const copy = { ...prev };
-        for (const f of failed) delete copy[f.key];
-        return copy;
-      });
-      const okCount = selectedCount - failed.length;
-      const names = failed.map(f => f.title || "(Sin título)").slice(0, 3).join(", ");
-      const extra = failed.length > 3 ? ` y ${failed.length - 3} más` : "";
-      setToast({ show: true, text: `Se borraron ${okCount} y fallaron ${failed.length}${names ? `: ${names}` : ""}${extra}`, key: null });
-    } else {
-      setToast({ show: true, text: `Se borraron ${selectedCount} evento(s)`, key: null });
-    }
-
-    // Salir de modo selección y limpiar
-    setSelectMode(false);
-    clearSelection();
-    setBulkDeleting(false);
-    await fetchEvents();
+    setEditingId(event.id ?? null);
+    setEditorOpen(true);
   }
 
-  // Toast de borrado y deshacer
-  const [toast, setToast] = useState<{ show: boolean; text: string; key: string | null }>({ show: false, text: "", key: null });
-  const toastTimerRef = useRef<number | null>(null);
-  const deleteTimerRef = useRef<number | null>(null);
-  const pendingRef = useRef<{ key: string; title: string; payload: { title: string; date: string; time: string } } | null>(null);
-
-  // --- Edit Modal State ---
-  const [editOpen, setEditOpen] = useState(false);
-  const [editMatch, setEditMatch] = useState<{ title: string; date: string; time: string } | null>(null);
-const [editForm, setEditForm] = useState<{
-  title: string;
-  date: string;
-  time: string;
-  location: string;
-  provisional: boolean;
-  tags: string[];
-}>({
-  title: "",
-  date: "",
-  time: "",
-  location: "",
-  provisional: false,
-  tags: [],
-});
-  const [savingEdit, setSavingEdit] = useState(false);
-  const prevEditRef = useRef<LocalFiesta | null>(null);
-
-  // --- Attendance logic ---
-  function getCurrentUser(): string | null {
-    // Cookie principal usada en el login
-    const c = (getCookie("commission_user") ?? getCookie("usuario"));
-    return typeof c === "string" && c.trim() ? (c as string) : null;
+  function updateForm<K extends keyof EventForm>(key: K, value: EventForm[K]) {
+    setForm((current) => ({ ...current, [key]: value }));
   }
 
-
-  function toggleAttend(ev: { title?: string; date?: string; time?: string }) {
-    const user = getCurrentUser();
-    if (!user) {
-      alert("No se pudo identificar tu usuario. Inicia sesión.");
-      return { desired: null as null | boolean, key: "" };
-    }
-    const key = makeKey(ev);
-    let desired: boolean = false;
-    setItems(prev => {
-      const idx = prev.findIndex(it => makeKey(it) === key);
-      if (idx === -1) return prev;
-      const curr = prev[idx];
-      const set = new Set(curr.attendees ?? []);
-      const currently = set.has(user);
-      desired = !currently; // estado deseado tras el toggle
-      if (currently) set.delete(user); else set.add(user);
-      const next = [...prev];
-      next[idx] = { ...curr, attendees: Array.from(set) } as LocalFiesta;
-      return next;
+  function toggleTag(tag: string) {
+    setForm((current) => {
+      const exists = current.tags.includes(tag);
+      return {
+        ...current,
+        tags: exists ? current.tags.filter((item) => item !== tag) : [...current.tags, tag],
+      };
     });
-    return { desired, key };
   }
 
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setSaving(true);
+    setError(null);
 
-  function handleAttendClick(ev: { title?: string; date?: string; time?: string }) {
-    const result = toggleAttend(ev);
-    if (result.desired === null) return;
-    const payload = { title: ev.title || "", date: ev.date || "", time: ev.time || "" };
-    (async () => {
-      try {
-        const res = await fetch("/api/events/attend", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            match: payload,
-            // Preferir id si viene de la API para evitar fallos de coincidencia
-            id: (ev as { id?: number | string }).id ?? null,
-            // Enviar también la marca exacta como está en la BBDD (timestamp sin zona con segundos)
-            startsAt: payload.date && payload.time ? `${payload.date} ${payload.time}:00` : null,
-            action: "toggle",
-          }),
-        });
-        type AttendResponse = { ok?: boolean; action?: string; error?: string };
-        const data: AttendResponse = await res.json().catch((): AttendResponse => ({}));
-        if (!res.ok) {
-          // rollback local si falla
-          toggleAttend(ev);
-          alert(data?.error || "No se pudo guardar la asistencia");
-          return;
-        }
+    const payload = {
+      title: form.title.trim(),
+      date: form.date,
+      time: form.time,
+      location: form.location.trim(),
+      provisional: form.provisional,
+      tags: form.tags,
+    };
 
-        const userNow = getCurrentUser();
-        // Sincronizamos la UI con la acción efectiva aplicada por el servidor
-        if (data?.action === "add" && userNow) {
-          setItems(prev => prev.map(it => {
-            if (makeKey(it) !== makeKey(ev)) return it;
-            const set = new Set([...(it.attendees ?? []), userNow]);
-            return { ...it, attendees: Array.from(set) } as LocalFiesta;
-          }));
-        } else if (data?.action === "remove" && userNow) {
-          setItems(prev => prev.map(it => {
-            if (makeKey(it) !== makeKey(ev)) return it;
-            return { ...it, attendees: (it.attendees ?? []).filter(u => u !== userNow) } as LocalFiesta;
-          }));
-        } else if (data?.action === "noop") {
-          // El servidor no aplicó cambios: revertimos el optimista
-          toggleAttend(ev);
-          // (opcional) alert("No se aplicó ningún cambio");
-        }
-        // Asegura estado fuente de verdad tras toggle de asistencia
-        await fetchEvents();
-      } catch (e) {
-        // rollback local por error de red
-        toggleAttend(ev);
-        alert("Error de red al guardar asistencia");
-      }
-    })();
-  }
-
-  function openEdit(ev: { title?: string; img?: string; description?: string; date?: string; time?: string; location?: string; provisional?: boolean; tags?: string[] }) {
-    const match = { title: ev.title || "", date: ev.date || "", time: ev.time || "" };
-    setEditMatch(match);
-    setEditForm({
-  title: ev.title || "",
-  date: ev.date || "",
-  time: ev.time || "",
-  location: ev.location || "",
-  provisional: ev.provisional ?? false,
-  tags: (ev as { tags?: string[] }).tags ?? [],
-});
-    // snapshot previo para revertir si falla
-    const found = items.find(it => (it.title||"")===match.title && (it.date||"")===match.date && (it.time||"")===match.time) || null;
-    prevEditRef.current = found ? { ...found } as LocalFiesta : null;
-    setEditOpen(true);
-  }
-
-  function closeEdit() { setEditOpen(false); }
-
-  async function saveEdit() {
-    if (!editMatch) return;
-    setSavingEdit(true);
-    // Optimistic update: aplicar cambios en local inmediatamente
-    setItems(prev => {
-      const idx = prev.findIndex(it => (it.title||"")===editMatch.title && (it.date||"")===editMatch.date && (it.time||"")===editMatch.time);
-      if (idx === -1) return prev;
-      const next = [...prev];
-      next[idx] = { ...next[idx], ...editForm } as LocalFiesta;
-      return next;
-    });
     try {
-      const res = await fetch("/api/events/update", {
+      const response = await fetch(editingId == null ? "/api/events/new" : "/api/events/update", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ match: editMatch, patch: editForm }),
+        body: JSON.stringify(
+          editingId == null
+            ? payload
+            : {
+                match: { id: editingId },
+                patch: payload,
+              }
+        ),
       });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        // rollback
-        if (prevEditRef.current) {
-          setItems(prev => {
-            const idx = prev.findIndex(it => (it.title||"")===editMatch.title && (it.date||"")===editMatch.date && (it.time||"")===editMatch.time);
-            if (idx === -1) return prev;
-            const next = [...prev];
-            next[idx] = { ...prevEditRef.current! } as LocalFiesta;
-            return next;
-          });
-        }
-        alert(data.error || "No se pudo guardar");
-        setSavingEdit(false);
-        return;
+      const json = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(json?.error || "No se pudieron guardar los cambios");
       }
-// Sincroniza desde la BD para evitar estados viejos y claves desfasadas
-await fetchEvents();
-setSavingEdit(false);
-setEditOpen(false);
-setEditMatch(null);
-prevEditRef.current = null;    
-} catch (err) {
-      // rollback
-      if (prevEditRef.current) {
-        setItems(prev => {
-          const idx = prev.findIndex(it => (it.title||"")===editMatch.title && (it.date||"")===editMatch.date && (it.time||"")===editMatch.time);
-          if (idx === -1) return prev;
-          const next = [...prev];
-          next[idx] = { ...prevEditRef.current! } as LocalFiesta;
-          return next;
-        });
-      }
-      alert("Error inesperado al guardar");
-      setSavingEdit(false);
+
+      await fetchEvents();
+      resetForm();
+    } catch (submitError: unknown) {
+      setError(submitError instanceof Error ? submitError.message : "No se pudieron guardar los cambios");
+    } finally {
+      setSaving(false);
     }
   }
 
-  function showDeleteToast(title: string, key: string) {
-    // Clear previous timer if any
-    if (toastTimerRef.current) {
-      window.clearTimeout(toastTimerRef.current);
-      toastTimerRef.current = null;
-    }
-    setToast({ show: true, text: `${title || "(Sin título)"} ha sido borrado`, key });
-    // Auto-hide after 5s
-    toastTimerRef.current = window.setTimeout(() => {
-      setToast(t => ({ ...t, show: false }));
-      toastTimerRef.current = null;
-    }, 5000);
-  }
+  async function handleDelete(event: LocalEvent) {
+    if (!event.id) return;
+    if (!window.confirm(`¿Borrar "${event.title}"?`)) return;
 
-  // Solo revierte el borrado localmente, no revierte el comentario de GitHub.
-  function undoDelete() {
-    if (!toast.key) return;
-    // Cancelar borrado pendiente
-    if (deleteTimerRef.current) { window.clearTimeout(deleteTimerRef.current); deleteTimerRef.current = null; }
-    pendingRef.current = null;
-
-    setRemoved(prev => {
-      const copy = { ...prev };
-      delete copy[toast.key as string];
-      return copy;
-    });
-    if (toastTimerRef.current) { window.clearTimeout(toastTimerRef.current); toastTimerRef.current = null; }
-    setToast({ show: false, text: "", key: null });
-  }
-
-  async function handleDelete(ev: { title?: string; date?: string; time?: string }) {
-    if (!confirm("¿Seguro que quieres borrar este evento?")) return;
-
-    // Limpiar timers previos si los hubiera
-    if (toastTimerRef.current) { window.clearTimeout(toastTimerRef.current); toastTimerRef.current = null; }
-    if (deleteTimerRef.current) { window.clearTimeout(deleteTimerRef.current); deleteTimerRef.current = null; }
-
-    const payload = { title: ev.title || "", date: ev.date || "", time: ev.time || "" };
-    const key = makeKey(payload);
-
-    // Ocultamos inmediatamente en UI y mostramos toast
-    setRemoved(prev => ({ ...prev, [key]: true }));
-    showDeleteToast(payload.title, key);
-    setOpenIndex(null);
-
-    // Guardamos como borrado pendiente (para poder deshacer)
-    pendingRef.current = { key, title: payload.title, payload };
-
-    // Programamos el borrado real para dentro de 5s
-    deleteTimerRef.current = window.setTimeout(async () => {
-      // Si ya no hay pendiente (se deshizo), no hacemos nada
-      if (!pendingRef.current || pendingRef.current.key !== key) return;
-      try {
-        const res = await fetch("/api/events/delete", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
-        const data = await res.json().catch(() => ({}));
-        if (!res.ok) {
-  alert(data.error || "No se pudo borrar");
-  // Revertimos en UI si falló el commit
-  setRemoved(prev => { const copy = { ...prev }; delete copy[key]; return copy; });
-} else {
-  // Refrescar lista tras borrar en servidor
-  await fetchEvents();
-}
-      } catch (err) {
-        alert("Error inesperado al borrar");
-        setRemoved(prev => { const copy = { ...prev }; delete copy[key]; return copy; });
-      } finally {
-        // Limpieza
-        pendingRef.current = null;
-        if (deleteTimerRef.current) { window.clearTimeout(deleteTimerRef.current); deleteTimerRef.current = null; }
+    setDeletingId(event.id);
+    setError(null);
+    try {
+      const response = await fetch("/api/events/delete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: event.id }),
+      });
+      const json = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(json?.error || "No se pudo borrar el evento");
       }
-    }, 5000);
 
-    // También programamos el auto-hide del toast a 5s (si no se deshace)
-    toastTimerRef.current = window.setTimeout(() => {
-      setToast(t => ({ ...t, show: false }));
-      toastTimerRef.current = null;
-    }, 5000);
+      await fetchEvents();
+    } catch (deleteError: unknown) {
+      setError(deleteError instanceof Error ? deleteError.message : "No se pudo borrar el evento");
+    } finally {
+      setDeletingId(null);
+    }
   }
 
-  return (
-    <main className="min-h-screen bg-[#E85D6A] text-[#0C2335]">
-      <div className="max-w-5xl mx-auto px-4 py-12">
-        {savingNotice && (
-          <div className="mb-4 rounded-lg border border-[#0C2335]/20 bg-white/80 px-4 py-2 text-sm text-[#0C2335]">
-            Evento creado
-          </div>
-        )}
-        <h1 className="text-[80px] leading-none font-semibold break-words">Horarios</h1>
+  async function toggleAllVisibility() {
+    const nextVisible = !allEventsVisible;
+    setTogglingVisibility(true);
+    setError(null);
+    try {
+      const response = await fetch("/api/events/visibility", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ visible: nextVisible }),
+      });
+      const json = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(json?.error || "No se pudo actualizar la visibilidad");
+      }
+      await fetchEvents();
+    } catch (toggleError: unknown) {
+      setError(toggleError instanceof Error ? toggleError.message : "No se pudo actualizar la visibilidad");
+    } finally {
+      setTogglingVisibility(false);
+    }
+  }
 
-        {loading && (
-          <div className="mt-4 rounded-lg border border-[#0C2335]/20 bg-white/80 px-4 py-2 text-sm text-[#0C2335]">Cargando eventos…</div>
-        )}
-        {!loading && error && (
-          <div className="mt-4 rounded-lg border border-red-500/30 bg-white/80 px-4 py-2 text-sm text-red-700">{error}</div>
-        )}
-
-        <div className="mt-2 flex items-center justify-end gap-2">
-          {!selectMode ? (
-            <button
-              type="button"
-              onClick={() => setSelectMode(true)}
-              className="rounded border border-[#0C2335]/30 px-3 py-1.5 text-sm hover:bg-[#0C2335]/5"
+  function renderEventCard(event: LocalEvent) {
+    return (
+      <article
+        key={`${event.id ?? `${event.date}-${event.time}-${event.title}`}`}
+        className="border-t border-[#1B4332]/18 py-5 first:border-t-0"
+      >
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <p className="text-[11px] uppercase tracking-[0.28em] text-[#1B4332]/55">{event.time}</p>
+            <h3
+              className="mt-2 text-3xl uppercase leading-none text-[#1B4332]"
+              style={{ fontFamily: "var(--font-bebas-neue)" }}
             >
-              Seleccionar
-            </button>
-          ) : (
-            <>
-              <button
-                type="button"
-                onClick={() => { setSelectMode(false); clearSelection(); }}
-                className="rounded border border-[#0C2335]/30 px-3 py-1.5 text-sm hover:bg-[#0C2335]/5"
-              >
-                Cancelar
-              </button>
-              <button
-                type="button"
-                disabled={selectedCount === 0 || bulkDeleting}
-                onClick={handleBulkDelete}
-                className="inline-flex items-center gap-2 rounded bg-[#0C2335] text-white px-3 py-1.5 text-sm disabled:opacity-50"
-              >
-                {bulkDeleting && (
-                  <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" opacity="0.25"/>
-                    <path d="M22 12a10 10 0 0 1-10 10" stroke="currentColor" strokeWidth="4"/>
-                  </svg>
-                )}
-                Eliminar seleccionados ({selectedCount})
-              </button>
-            </>
+              {event.title}
+            </h3>
+          </div>
+          {event.provisional && (
+            <span className="rounded-full border border-[#A61F24] px-3 py-1 text-[11px] uppercase tracking-[0.2em] text-[#A61F24]">
+              Provisional
+            </span>
           )}
         </div>
 
-        {/* Listado: fecha - hora, nombre */}
-        <ul className="mt-6 divide-y divide-[#0C2335]/10">
-          {eventosOrdenados.filter(ev => !removed[makeKey(ev)]).map((ev, idx) => {
-            const fechaHora = ev.date && ev.time
-              ? `${ev.date} - ${ev.time}`
-              : ev.date || ev.time || "—";
-            const isOpen = openIndex === idx;
-            const asistentes = (ev as { attendees?: string[] }).attendees ?? [];
-            const user = getCurrentUser();
-            const isAttending = !!(user && asistentes.includes(user));
-            return (
-              <li key={makeKey(ev)} className="py-3">
-                <div className="flex items-start gap-2">
-                  {selectMode && (
-                    <input
-                      type="checkbox"
-                      checked={!!selected[makeKey(ev)]}
-                      onChange={() => toggleSelect(makeKey(ev))}
-                      className="mt-1 h-4 w-4 accent-[#0C2335]"
-                      aria-label="Seleccionar evento"
-                    />
-                  )}
-                  <button
-                    type="button"
-                    onClick={() => setOpenIndex(isOpen ? null : idx)}
-                    className="flex-1 text-left"
-                  >
-                    <div className="flex items-baseline justify-between gap-3">
-                      <span className="text-sm whitespace-nowrap">{fechaHora}</span>
-                      <span className="text-base font-medium truncate">{ev.title || "(Sin título)"}</span>
-                    </div>
-                  </button>
-                </div>
-                {isOpen && (
-                  <div className="mt-2 pl-2 text-sm space-y-2">
-                    <p><span className="font-semibold">Lugar:</span> {ev.location || "—"}</p>
-                    <p><span className="font-semibold">Provisional:</span> {ev.provisional ? "Sí" : "No"}</p>
-                    <p>
-                      <span className="font-semibold">Asistirá:</span>{" "}
-                      {asistentes.length > 0 ? asistentes.join(", ") : <span className="italic">de momento nadie...</span>}
-                    </p>
-                    <p>
-                      <span className="font-semibold">Etiquetas:</span>{" "}
-                      {ev.tags && ev.tags.length > 0 ? ev.tags.join(", ") : "—"}
-                    </p>
+        <div className="mt-5 grid gap-3 text-sm text-[#1B4332]/80 sm:grid-cols-[1.2fr_0.8fr]">
+          <div>
+            <p className="text-[11px] uppercase tracking-[0.25em] text-[#1B4332]/45">Lugar</p>
+            <p className="mt-1">{event.location || "Sin lugar indicado"}</p>
+          </div>
+          <div>
+            <p className="text-[11px] uppercase tracking-[0.25em] text-[#1B4332]/45">Etiquetas</p>
+            <p className="mt-1">{event.tags.length > 0 ? event.tags.join(", ") : "Sin etiquetas"}</p>
+          </div>
+          <div>
+            <p className="text-[11px] uppercase tracking-[0.25em] text-[#1B4332]/45">Visibilidad</p>
+            <p className="mt-1">{event.visible ? "Visible" : "Oculto"}</p>
+          </div>
+        </div>
 
-                    {/* Action buttons: trash, pencil, check */}
-                    {!selectMode && (
-                      <div className="pt-1 flex items-center gap-3 justify-end">
-                        {/* Trash */}
-                        <button
-                          type="button"
-                          aria-label="Eliminar"
-                          onClick={() => handleDelete(ev)}
-                          className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-[#0C2335]/30 hover:bg-[#0C2335]/5"
-                        >
-                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M3 6h18" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                            <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                            <path d="M6 6l1 14a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-14" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                            <path d="M10 11v6M14 11v6" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                          </svg>
-                        </button>
+        <div className="mt-5 flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={() => openEdit(event)}
+            className="rounded-full border border-[#1B4332] px-4 py-2 text-[11px] uppercase tracking-[0.24em] text-[#1B4332] transition hover:bg-[#1B4332] hover:text-[#F0EAD6]"
+          >
+            Editar
+          </button>
+          <button
+            type="button"
+            onClick={() => handleDelete(event)}
+            disabled={deletingId === event.id}
+            className="rounded-full border border-[#A61F24] px-4 py-2 text-[11px] uppercase tracking-[0.24em] text-[#A61F24] transition hover:bg-[#A61F24] hover:text-white disabled:opacity-50"
+          >
+            {deletingId === event.id ? "Borrando..." : "Borrar"}
+          </button>
+        </div>
+      </article>
+    );
+  }
 
-                        {/* Pencil */}
-                        <button
-                          type="button"
-                          aria-label="Editar"
-                          onClick={() => openEdit(ev)}
-                          className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-[#0C2335]/30 hover:bg-[#0C2335]/5"
-                        >
-                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25z" stroke="currentColor" strokeWidth="1.5" fill="none"/>
-                            <path d="M20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" stroke="currentColor" strokeWidth="1.5" fill="none"/>
-                          </svg>
-                        </button>
+  function renderGroup(title: string, accent: string, groups: EventGroup[], ref?: React.RefObject<HTMLDivElement | null>) {
+    if (groups.length === 0) return null;
 
-                        {/* Check */}
-                        <button
-                          type="button"
-                          aria-label="Confirmar"
-                          onClick={() => handleAttendClick(ev)}
-                          className={`inline-flex h-9 w-9 items-center justify-center rounded-md border ${isAttending ? 'bg-green-500 text-white border-green-600' : 'border-[#0C2335]/30 hover:bg-[#0C2335]/5'}`}
-                        >
-                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M20 6L9 17l-5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                          </svg>
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </li>
-            );
-          })}
-        </ul>
-      </div>
-      {/* Edit Modal */}
-      {editOpen && (
-        <div className="fixed inset-0 z-50">
-          <div className="absolute inset-0 bg-black/40" onClick={closeEdit} aria-hidden="true" />
-          <div className="absolute inset-0 bg-[#E85D6A] text-[#0C2335] md:rounded-t-xl md:top-12 md:h-[calc(100%-3rem)] overflow-auto">
-            <div className="sticky top-0 flex items-center justify-between border-b border-[#0C2335]/20 bg-[#E85D6A] px-4 py-3">
-              <h3 className="font-semibold text-lg">Editar evento</h3>
-              <button onClick={closeEdit} className="rounded border border-[#0C2335]/30 px-2 py-1 text-sm hover:bg-[#0C2335]/5">Cerrar</button>
+    return (
+      <section ref={ref} className="scroll-mt-24">
+        <div className="mb-5 flex items-center gap-3">
+          <span className="h-px flex-1 bg-[#1B4332]/20" />
+          <p className="text-[11px] uppercase tracking-[0.4em] text-[#1B4332]/55">{title}</p>
+          <span className="h-px flex-1 bg-[#1B4332]/20" />
+        </div>
+
+        <div className="space-y-8">
+          {groups.map((group) => (
+            <div key={group.date} className="px-1 py-2" style={{ ["--group-bg" as string]: accent }}>
+              <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+                <h2
+                  className="text-4xl uppercase leading-none text-[#1B4332]"
+                  style={{ fontFamily: "var(--font-bebas-neue)" }}
+                >
+                  {group.label}
+                </h2>
+                <p className="text-sm text-[#1B4332]/65">{group.items.length} evento(s)</p>
+              </div>
+
+              <div className="mt-5">
+                {group.items.map(renderEventCard)}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+    );
+  }
+
+  return (
+    <main className="min-h-screen bg-[#F0EAD6] text-[#1B4332]">
+      <section className="border-b-2 border-[#1B4332]">
+        <div className="mx-auto max-w-7xl px-5 py-8 sm:px-8 sm:py-10">
+          <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
+            <div className="max-w-2xl">
+              <p className="text-[10px] uppercase tracking-[0.42em] text-[#1B4332]/45">Comision de fiestas</p>
+              <h1
+                className="mt-3 text-[4.5rem] uppercase leading-[0.84] text-[#1B4332] sm:text-[6.5rem]"
+                style={{ fontFamily: "var(--font-bebas-neue)" }}
+              >
+                Horarios
+              </h1>
+              <p className="mt-4 max-w-xl text-sm leading-6 text-[#1B4332]/78">
+                Un solo panel para crear, editar y borrar eventos. Si no aplicas filtro,
+                el listado se centra en hoy: arriba quedan los dias anteriores y debajo los siguientes.
+              </p>
             </div>
 
-            <div className="p-4">
-              <form className="grid grid-cols-1 gap-3 max-w-2xl">
-                <label className="text-sm">Título
-                  <input
-                    value={editForm.title}
-                    onChange={(e)=>setEditForm({...editForm, title: e.target.value})}
-                    className="mt-1 w-full rounded border border-[#0C2335]/30 bg-[#E85D6A] px-3 py-2 text-sm text-[#0C2335]"
-                  />
-                </label>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <label className="text-sm">Fecha
-                    <input type="date" value={editForm.date} onChange={e=>setEditForm({...editForm, date: e.target.value})} className="mt-1 w-full rounded border border-[#0C2335]/30 bg-[#E85D6A] px-3 py-2 text-sm text-[#0C2335]" />
-                  </label>
-                  <label className="text-sm">Hora
-                    <input type="time" value={editForm.time} onChange={e=>setEditForm({...editForm, time: e.target.value})} className="mt-1 w-full rounded border border-[#0C2335]/30 bg-[#E85D6A] px-3 py-2 text-sm text-[#0C2335]" />
-                  </label>
-                </div>
-
-                <label className="text-sm">Lugar
-                  <input value={editForm.location} onChange={e=>setEditForm({...editForm, location: e.target.value})} className="mt-1 w-full rounded border border-[#0C2335]/30 bg-[#E85D6A] px-3 py-2 text-sm text-[#0C2335]" />
-                </label>
-
-
-                <div className="flex items-center gap-2">
-  <input
-    id="edit-provisional"
-    type="checkbox"
-    checked={!!editForm.provisional}
-    onChange={(e)=>setEditForm({...editForm, provisional: e.target.checked})}
-    className="h-4 w-4 border"
-  />
-  <label htmlFor="edit-provisional" className="text-sm font-semibold">Provisional</label>
-</div>
-
-                <fieldset className="text-sm">
-                  <legend className="font-semibold">Etiquetas</legend>
-                  <div className="mt-1 grid grid-cols-2 gap-2">
-                    {["noche","familia","todos los públicos","comida/cena","toros"].map(tag => (
-                      <label key={tag} className="flex items-center gap-2">
-                        <input
-                          type="checkbox"
-                          value={tag}
-                          checked={editForm.tags.includes(tag)}
-                          onChange={e => {
-                            const checked = e.target.checked;
-                            setEditForm({
-                              ...editForm,
-                              tags: checked
-                                ? [...editForm.tags, tag]
-                                : editForm.tags.filter(t => t !== tag),
-                            });
-                          }}
-                          className="h-4 w-4 border"
-                        />
-                        {tag}
-                      </label>
-                    ))}
-                  </div>
-                </fieldset>
-
-                <div className="flex justify-end items-center gap-3 pt-2">
-                  {savingEdit && <span className="text-xs opacity-80">Guardando…</span>}
-                  <button type="button" onClick={closeEdit} disabled={savingEdit} className="rounded border border-[#0C2335]/30 px-3 py-2 text-sm hover:bg-[#0C2335]/5 disabled:opacity-60">Cancelar</button>
-                  <button type="button" onClick={saveEdit} disabled={savingEdit} className="rounded bg-[#0C2335] text-white px-4 py-2 text-sm hover:opacity-90 disabled:opacity-60">Guardar</button>
-                </div>
-              </form>
+            <div className="flex flex-wrap gap-3">
+              <button
+                type="button"
+                onClick={openCreate}
+                className="rounded-full border-2 border-[#1B4332] bg-[#1B4332] px-6 py-3 text-[11px] uppercase tracking-[0.3em] text-[#F0EAD6] transition hover:bg-transparent hover:text-[#1B4332]"
+              >
+                Nuevo evento
+              </button>
+              <button
+                type="button"
+                onClick={toggleAllVisibility}
+                disabled={togglingVisibility || items.length === 0}
+                className="rounded-full border-2 border-[#1B4332] px-6 py-3 text-[11px] uppercase tracking-[0.3em] text-[#1B4332] transition hover:bg-[#1B4332] hover:text-[#F0EAD6] disabled:opacity-50"
+              >
+                {togglingVisibility ? "Actualizando..." : allEventsVisible ? "Ocultar todas" : "Hacer todas visibles"}
+              </button>
+              <a
+                href="/api/logout"
+                className="rounded-full border-2 border-[#A61F24] px-6 py-3 text-[11px] uppercase tracking-[0.3em] text-[#A61F24] transition hover:bg-[#A61F24] hover:text-white"
+              >
+                Cerrar sesion
+              </a>
             </div>
           </div>
         </div>
+      </section>
+
+      <section className="border-b-2 border-[#1B4332] bg-[#E5DDC4]">
+        <div className="mx-auto flex max-w-7xl flex-col gap-4 px-5 py-5 sm:px-8 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <p className="text-[10px] uppercase tracking-[0.36em] text-[#1B4332]/45">Filtro por dia</p>
+            <div className="mt-3 flex flex-wrap items-center gap-3">
+              <input
+                type="date"
+                value={filterDate}
+                onChange={(event) => setFilterDate(event.target.value)}
+                className="rounded-full border border-[#1B4332] bg-[#F0EAD6] px-4 py-2 text-sm text-[#1B4332]"
+              />
+              <button
+                type="button"
+                onClick={() => setFilterDate(todayKey)}
+                className="rounded-full border border-[#1B4332] px-4 py-2 text-[11px] uppercase tracking-[0.24em] text-[#1B4332] transition hover:bg-[#1B4332] hover:text-[#F0EAD6]"
+              >
+                Hoy
+              </button>
+              <button
+                type="button"
+                onClick={() => setFilterDate("")}
+                className="rounded-full border border-[#1B4332]/35 px-4 py-2 text-[11px] uppercase tracking-[0.24em] text-[#1B4332]/70 transition hover:border-[#1B4332] hover:text-[#1B4332]"
+              >
+                Ver todo
+              </button>
+            </div>
+          </div>
+
+          <div className="text-sm text-[#1B4332]/72">
+            {filterDate ? (
+              <p>Mostrando solo {toDisplayDate(filterDate)}.</p>
+            ) : (
+              <p>Vista completa centrada en el dia de hoy.</p>
+            )}
+          </div>
+        </div>
+      </section>
+
+      {editorOpen && (
+        <section className="border-b-2 border-[#1B4332] bg-[#A61F24] text-[#F0EAD6]">
+          <div className="mx-auto max-w-7xl px-5 py-8 sm:px-8">
+            <div className="mb-6 flex items-start justify-between gap-4">
+              <div>
+                <p className="text-[10px] uppercase tracking-[0.36em] text-[#F0EAD6]/65">
+                  {editingId == null ? "Crear evento" : "Editar evento"}
+                </p>
+                <h2
+                  className="mt-2 text-5xl uppercase leading-none"
+                  style={{ fontFamily: "var(--font-bebas-neue)" }}
+                >
+                  {editingId == null ? "Nuevo horario" : "Actualizar horario"}
+                </h2>
+              </div>
+              <button
+                type="button"
+                onClick={resetForm}
+                className="rounded-full border border-[#F0EAD6]/45 px-4 py-2 text-[11px] uppercase tracking-[0.24em] transition hover:bg-[#F0EAD6] hover:text-[#A61F24]"
+              >
+                Cerrar
+              </button>
+            </div>
+
+            <form className="grid gap-4 lg:grid-cols-2" onSubmit={handleSubmit}>
+              <label className="block">
+                <span className="text-[11px] uppercase tracking-[0.24em] text-[#F0EAD6]/70">Titulo</span>
+                <input
+                  required
+                  value={form.title}
+                  onChange={(event) => updateForm("title", event.target.value)}
+                  className="mt-2 w-full rounded-2xl border border-[#F0EAD6]/35 bg-transparent px-4 py-3 text-base outline-none placeholder:text-[#F0EAD6]/40"
+                  placeholder="Gran prix, verbena, cena..."
+                />
+              </label>
+
+              <label className="block">
+                <span className="text-[11px] uppercase tracking-[0.24em] text-[#F0EAD6]/70">Lugar</span>
+                <input
+                  value={form.location}
+                  onChange={(event) => updateForm("location", event.target.value)}
+                  className="mt-2 w-full rounded-2xl border border-[#F0EAD6]/35 bg-transparent px-4 py-3 text-base outline-none placeholder:text-[#F0EAD6]/40"
+                  placeholder="Plaza, fronton, parque..."
+                />
+              </label>
+
+              <label className="block">
+                <span className="text-[11px] uppercase tracking-[0.24em] text-[#F0EAD6]/70">Fecha</span>
+                <input
+                  required
+                  type="date"
+                  value={form.date}
+                  onChange={(event) => updateForm("date", event.target.value)}
+                  className="mt-2 w-full rounded-2xl border border-[#F0EAD6]/35 bg-transparent px-4 py-3 text-base outline-none"
+                />
+              </label>
+
+              <label className="block">
+                <span className="text-[11px] uppercase tracking-[0.24em] text-[#F0EAD6]/70">Hora</span>
+                <input
+                  required
+                  type="time"
+                  value={form.time}
+                  onChange={(event) => updateForm("time", event.target.value)}
+                  className="mt-2 w-full rounded-2xl border border-[#F0EAD6]/35 bg-transparent px-4 py-3 text-base outline-none"
+                />
+              </label>
+
+              <div className="lg:col-span-2">
+                <p className="text-[11px] uppercase tracking-[0.24em] text-[#F0EAD6]/70">Etiquetas</p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {TAG_OPTIONS.map((tag) => {
+                    const active = form.tags.includes(tag);
+                    return (
+                      <button
+                        key={tag}
+                        type="button"
+                        onClick={() => toggleTag(tag)}
+                        className={`rounded-full border px-4 py-2 text-[11px] uppercase tracking-[0.2em] transition ${
+                          active
+                            ? "border-[#F0EAD6] bg-[#F0EAD6] text-[#A61F24]"
+                            : "border-[#F0EAD6]/35 text-[#F0EAD6]"
+                        }`}
+                      >
+                        {tag}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <label className="flex items-center gap-3 lg:col-span-2">
+                <input
+                  type="checkbox"
+                  checked={form.provisional}
+                  onChange={(event) => updateForm("provisional", event.target.checked)}
+                  className="h-5 w-5 rounded border border-[#F0EAD6]/35"
+                />
+                <span className="text-sm">Marcar como provisional</span>
+              </label>
+
+              <div className="flex flex-wrap gap-3 lg:col-span-2">
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className="rounded-full bg-[#F0EAD6] px-6 py-3 text-[11px] uppercase tracking-[0.3em] text-[#A61F24] transition hover:opacity-90 disabled:opacity-60"
+                >
+                  {saving ? "Guardando..." : editingId == null ? "Crear evento" : "Guardar cambios"}
+                </button>
+                <button
+                  type="button"
+                  onClick={resetForm}
+                  className="rounded-full border border-[#F0EAD6]/35 px-6 py-3 text-[11px] uppercase tracking-[0.3em] transition hover:bg-[#F0EAD6] hover:text-[#A61F24]"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </form>
+          </div>
+        </section>
       )}
-      
-    {/* Floating add button */}
-    <Link
-      href="/layoutComision/horarios/nuevo"
-      aria-label="Añadir nuevo horario"
-      className="fixed bottom-6 right-6 h-14 w-14 rounded-full bg-[#0C2335] text-white shadow-lg flex items-center justify-center hover:opacity-90"
-    >
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-      </svg>
-    </Link>
+
+      <section className="mx-auto max-w-7xl px-5 py-8 sm:px-8 sm:py-10">
+        {loading && (
+          <div className="rounded-[2rem] border border-[#1B4332] bg-white/70 px-6 py-5 text-sm text-[#1B4332]/70">
+            Cargando horarios...
+          </div>
+        )}
+
+        {!loading && error && (
+          <div className="mb-6 rounded-[2rem] border border-[#A61F24] bg-white/80 px-6 py-5 text-sm text-[#A61F24]">
+            {error}
+          </div>
+        )}
+
+        {!loading && visibleItems.length === 0 && (
+          <div className="rounded-[2rem] border border-[#1B4332] bg-white/70 px-6 py-8 text-sm text-[#1B4332]/70">
+            No hay eventos para este dia todavia.
+          </div>
+        )}
+
+        {!loading && filterDate && filteredGroups.length > 0 && (
+          <div className="space-y-8">
+            {renderGroup("Dia filtrado", "#FFF4D8", filteredGroups)}
+          </div>
+        )}
+
+        {!loading && !filterDate && (
+          <div className="space-y-10">
+            {renderGroup("Anteriores", "#E5DDC4", grouped.previous)}
+            {renderGroup("Hoy", "#FFF4D8", grouped.today, todayRef)}
+            {renderGroup("Siguientes", "#DDE8DF", grouped.next)}
+          </div>
+        )}
+      </section>
     </main>
   );
 }

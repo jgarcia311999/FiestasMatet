@@ -1,30 +1,21 @@
-// src/app/api/events/route.ts
 import { NextResponse } from "next/server";
-import fallbackEvents from "../../../../events.json";
+import { cookies } from "next/headers";
+import crypto from "crypto";
 import { formatInTimeZone } from "date-fns-tz";
+import { db } from "@/db/client";
+import { events } from "@/db/schema";
+import { eq } from "drizzle-orm";
 
-// Evita cache en desarrollo/producción; siempre datos frescos
 export const dynamic = "force-dynamic";
-// Si usas Neon serverless en Edge, puedes activar esto:
-// export const runtime = "edge";
 
 const TZ = "Europe/Madrid";
-
-type FallbackEvent = {
-  id: number;
-  title: string;
-  starts_at: string;
-  location?: string;
-  provisional?: boolean;
-  attendees?: string[] | null;
-  tags?: string[] | null;
-};
 
 function normalizeRows(
   rows: Array<{
     id: number;
     title: string;
     location?: string | null;
+    visible?: boolean | null;
     provisional?: boolean | null;
     attendees?: unknown;
     startsAt: string | Date;
@@ -36,6 +27,7 @@ function normalizeRows(
     return {
       ...event,
       location: event.location ?? "",
+      visible: !!event.visible,
       provisional: !!event.provisional,
       attendees: Array.isArray(event.attendees) ? event.attendees : [],
       tags: Array.isArray(event.tags) ? event.tags : [],
@@ -46,63 +38,53 @@ function normalizeRows(
   });
 }
 
-export async function GET() {
+async function canIncludeHidden() {
+  const includeHiddenCookie = (await cookies()).get("commission_auth")?.value;
+  if (!includeHiddenCookie) return false;
+
+  const pass = process.env.INTRANET_PASS || "";
+  const secret = process.env.SESSION_SECRET || "";
+  const expected = crypto.createHash("sha256").update(pass + secret).digest("hex");
+  return includeHiddenCookie === expected;
+}
+
+export async function GET(req: Request) {
   try {
-    if (process.env.DATABASE_URL) {
-      const [{ db }, { events }] = await Promise.all([
-        import("../../../db/client.js"),
-        import("../../../db/schema.js"),
-      ]);
-
-      const rows = await db
-        .select({
-          id: events.id,
-          title: events.title,
-          location: events.location,
-          provisional: events.provisional,
-          attendees: events.attendees,
-          startsAt: events.startsAt,
-          tags: events.tags,
-        })
-        .from(events);
-
-      const normalized = normalizeRows(rows).sort(
-        (a, b) => new Date(a.startsAt).getTime() - new Date(b.startsAt).getTime()
+    if (!process.env.DATABASE_URL) {
+      return NextResponse.json(
+        { error: "DATABASE_URL no esta configurada. Horarios solo funciona con la BBDD real." },
+        { status: 500 }
       );
-
-      return NextResponse.json({ events: normalized });
     }
 
-    const normalizedFallback = normalizeRows(
-      (fallbackEvents as FallbackEvent[]).map((event) => ({
-        id: event.id,
-        title: event.title,
-        location: event.location ?? "",
-        provisional: event.provisional ?? false,
-        attendees: event.attendees ?? [],
-        startsAt: event.starts_at,
-        tags: event.tags ?? [],
-      }))
+    const { searchParams } = new URL(req.url);
+    const wantsHidden = searchParams.get("includeHidden") === "1";
+    const includeHidden = wantsHidden && (await canIncludeHidden());
+
+    const baseQuery = db
+      .select({
+        id: events.id,
+        title: events.title,
+        location: events.location,
+        visible: events.visible,
+        provisional: events.provisional,
+        attendees: events.attendees,
+        startsAt: events.startsAt,
+        tags: events.tags,
+      })
+      .from(events);
+
+    const rows = includeHidden ? await baseQuery : await baseQuery.where(eq(events.visible, true));
+
+    const normalized = normalizeRows(rows).sort(
+      (a, b) => new Date(a.startsAt).getTime() - new Date(b.startsAt).getTime()
     );
 
-    return NextResponse.json({ events: normalizedFallback });
+    return NextResponse.json({ events: normalized });
   } catch (err: unknown) {
-    const normalizedFallback = normalizeRows(
-      (fallbackEvents as FallbackEvent[]).map((event) => ({
-        id: event.id,
-        title: event.title,
-        location: event.location ?? "",
-        provisional: event.provisional ?? false,
-        attendees: event.attendees ?? [],
-        startsAt: event.starts_at,
-        tags: event.tags ?? [],
-      }))
+    return NextResponse.json(
+      { error: err instanceof Error ? err.message : "No se pudieron obtener los eventos desde la base de datos" },
+      { status: 500 }
     );
-
-    return NextResponse.json({
-      events: normalizedFallback,
-      source: "fallback",
-      warning: err instanceof Error ? err.message : "No se pudieron obtener los eventos desde la base de datos",
-    });
   }
 }

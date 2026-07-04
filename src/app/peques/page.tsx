@@ -111,7 +111,6 @@ export default function PequesPage() {
     <ArchivePageLayout
       title="Peques"
       kicker="Familia y todos los públicos"
-      chapter="CAP.03"
       accent={RED}
       intro="La parte del programa que abre espacio a juegos, reuniones y actos donde el pueblo entero entra dentro."
     >

@@ -16,18 +16,6 @@ function getCoverPath(year: number) {
   return encodeURI(`/LIBROS DE FIESTAS/PORTADAS/Portada ${year}.png`);
 }
 
-function getInteriorFolder(year: number) {
-  if (year === 1981) {
-    return "LIBRO 1981(pdfgear.com) 2";
-  }
-
-  return `LIBRO ${year}(pdfgear.com)`;
-}
-
-function getInteriorPath(year: number, page: number) {
-  return encodeURI(`/LIBROS DE FIESTAS/Imgs/${getInteriorFolder(year)}/Page${page}.png`);
-}
-
 function getDecadeLabel(year: number) {
   return `${Math.floor(year / 10) * 10}s`;
 }
@@ -109,14 +97,10 @@ function getArchiveEntry(year: number) {
 
 export default function HistoriaPage() {
   const [selectedYear, setSelectedYear] = useState<number>(2024);
-  const [activeInteriorIndex, setActiveInteriorIndex] = useState(0);
   const [isSelectingYear, setIsSelectingYear] = useState(false);
   const featuredRef = useRef<HTMLElement | null>(null);
-  const filmstripRef = useRef<HTMLDivElement | null>(null);
 
   const selectedEntry = useMemo(() => getArchiveEntry(selectedYear), [selectedYear]);
-  const interiorPages = selectedEntry?.ocrPages ?? [];
-  const activeInterior = interiorPages[activeInteriorIndex] ?? null;
   const selectedIndex = YEARS.indexOf(selectedYear);
   const previousYear = selectedIndex > 0 ? YEARS[selectedIndex - 1] : null;
   const nextYear = selectedIndex < YEARS.length - 1 ? YEARS[selectedIndex + 1] : null;
@@ -129,11 +113,6 @@ export default function HistoriaPage() {
     () => extractDisplayNames(selectedEntry?.clavariaLines ?? []),
     [selectedEntry]
   );
-
-  useEffect(() => {
-    setActiveInteriorIndex(0);
-    filmstripRef.current?.scrollTo({ left: 0, behavior: "smooth" });
-  }, [selectedYear]);
 
   const yearsByDecade = useMemo(() => {
     const groups = new Map<string, number[]>();
@@ -173,15 +152,14 @@ export default function HistoriaPage() {
   return (
     <ArchivePageLayout
       title="Historia"
-      kicker="Portadas, páginas y nombres"
-      chapter="Cap. 05"
-      accent="#A61F24"
-      intro="Cada libro tiene su cubierta, su forma de maquetar el verano y, cuando el escaneo lo permite, los nombres de quienes levantaron las fiestas ese año."
+      kicker="Portadas y memoria"
+      accent="#1B4332"
+      intro="Un recorrido por los libros de fiestas conservados. Cada año reúne su portada y, cuando el escaneo ayuda, nombres de comisión y clavarias."
       contentWidthClassName="max-w-[1500px]"
     >
       <section
         ref={featuredRef}
-        className="relative overflow-hidden rounded-[2rem] border border-[#1B4332]/10 bg-[linear-gradient(135deg,rgba(166,31,36,0.05),rgba(255,255,255,0.35)_38%,rgba(27,67,50,0.05)_100%)] p-5 sm:p-6 lg:p-8"
+        className="relative overflow-hidden border-b-2 border-[#1B4332] pb-10"
       >
         <div className="pointer-events-none absolute right-4 top-2 text-[5rem] font-semibold leading-none text-[#1B4332]/6 sm:text-[8rem] lg:text-[11rem]">
           {selectedYear}
@@ -194,8 +172,8 @@ export default function HistoriaPage() {
           }`}
         >
           <div className="space-y-4">
-            <div className="rounded-[1.5rem] border border-[#1B4332]/10 bg-[#f7f1df] p-4 shadow-[0_20px_60px_rgba(27,67,50,0.08)]">
-              <div className="relative mx-auto aspect-[2/3] w-full max-w-[14rem] overflow-hidden rounded-[1rem] border border-[#1B4332]/12 shadow-[0_18px_50px_rgba(0,0,0,0.1)]">
+            <div className="border border-[#1B4332]/12 bg-[#f7f1df] p-4">
+              <div className="relative mx-auto aspect-[2/3] w-full max-w-[14rem] overflow-hidden border border-[#1B4332]/12">
                 <Image
                   src={getCoverPath(selectedYear)}
                   alt={`Portada del libro de fiestas ${selectedYear}`}
@@ -228,24 +206,24 @@ export default function HistoriaPage() {
                 →
               </button>
               <div className="ml-2 text-[10px] uppercase tracking-[0.3em] text-[#a78d73]">
-                {selectedEntry ? `${selectedEntry.interiorPages.length} páginas interiores` : "Solo portada"}
+                Portada conservada
               </div>
             </div>
           </div>
 
           <div className="space-y-6">
             <div className="grid gap-5 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]">
-              <div className="rounded-[1.6rem] border border-[#1B4332]/10 bg-[#f7f1df] p-5">
-                <p className="text-[10px] uppercase tracking-[0.3em] text-[#A61F24]">Edición seleccionada</p>
+              <div className="border border-[#1B4332]/12 bg-[#f7f1df] p-5">
+                <p className="text-[10px] uppercase tracking-[0.3em] text-[#1B4332]/50">Edición seleccionada</p>
                 <h2 className="mt-3 text-[4rem] font-semibold leading-none sm:text-[5.4rem]">{selectedYear}</h2>
                 <p className="mt-4 max-w-xl text-[15px] leading-7 text-[#486150]">
                   {selectedEntry
-                    ? "Esta ficha reúne la portada, las páginas interiores conservadas y el texto reconocido desde el escaneo."
-                    : "Todavía no hay páginas interiores digitalizadas para este año, pero la portada ya forma parte del archivo."}
+                    ? "Esta ficha reúne la portada y el texto reconocido desde el escaneo cuando ha sido posible."
+                    : "Por ahora conservamos la portada de esta edición dentro del archivo."}
                 </p>
 
                 <div className="mt-6 grid gap-4">
-                  <div className="rounded-[1.2rem] border border-[#1B4332]/10 bg-[#f3eadc] p-4">
+                  <div className="border-t border-[#1B4332]/10 pt-4">
                     <p className="text-[10px] uppercase tracking-[0.28em] text-[#a78d73]">Comisión</p>
                     {commissionLines.length > 0 ? (
                       <ul className="mt-3 grid gap-x-6 gap-y-1.5 text-sm leading-6 text-[#1B4332] sm:grid-cols-2">
@@ -260,7 +238,7 @@ export default function HistoriaPage() {
                     )}
                   </div>
 
-                  <div className="rounded-[1.2rem] border border-[#1B4332]/10 bg-[#f3eadc] p-4">
+                  <div className="border-t border-[#1B4332]/10 pt-4">
                     <p className="text-[10px] uppercase tracking-[0.28em] text-[#a78d73]">Clavarias</p>
                     {clavariaLines.length > 0 ? (
                       <ul className="mt-3 grid gap-x-6 gap-y-1.5 text-sm leading-6 text-[#1B4332] sm:grid-cols-2">
@@ -280,86 +258,19 @@ export default function HistoriaPage() {
                   Texto obtenido desde el escaneo. Puede contener pequeñas erratas de reconocimiento.
                 </p>
               </div>
-
-              <div className="rounded-[1.6rem] border border-[#1B4332]/10 bg-[#f7f1df] p-4 sm:p-5">
-                <div className="mb-4 flex items-center justify-between gap-4 border-b border-[#1B4332]/10 pb-4">
-                  <div>
-                    <p className="text-[10px] uppercase tracking-[0.28em] text-[#a78d73]">Interior</p>
-                    <p className="mt-2 text-sm leading-6 text-[#486150]">
-                      {activeInterior
-                        ? `Página ${activeInterior.page} del libro ${selectedYear}.`
-                        : "No hay páginas interiores cargadas para este año."}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="relative overflow-hidden rounded-[1.3rem] border border-[#1B4332]/10 bg-[#1a1413]">
-                  {activeInterior ? (
-                    <div className="relative aspect-[4/3] min-h-[18rem]">
-                      <Image
-                        src={getInteriorPath(selectedYear, activeInterior.page)}
-                        alt={`Página ${activeInterior.page} del libro ${selectedYear}`}
-                        fill
-                        className="object-contain"
-                        sizes="(max-width: 1024px) 100vw, 40rem"
-                        unoptimized
-                      />
-                      <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-[linear-gradient(180deg,transparent,rgba(7,5,5,0.88))] p-4">
-                        <p className="text-[10px] uppercase tracking-[0.3em] text-[#f3eadc]/72">
-                          Pág. {activeInterior.page}
-                        </p>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="flex min-h-[18rem] items-center justify-center px-6 text-center text-sm leading-7 text-[#dbcab7]">
-                      Esta edición todavía espera su tira interior.
-                    </div>
-                  )}
-                </div>
-
-                {interiorPages.length > 0 && (
-                  <div ref={filmstripRef} className="mt-4 flex gap-3 overflow-x-auto pb-1">
-                    {interiorPages.map((item, index) => (
-                      <button
-                        key={`${item.page}-${index}`}
-                        type="button"
-                        onClick={() => setActiveInteriorIndex(index)}
-                        className={`group relative h-28 w-24 shrink-0 overflow-hidden rounded-[1rem] border transition ${
-                          index === activeInteriorIndex
-                            ? "border-[#A61F24] ring-1 ring-[#A61F24]/35"
-                            : "border-[#1B4332]/10 opacity-75 hover:opacity-100"
-                        }`}
-                      >
-                        <Image
-                          src={getInteriorPath(selectedYear, item.page)}
-                          alt={`Miniatura de la página ${item.page}`}
-                          fill
-                          className="object-cover transition duration-300 group-hover:scale-[1.03]"
-                          sizes="96px"
-                          unoptimized
-                        />
-                        <div className="absolute inset-0 bg-[linear-gradient(180deg,transparent_35%,rgba(8,5,5,0.92)_100%)]" />
-                        <span className="absolute bottom-2 left-3 text-[10px] uppercase tracking-[0.25em] text-[#f3eadc]">
-                          {item.page}
-                        </span>
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
             </div>
           </div>
         </div>
       </section>
 
-      <section className="mt-10 rounded-[2rem] border border-white/10 bg-white/5 p-5 sm:p-6">
-        <div className="flex flex-wrap items-end justify-between gap-4 border-b border-white/10 pb-5">
+      <section className="mt-10 border-t-2 border-[#1B4332] pt-8">
+        <div className="flex flex-wrap items-end justify-between gap-4 border-b border-[#1B4332]/10 pb-5">
           <div>
-            <p className="text-[10px] uppercase tracking-[0.3em] text-[#A61F24]">Cronología</p>
+            <p className="text-[10px] uppercase tracking-[0.3em] text-[#1B4332]/50">Cronología</p>
             <h3 className="mt-3 text-3xl font-semibold">Elige una edición</h3>
           </div>
-          <p className="max-w-xl text-sm leading-7 text-[#dbcab7]">
-            Toca cualquier portada para cargar arriba su ficha completa con imágenes y texto extraído del interior.
+          <p className="max-w-xl text-sm leading-7 text-[#486150]">
+            Toca cualquier portada para cargar arriba su ficha con la portada y los nombres recuperados del archivo.
           </p>
         </div>
 
@@ -370,16 +281,16 @@ export default function HistoriaPage() {
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8">
                 {years.map((year) => {
                   const entry = getArchiveEntry(year);
-                  const hasInterior = !!entry && entry.interiorPages.length > 0;
+                  const hasArchiveText = !!entry && (entry.commissionLines.length > 0 || entry.clavariaLines.length > 0);
 
                   return (
                     <button
                       key={year}
                       type="button"
                       onClick={() => handleSelectYear(year)}
-                      className={`group relative overflow-hidden rounded-[1.2rem] border text-left transition ${
+                      className={`group relative overflow-hidden border text-left transition ${
                         selectedYear === year
-                          ? "-translate-y-1 border-[#A61F24] bg-[#f7f1df] ring-1 ring-[#A61F24]/35 shadow-lg shadow-[#A61F24]/10"
+                          ? "-translate-y-1 border-[#1B4332] bg-[#f7f1df]"
                           : "border-[#1B4332]/10 bg-[#f3eadc] hover:border-[#1B4332]/20 hover:-translate-y-0.5"
                       }`}
                     >
@@ -396,7 +307,7 @@ export default function HistoriaPage() {
                         <div className="absolute bottom-3 left-3 right-3">
                           <p className="text-lg font-semibold leading-none text-[#f3eadc]">{year}</p>
                           <p className="mt-1 text-[10px] uppercase tracking-[0.24em] text-[#f3eadc]/68">
-                            {hasInterior ? `${entry.interiorPages.length} páginas` : "Solo portada"}
+                            {hasArchiveText ? "Portada + archivo" : "Solo portada"}
                           </p>
                         </div>
                       </div>

@@ -102,7 +102,6 @@ export default function NochePage() {
     <ArchivePageLayout
       title="Noche"
       kicker="Verbenas y música en la plaza"
-      chapter="CAP.02"
       accent={INK}
       intro="Cuando baja el sol, el programa se lee distinto: escenario, plaza, música y gente entrando y saliendo del mismo recorrido."
     >

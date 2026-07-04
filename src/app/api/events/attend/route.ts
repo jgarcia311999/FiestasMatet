@@ -6,8 +6,6 @@ import { db } from "@/db/client";
 import { events } from "@/db/schema";
 import { eq, sql } from "drizzle-orm";
 
-const TZ = "Europe/Madrid";
-
 const MatchSchema = z.union([
   z.object({ id: z.union([z.string(), z.number()]) }),
   z.object({
