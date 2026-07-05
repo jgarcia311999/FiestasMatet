@@ -174,6 +174,7 @@ export default function HorariosPage() {
   const [editorOpen, setEditorOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [togglingVisibility, setTogglingVisibility] = useState(false);
+  const [togglingEventId, setTogglingEventId] = useState<number | string | null>(null);
   const [deletingId, setDeletingId] = useState<number | string | null>(null);
   const [editingId, setEditingId] = useState<number | string | null>(null);
   const [form, setForm] = useState<EventForm>(EMPTY_FORM);
@@ -358,6 +359,37 @@ export default function HorariosPage() {
     }
   }
 
+  async function toggleEventVisibility(event: LocalEvent) {
+    if (!event.id) return;
+
+    setTogglingEventId(event.id);
+    setError(null);
+    try {
+      const response = await fetch("/api/events/update", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          match: { id: event.id },
+          patch: { visible: !event.visible },
+        }),
+      });
+      const json = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(json?.error || "No se pudo actualizar la visibilidad del evento");
+      }
+
+      await fetchEvents();
+    } catch (toggleError: unknown) {
+      setError(
+        toggleError instanceof Error
+          ? toggleError.message
+          : "No se pudo actualizar la visibilidad del evento"
+      );
+    } finally {
+      setTogglingEventId(null);
+    }
+  }
+
   function renderEventCard(event: LocalEvent) {
     return (
       <article
@@ -407,6 +439,22 @@ export default function HorariosPage() {
             className="rounded-full border border-[#1B4332] px-4 py-2 text-[11px] uppercase tracking-[0.24em] text-[#1B4332] transition hover:bg-[#1B4332] hover:text-[#F0EAD6]"
           >
             Editar
+          </button>
+          <button
+            type="button"
+            onClick={() => toggleEventVisibility(event)}
+            disabled={togglingEventId === event.id}
+            className={`rounded-full border px-4 py-2 text-[11px] uppercase tracking-[0.24em] transition disabled:opacity-50 ${
+              event.visible
+                ? "border-[#A61F24] text-[#A61F24] hover:bg-[#A61F24] hover:text-white"
+                : "border-[#1B4332] text-[#1B4332] hover:bg-[#1B4332] hover:text-[#F0EAD6]"
+            }`}
+          >
+            {togglingEventId === event.id
+              ? "Actualizando..."
+              : event.visible
+              ? "Ocultar"
+              : "Mostrar"}
           </button>
           <button
             type="button"
