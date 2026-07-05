@@ -5,6 +5,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 type EventApi = {
   id?: number | string;
   title?: string;
+  calendarTitle?: string;
   location?: string;
   visible?: boolean;
   provisional?: boolean;
@@ -17,6 +18,7 @@ type EventApi = {
 
 type EventForm = {
   title: string;
+  calendarTitle: string;
   date: string;
   time: string;
   location: string;
@@ -27,6 +29,7 @@ type EventForm = {
 type LocalEvent = {
   id?: number | string;
   title: string;
+  calendarTitle: string;
   location: string;
   visible: boolean;
   provisional: boolean;
@@ -45,6 +48,7 @@ const TZ = "Europe/Madrid";
 const TAG_OPTIONS = ["noche", "familia", "todos los publicos", "comida/cena", "toros"];
 const EMPTY_FORM: EventForm = {
   title: "",
+  calendarTitle: "",
   date: "",
   time: "",
   location: "",
@@ -125,6 +129,7 @@ function fromApi(event: EventApi): LocalEvent | null {
   return {
     id: event.id,
     title: event.title?.trim() || "Sin titulo",
+    calendarTitle: event.calendarTitle?.trim() || "",
     location: event.location?.trim() || "",
     visible: !!event.visible,
     provisional: !!event.provisional,
@@ -239,6 +244,7 @@ export default function HorariosPage() {
   function openEdit(event: LocalEvent) {
     setForm({
       title: event.title,
+      calendarTitle: event.calendarTitle,
       date: event.date,
       time: event.time,
       location: event.location,
@@ -270,6 +276,7 @@ export default function HorariosPage() {
 
     const payload = {
       title: form.title.trim(),
+      calendarTitle: form.calendarTitle.trim(),
       date: form.date,
       time: form.time,
       location: form.location.trim(),
@@ -378,6 +385,10 @@ export default function HorariosPage() {
           <div>
             <p className="text-[11px] uppercase tracking-[0.25em] text-[#1B4332]/45">Lugar</p>
             <p className="mt-1">{event.location || "Sin lugar indicado"}</p>
+          </div>
+          <div>
+            <p className="text-[11px] uppercase tracking-[0.25em] text-[#1B4332]/45">Titulo calendario</p>
+            <p className="mt-1">{event.calendarTitle || "Usa el titulo completo"}</p>
           </div>
           <div>
             <p className="text-[11px] uppercase tracking-[0.25em] text-[#1B4332]/45">Etiquetas</p>
@@ -561,6 +572,16 @@ export default function HorariosPage() {
                   onChange={(event) => updateForm("title", event.target.value)}
                   className="mt-2 w-full rounded-2xl border border-[#F0EAD6]/35 bg-transparent px-4 py-3 text-base outline-none placeholder:text-[#F0EAD6]/40"
                   placeholder="Gran prix, verbena, cena..."
+                />
+              </label>
+
+              <label className="block">
+                <span className="text-[11px] uppercase tracking-[0.24em] text-[#F0EAD6]/70">Titulo corto calendario</span>
+                <input
+                  value={form.calendarTitle}
+                  onChange={(event) => updateForm("calendarTitle", event.target.value)}
+                  className="mt-2 w-full rounded-2xl border border-[#F0EAD6]/35 bg-transparent px-4 py-3 text-base outline-none placeholder:text-[#F0EAD6]/40"
+                  placeholder="Opcional: nombre corto en el iPhone"
                 />
               </label>
 

@@ -5,7 +5,6 @@ export default function Footer() {
   const hasSeg = (seg: string) => pathname.includes(`/` + seg);
   const isEditorial =
     pathname === "/" ||
-    pathname.startsWith("/home2") ||
     hasSeg("proximas") ||
     hasSeg("noche") ||
     hasSeg("peques") ||

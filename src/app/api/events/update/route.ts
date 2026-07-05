@@ -18,6 +18,7 @@ const MatchSchema = z.union([
 
 const PatchSchema = z.object({
   title: z.string().trim().min(1).optional(),
+  calendarTitle: z.string().trim().max(120).or(z.literal("")).optional(),
   img: z.string().trim().min(1).or(z.literal("")).optional(),
   description: z.string().optional(),
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
@@ -72,6 +73,7 @@ export async function POST(req: Request) {
 
     const updateSet: Record<string, unknown> = {};
     if (patch.title !== undefined) updateSet.title = patch.title;
+    if (patch.calendarTitle !== undefined) updateSet.calendarTitle = patch.calendarTitle || null;
     if (patch.img !== undefined) updateSet.img = patch.img;
     if (patch.description !== undefined) updateSet.description = patch.description;
     if (patch.location !== undefined) updateSet.location = patch.location;
@@ -94,6 +96,7 @@ export async function POST(req: Request) {
       .returning({
         id: events.id,
         title: events.title,
+        calendarTitle: events.calendarTitle,
         startsAt: events.startsAt,
         location: events.location,
         visible: events.visible,

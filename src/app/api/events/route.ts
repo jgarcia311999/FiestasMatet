@@ -14,6 +14,7 @@ function normalizeRows(
   rows: Array<{
     id: number;
     title: string;
+    calendarTitle?: string | null;
     location?: string | null;
     visible?: boolean | null;
     provisional?: boolean | null;
@@ -26,6 +27,7 @@ function normalizeRows(
     const startsAt = event.startsAt instanceof Date ? event.startsAt : new Date(event.startsAt);
     return {
       ...event,
+      calendarTitle: event.calendarTitle ?? "",
       location: event.location ?? "",
       visible: !!event.visible,
       provisional: !!event.provisional,
@@ -65,6 +67,7 @@ export async function GET(req: Request) {
       .select({
         id: events.id,
         title: events.title,
+        calendarTitle: events.calendarTitle,
         location: events.location,
         visible: events.visible,
         provisional: events.provisional,

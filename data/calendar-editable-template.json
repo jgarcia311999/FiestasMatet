@@ -1,0 +1,659 @@
+[
+  {
+    "id": 666,
+    "startsAt": "2026-08-06T18:00:00.000Z",
+    "currentTitle": "Merienda de confraternidad organizada por la asociación de jubilados y amenizada por el dúo musical Gonsy",
+    "shortTitle": "",
+    "fullTitleForNotes": "Merienda de confraternidad organizada por la asociación de jubilados y amenizada por el dúo musical Gonsy",
+    "location": "",
+    "provisional": false,
+    "tags": [
+      "comida/cena"
+    ]
+  },
+  {
+    "id": 667,
+    "startsAt": "2026-08-07T16:00:00.000Z",
+    "currentTitle": "Cuentacuentos",
+    "shortTitle": "",
+    "fullTitleForNotes": "Cuentacuentos",
+    "location": "Museo",
+    "provisional": false,
+    "tags": [
+      "familia",
+      "todos los publicos"
+    ]
+  },
+  {
+    "id": 668,
+    "startsAt": "2026-08-07T17:30:00.000Z",
+    "currentTitle": "¡Los Intensos!",
+    "shortTitle": "",
+    "fullTitleForNotes": "¡Los Intensos!",
+    "location": "Plaza de la Iglesia",
+    "provisional": false,
+    "tags": [
+      "familia",
+      "todos los publicos"
+    ]
+  },
+  {
+    "id": 669,
+    "startsAt": "2026-08-07T20:00:00.000Z",
+    "currentTitle": "Cena de sobaquillo",
+    "shortTitle": "",
+    "fullTitleForNotes": "Cena de sobaquillo",
+    "location": "",
+    "provisional": false,
+    "tags": [
+      "comida/cena"
+    ]
+  },
+  {
+    "id": 670,
+    "startsAt": "2026-08-07T21:30:00.000Z",
+    "currentTitle": "Chupinazo para dar inicio de fiestas frente al ayuntamiento acompañado de una charanga que amenice el acto",
+    "shortTitle": "",
+    "fullTitleForNotes": "Chupinazo para dar inicio de fiestas frente al ayuntamiento acompañado de una charanga que amenice el acto",
+    "location": "Frente al Ayuntamiento",
+    "provisional": false,
+    "tags": []
+  },
+  {
+    "id": 671,
+    "startsAt": "2026-08-07T23:00:00.000Z",
+    "currentTitle": "Discomóvil - DJ Cyaa Music",
+    "shortTitle": "",
+    "fullTitleForNotes": "Discomóvil - DJ Cyaa Music",
+    "location": "",
+    "provisional": false,
+    "tags": [
+      "noche"
+    ]
+  },
+  {
+    "id": 672,
+    "startsAt": "2026-08-08T21:00:00.000Z",
+    "currentTitle": "Presentación de las clavarias de la Virgen de la Asunción 2026: Zaira Folch Serra, Valeria Lloria Flores, Miriam Alférez Silvestre y Carolina Delgado Martínez",
+    "shortTitle": "",
+    "fullTitleForNotes": "Presentación de las clavarias de la Virgen de la Asunción 2026: Zaira Folch Serra, Valeria Lloria Flores, Miriam Alférez Silvestre y Carolina Delgado Martínez",
+    "location": "",
+    "provisional": false,
+    "tags": []
+  },
+  {
+    "id": 673,
+    "startsAt": "2026-08-08T22:00:00.000Z",
+    "currentTitle": "Orquesta - El Legado",
+    "shortTitle": "",
+    "fullTitleForNotes": "Orquesta - El Legado",
+    "location": "",
+    "provisional": false,
+    "tags": [
+      "noche"
+    ]
+  },
+  {
+    "id": 674,
+    "startsAt": "2026-08-09T16:00:00.000Z",
+    "currentTitle": "Pasacalles insectes",
+    "shortTitle": "",
+    "fullTitleForNotes": "Pasacalles insectes",
+    "location": "",
+    "provisional": false,
+    "tags": [
+      "familia",
+      "todos los publicos"
+    ]
+  },
+  {
+    "id": 675,
+    "startsAt": "2026-08-09T17:00:00.000Z",
+    "currentTitle": "Històries, la caixa màgica",
+    "shortTitle": "",
+    "fullTitleForNotes": "Històries, la caixa màgica",
+    "location": "",
+    "provisional": false,
+    "tags": [
+      "familia",
+      "todos los publicos"
+    ]
+  },
+  {
+    "id": 676,
+    "startsAt": "2026-08-09T19:00:00.000Z",
+    "currentTitle": "Concurso de paellas",
+    "shortTitle": "",
+    "fullTitleForNotes": "Concurso de paellas",
+    "location": "Plaza de la Iglesia",
+    "provisional": false,
+    "tags": [
+      "comida/cena"
+    ]
+  },
+  {
+    "id": 677,
+    "startsAt": "2026-08-09T22:00:00.000Z",
+    "currentTitle": "Discomóvil - DJ Ronda",
+    "shortTitle": "",
+    "fullTitleForNotes": "Discomóvil - DJ Ronda",
+    "location": "",
+    "provisional": false,
+    "tags": [
+      "noche"
+    ]
+  },
+  {
+    "id": 678,
+    "startsAt": "2026-08-10T16:00:00.000Z",
+    "currentTitle": "Parque infantil en la Plaza de la Iglesia",
+    "shortTitle": "",
+    "fullTitleForNotes": "Parque infantil en la Plaza de la Iglesia",
+    "location": "Plaza de la Iglesia",
+    "provisional": false,
+    "tags": [
+      "familia",
+      "todos los publicos"
+    ]
+  },
+  {
+    "id": 679,
+    "startsAt": "2026-08-10T20:00:00.000Z",
+    "currentTitle": "Cena de sobaquillo",
+    "shortTitle": "",
+    "fullTitleForNotes": "Cena de sobaquillo",
+    "location": "",
+    "provisional": false,
+    "tags": [
+      "comida/cena"
+    ]
+  },
+  {
+    "id": 680,
+    "startsAt": "2026-08-11T16:00:00.000Z",
+    "currentTitle": "Torneo fútbol 3 en la Plaza de la Iglesia",
+    "shortTitle": "",
+    "fullTitleForNotes": "Torneo fútbol 3 en la Plaza de la Iglesia",
+    "location": "Plaza de la Iglesia",
+    "provisional": false,
+    "tags": [
+      "familia",
+      "todos los publicos"
+    ]
+  },
+  {
+    "id": 681,
+    "startsAt": "2026-08-11T20:00:00.000Z",
+    "currentTitle": "Cena de sobaquillo",
+    "shortTitle": "",
+    "fullTitleForNotes": "Cena de sobaquillo",
+    "location": "",
+    "provisional": false,
+    "tags": [
+      "comida/cena"
+    ]
+  },
+  {
+    "id": 682,
+    "startsAt": "2026-08-11T21:00:00.000Z",
+    "currentTitle": "Cine \"Del revés\"",
+    "shortTitle": "",
+    "fullTitleForNotes": "Cine \"Del revés\"",
+    "location": "",
+    "provisional": false,
+    "tags": [
+      "familia",
+      "todos los publicos"
+    ]
+  },
+  {
+    "id": 683,
+    "startsAt": "2026-08-12T15:00:00.000Z",
+    "currentTitle": "Torneo de parchís, dominó y guiñote en la Plaza de la Iglesia",
+    "shortTitle": "",
+    "fullTitleForNotes": "Torneo de parchís, dominó y guiñote en la Plaza de la Iglesia",
+    "location": "Plaza de la Iglesia",
+    "provisional": false,
+    "tags": [
+      "familia",
+      "todos los publicos"
+    ]
+  },
+  {
+    "id": 684,
+    "startsAt": "2026-08-12T17:00:00.000Z",
+    "currentTitle": "Encuentro en la Plaza de la Iglesia para disfrutar del eclipse solar desde la era",
+    "shortTitle": "",
+    "fullTitleForNotes": "Encuentro en la Plaza de la Iglesia para disfrutar del eclipse solar desde la era",
+    "location": "Plaza de la Iglesia / La Era",
+    "provisional": false,
+    "tags": [
+      "familia",
+      "todos los publicos"
+    ]
+  },
+  {
+    "id": 685,
+    "startsAt": "2026-08-12T20:00:00.000Z",
+    "currentTitle": "Cena de sobaquillo",
+    "shortTitle": "",
+    "fullTitleForNotes": "Cena de sobaquillo",
+    "location": "",
+    "provisional": false,
+    "tags": [
+      "comida/cena"
+    ]
+  },
+  {
+    "id": 686,
+    "startsAt": "2026-08-12T21:30:00.000Z",
+    "currentTitle": "Noche de playbacks para todas las edades",
+    "shortTitle": "",
+    "fullTitleForNotes": "Noche de playbacks para todas las edades",
+    "location": "",
+    "provisional": false,
+    "tags": [
+      "familia",
+      "todos los publicos",
+      "noche"
+    ]
+  },
+  {
+    "id": 687,
+    "startsAt": "2026-08-12T22:30:00.000Z",
+    "currentTitle": "Serenata a las clavarias de la Virgen de la Asunción",
+    "shortTitle": "",
+    "fullTitleForNotes": "Serenata a las clavarias de la Virgen de la Asunción",
+    "location": "",
+    "provisional": false,
+    "tags": [
+      "noche"
+    ]
+  },
+  {
+    "id": 688,
+    "startsAt": "2026-08-13T17:00:00.000Z",
+    "currentTitle": "Cabalgata de disfraces amenizada por una charanga. El trayecto comenzará frente al ayuntamiento",
+    "shortTitle": "",
+    "fullTitleForNotes": "Cabalgata de disfraces amenizada por una charanga. El trayecto comenzará frente al ayuntamiento",
+    "location": "Frente al Ayuntamiento",
+    "provisional": false,
+    "tags": [
+      "familia",
+      "todos los publicos"
+    ]
+  },
+  {
+    "id": 689,
+    "startsAt": "2026-08-13T20:00:00.000Z",
+    "currentTitle": "Cena de sobaquillo y a continuación bingo",
+    "shortTitle": "",
+    "fullTitleForNotes": "Cena de sobaquillo y a continuación bingo",
+    "location": "",
+    "provisional": false,
+    "tags": [
+      "comida/cena"
+    ]
+  },
+  {
+    "id": 690,
+    "startsAt": "2026-08-13T22:00:00.000Z",
+    "currentTitle": "Discomóvil 80's & 90's - DJ Alfon",
+    "shortTitle": "",
+    "fullTitleForNotes": "Discomóvil 80's & 90's - DJ Alfon",
+    "location": "",
+    "provisional": false,
+    "tags": [
+      "noche"
+    ]
+  },
+  {
+    "id": 691,
+    "startsAt": "2026-08-14T11:30:00.000Z",
+    "currentTitle": "Volteo general de campanas",
+    "shortTitle": "",
+    "fullTitleForNotes": "Volteo general de campanas",
+    "location": "",
+    "provisional": false,
+    "tags": []
+  },
+  {
+    "id": 692,
+    "startsAt": "2026-08-14T18:00:00.000Z",
+    "currentTitle": "Ofrenda de flores a la Virgen del Rosario",
+    "shortTitle": "",
+    "fullTitleForNotes": "Ofrenda de flores a la Virgen del Rosario",
+    "location": "",
+    "provisional": false,
+    "tags": []
+  },
+  {
+    "id": 693,
+    "startsAt": "2026-08-14T20:00:00.000Z",
+    "currentTitle": "Cena de sobaquillo",
+    "shortTitle": "",
+    "fullTitleForNotes": "Cena de sobaquillo",
+    "location": "",
+    "provisional": false,
+    "tags": [
+      "comida/cena"
+    ]
+  },
+  {
+    "id": 694,
+    "startsAt": "2026-08-14T22:00:00.000Z",
+    "currentTitle": "Orquesta Gamma Live",
+    "shortTitle": "",
+    "fullTitleForNotes": "Orquesta Gamma Live",
+    "location": "",
+    "provisional": false,
+    "tags": [
+      "noche"
+    ]
+  },
+  {
+    "id": 695,
+    "startsAt": "2026-08-15T09:30:00.000Z",
+    "currentTitle": "Pasacalles para asistir a la Santa Misa, en el que se recogerán a las clavarias",
+    "shortTitle": "",
+    "fullTitleForNotes": "Pasacalles para asistir a la Santa Misa, en el que se recogerán a las clavarias",
+    "location": "",
+    "provisional": false,
+    "tags": []
+  },
+  {
+    "id": 696,
+    "startsAt": "2026-08-15T10:00:00.000Z",
+    "currentTitle": "Eucaristía solemne en la iglesia parroquial en honor a la Santísima Virgen de la Asunción",
+    "shortTitle": "",
+    "fullTitleForNotes": "Eucaristía solemne en la iglesia parroquial en honor a la Santísima Virgen de la Asunción",
+    "location": "Iglesia parroquial",
+    "provisional": false,
+    "tags": []
+  },
+  {
+    "id": 697,
+    "startsAt": "2026-08-15T19:00:00.000Z",
+    "currentTitle": "Solemne procesión en honor a la Santísima Virgen de la Asunción",
+    "shortTitle": "",
+    "fullTitleForNotes": "Solemne procesión en honor a la Santísima Virgen de la Asunción",
+    "location": "",
+    "provisional": false,
+    "tags": []
+  },
+  {
+    "id": 698,
+    "startsAt": "2026-08-15T20:30:00.000Z",
+    "currentTitle": "Cena de sobaquillo",
+    "shortTitle": "",
+    "fullTitleForNotes": "Cena de sobaquillo",
+    "location": "",
+    "provisional": false,
+    "tags": [
+      "comida/cena"
+    ]
+  },
+  {
+    "id": 699,
+    "startsAt": "2026-08-15T22:00:00.000Z",
+    "currentTitle": "Macro discomóvil - DJ Villalba",
+    "shortTitle": "",
+    "fullTitleForNotes": "Macro discomóvil - DJ Villalba",
+    "location": "",
+    "provisional": false,
+    "tags": [
+      "noche"
+    ]
+  },
+  {
+    "id": 700,
+    "startsAt": "2026-08-16T09:30:00.000Z",
+    "currentTitle": "Pasacalles para asistir a la Santa Misa, en el que se recogerán a las clavarias",
+    "shortTitle": "",
+    "fullTitleForNotes": "Pasacalles para asistir a la Santa Misa, en el que se recogerán a las clavarias",
+    "location": "",
+    "provisional": false,
+    "tags": []
+  },
+  {
+    "id": 701,
+    "startsAt": "2026-08-16T10:00:00.000Z",
+    "currentTitle": "Eucaristía solemne en la iglesia parroquial en honor a la Santísima Virgen del Rosario",
+    "shortTitle": "",
+    "fullTitleForNotes": "Eucaristía solemne en la iglesia parroquial en honor a la Santísima Virgen del Rosario",
+    "location": "Iglesia parroquial",
+    "provisional": false,
+    "tags": []
+  },
+  {
+    "id": 702,
+    "startsAt": "2026-08-16T19:00:00.000Z",
+    "currentTitle": "Solemne procesión en honor a la Santísima Virgen del Rosario",
+    "shortTitle": "",
+    "fullTitleForNotes": "Solemne procesión en honor a la Santísima Virgen del Rosario",
+    "location": "",
+    "provisional": false,
+    "tags": []
+  },
+  {
+    "id": 703,
+    "startsAt": "2026-08-16T20:30:00.000Z",
+    "currentTitle": "Gala por el 50 aniversario de Comisión de Fiestas",
+    "shortTitle": "",
+    "fullTitleForNotes": "Gala por el 50 aniversario de Comisión de Fiestas",
+    "location": "",
+    "provisional": false,
+    "tags": []
+  },
+  {
+    "id": 704,
+    "startsAt": "2026-08-17T08:30:00.000Z",
+    "currentTitle": "Eucaristía solemne en la ermita Santa Bárbara en recuerdo de nuestros antepasados, en especial, a los fallecidos en el último año",
+    "shortTitle": "",
+    "fullTitleForNotes": "Eucaristía solemne en la ermita Santa Bárbara en recuerdo de nuestros antepasados, en especial, a los fallecidos en el último año",
+    "location": "Ermita Santa Bárbara",
+    "provisional": false,
+    "tags": []
+  },
+  {
+    "id": 705,
+    "startsAt": "2026-08-20T10:00:00.000Z",
+    "currentTitle": "Entrada de toros infantiles",
+    "shortTitle": "",
+    "fullTitleForNotes": "Entrada de toros infantiles",
+    "location": "",
+    "provisional": false,
+    "tags": [
+      "toros",
+      "familia",
+      "todos los publicos"
+    ]
+  },
+  {
+    "id": 706,
+    "startsAt": "2026-08-20T17:00:00.000Z",
+    "currentTitle": "Concurso de recortes para niños",
+    "shortTitle": "",
+    "fullTitleForNotes": "Concurso de recortes para niños",
+    "location": "",
+    "provisional": false,
+    "tags": [
+      "toros",
+      "familia",
+      "todos los publicos"
+    ]
+  },
+  {
+    "id": 707,
+    "startsAt": "2026-08-20T18:00:00.000Z",
+    "currentTitle": "Toro embolado infantil",
+    "shortTitle": "",
+    "fullTitleForNotes": "Toro embolado infantil",
+    "location": "",
+    "provisional": false,
+    "tags": [
+      "toros",
+      "familia",
+      "todos los publicos"
+    ]
+  },
+  {
+    "id": 708,
+    "startsAt": "2026-08-20T22:30:00.000Z",
+    "currentTitle": "Toro embolado de la ganadería La Morada",
+    "shortTitle": "",
+    "fullTitleForNotes": "Toro embolado de la ganadería La Morada",
+    "location": "",
+    "provisional": false,
+    "tags": [
+      "toros",
+      "noche"
+    ]
+  },
+  {
+    "id": 709,
+    "startsAt": "2026-08-21T12:00:00.000Z",
+    "currentTitle": "Entrada de toros y vacas de la ganadería Capota",
+    "shortTitle": "",
+    "fullTitleForNotes": "Entrada de toros y vacas de la ganadería Capota",
+    "location": "",
+    "provisional": false,
+    "tags": [
+      "toros"
+    ]
+  },
+  {
+    "id": 710,
+    "startsAt": "2026-08-21T16:00:00.000Z",
+    "currentTitle": "Tarde de vacas y toro de la merienda de la ganadería Capota",
+    "shortTitle": "",
+    "fullTitleForNotes": "Tarde de vacas y toro de la merienda de la ganadería Capota",
+    "location": "",
+    "provisional": false,
+    "tags": [
+      "toros"
+    ]
+  },
+  {
+    "id": 711,
+    "startsAt": "2026-08-21T18:00:00.000Z",
+    "currentTitle": "Desencajonado de la ganadería Capota",
+    "shortTitle": "",
+    "fullTitleForNotes": "Desencajonado de la ganadería Capota",
+    "location": "",
+    "provisional": false,
+    "tags": [
+      "toros"
+    ]
+  },
+  {
+    "id": 712,
+    "startsAt": "2026-08-21T22:00:00.000Z",
+    "currentTitle": "Toro embolado de la ganadería Capota",
+    "shortTitle": "",
+    "fullTitleForNotes": "Toro embolado de la ganadería Capota",
+    "location": "",
+    "provisional": false,
+    "tags": [
+      "toros",
+      "noche"
+    ]
+  },
+  {
+    "id": 713,
+    "startsAt": "2026-08-21T23:00:00.000Z",
+    "currentTitle": "Discomóvil - DJ Villalba",
+    "shortTitle": "",
+    "fullTitleForNotes": "Discomóvil - DJ Villalba",
+    "location": "",
+    "provisional": false,
+    "tags": [
+      "noche"
+    ]
+  },
+  {
+    "id": 714,
+    "startsAt": "2026-08-22T12:00:00.000Z",
+    "currentTitle": "Entrada de toros y vacas de la ganadería La Morada",
+    "shortTitle": "",
+    "fullTitleForNotes": "Entrada de toros y vacas de la ganadería La Morada",
+    "location": "",
+    "provisional": false,
+    "tags": [
+      "toros"
+    ]
+  },
+  {
+    "id": 715,
+    "startsAt": "2026-08-22T15:00:00.000Z",
+    "currentTitle": "Tardeo - DJ Alfon",
+    "shortTitle": "",
+    "fullTitleForNotes": "Tardeo - DJ Alfon",
+    "location": "",
+    "provisional": false,
+    "tags": [
+      "noche"
+    ]
+  },
+  {
+    "id": 716,
+    "startsAt": "2026-08-22T16:00:00.000Z",
+    "currentTitle": "Tarde de vacas y toro de la merienda de la ganadería La Morada",
+    "shortTitle": "",
+    "fullTitleForNotes": "Tarde de vacas y toro de la merienda de la ganadería La Morada",
+    "location": "",
+    "provisional": false,
+    "tags": [
+      "toros"
+    ]
+  },
+  {
+    "id": 717,
+    "startsAt": "2026-08-22T22:00:00.000Z",
+    "currentTitle": "Toro embolado de la ganadería Luis López",
+    "shortTitle": "",
+    "fullTitleForNotes": "Toro embolado de la ganadería Luis López",
+    "location": "",
+    "provisional": false,
+    "tags": [
+      "toros",
+      "noche"
+    ]
+  },
+  {
+    "id": 718,
+    "startsAt": "2026-08-22T23:00:00.000Z",
+    "currentTitle": "Discomóvil - DJ Ronda",
+    "shortTitle": "",
+    "fullTitleForNotes": "Discomóvil - DJ Ronda",
+    "location": "",
+    "provisional": false,
+    "tags": [
+      "noche"
+    ]
+  },
+  {
+    "id": 719,
+    "startsAt": "2026-08-23T12:00:00.000Z",
+    "currentTitle": "Entrada de toros y vacas de la ganadería Luis López",
+    "shortTitle": "",
+    "fullTitleForNotes": "Entrada de toros y vacas de la ganadería Luis López",
+    "location": "",
+    "provisional": false,
+    "tags": [
+      "toros"
+    ]
+  },
+  {
+    "id": 720,
+    "startsAt": "2026-08-23T16:00:00.000Z",
+    "currentTitle": "Tarde de vacas y toro de la merienda de la ganadería Paloma",
+    "shortTitle": "",
+    "fullTitleForNotes": "Tarde de vacas y toro de la merienda de la ganadería Paloma",
+    "location": "",
+    "provisional": false,
+    "tags": [
+      "toros"
+    ]
+  }
+]

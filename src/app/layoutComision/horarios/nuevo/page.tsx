@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 export default function NuevoEventoPage() {
   type FormState = {
     title: string;
+    calendarTitle: string;
     date: string; // YYYY-MM-DD
     time: string; // HH:MM
     location: string;
@@ -13,6 +14,7 @@ export default function NuevoEventoPage() {
   };
   const [form, setForm] = useState<FormState>({
     title: "",
+    calendarTitle: "",
     date: "",
     time: "",
     location: "",
@@ -45,6 +47,7 @@ export default function NuevoEventoPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           title: title,
+          calendarTitle: form.calendarTitle.trim(),
           date: form.date,
           time: form.time,
           location: form.location.trim(),
@@ -84,6 +87,16 @@ export default function NuevoEventoPage() {
             onChange={(e) => set("title", e.target.value)}
             className="w-full rounded-md border px-3 py-2 text-sm bg-[#E85D6A] text-[#0C2335]"
             required
+          />
+        </div>
+
+        <div>
+          <label className="text-sm font-semibold">Título corto para calendario</label>
+          <input
+            value={form.calendarTitle}
+            onChange={(e) => set("calendarTitle", e.target.value)}
+            className="w-full rounded-md border px-3 py-2 text-sm bg-[#E85D6A] text-[#0C2335]"
+            placeholder="Opcional: nombre corto"
           />
         </div>
 

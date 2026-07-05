@@ -14,6 +14,7 @@ export const users = pgTable("users", {
 export const events = pgTable("events", {
   id: serial("id").primaryKey(),
   title: varchar("title", { length: 200 }).notNull(),
+  calendarTitle: varchar("calendar_title", { length: 120 }),
   // Combina date + time en un solo campo timestamp (UTC)
   startsAt: timestamp("starts_at", { withTimezone: true }).notNull(),
   location: varchar("location", { length: 200 }).notNull(),

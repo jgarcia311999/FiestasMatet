@@ -18,6 +18,7 @@ const EmptyToUndef = <T extends z.ZodTypeAny>(schema: T) =>
 const CreateSchema = z
   .object({
     title: z.string().trim().min(1, "Título requerido"),
+    calendarTitle: EmptyToUndef(z.string().trim().max(120)).optional(),
     // img and description removed
     // O bien nos mandan startsAt directamente, o bien date+time
     startsAt: z.union([z.string(), z.date()]).optional(),
@@ -61,6 +62,7 @@ export async function POST(req: Request) {
       .insert(events)
       .values({
         title: body.title,
+        calendarTitle: body.calendarTitle,
         // img and description removed
         startsAt: startsAtValue,
         location: body.location ?? "",
@@ -72,6 +74,7 @@ export async function POST(req: Request) {
       .returning({
         id: events.id,
         title: events.title,
+        calendarTitle: events.calendarTitle,
         // img and description removed
         startsAt: events.startsAt,
         location: events.location,
