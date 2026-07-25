@@ -226,12 +226,12 @@ export default function Home() {
               data-reveal
               style={{ "--reveal-delay": "0.26s" } as React.CSSProperties}
             >
-              <a
+              <Link
                 href="/calendar"
                 className="border-2 border-[#1B4332] bg-[#1B4332] px-6 py-3 text-[11px] font-medium uppercase tracking-[0.32em] text-[#F0EAD6] transition hover:bg-transparent hover:text-[#1B4332]"
               >
                 Calendario
-              </a>
+              </Link>
               <a
                 href="/suscribirse"
                 className="border-2 border-[#1B4332]/25 px-6 py-3 text-[11px] font-medium uppercase tracking-[0.32em] text-[#1B4332] transition hover:border-[#1B4332]"

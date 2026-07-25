@@ -3,6 +3,7 @@ import { Geist, Geist_Mono, Bebas_Neue, Dancing_Script } from "next/font/google"
 import "./globals.css";
 import Footer from "@/components/footer";
 import { Analytics } from "@vercel/analytics/next";
+import { AppProviders } from "@/components/app-providers";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -57,9 +58,11 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${bebasNeue.variable} ${dancingScript.variable} antialiased min-h-screen flex flex-col`}
       >
-        <main className="flex-1">{children}</main>
-        <Footer />
-        <Analytics />
+        <AppProviders>
+          <main className="flex-1">{children}</main>
+          <Footer />
+          <Analytics />
+        </AppProviders>
       </body>
     </html>
   ); 

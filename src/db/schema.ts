@@ -1,4 +1,4 @@
-import { pgTable, serial, text, varchar, timestamp, boolean, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, serial, text, varchar, timestamp, boolean, jsonb, date, integer, time } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
 /* USERS */
@@ -24,6 +24,31 @@ export const events = pgTable("events", {
   attendees: jsonb("attendees"), // $type<string[]>() si quieres tipado más estricto en consultas
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   tags: jsonb("tags").$type<string[]>().default([]),
+});
+
+/* HORARIOS COMISION */
+export const personas = pgTable("personas", {
+  id: serial("id").primaryKey(),
+  nombre: varchar("nombre", { length: 140 }).notNull(),
+  activo: boolean("activo").default(true).notNull(),
+  orden: integer("orden"),
+  calendarToken: varchar("calendar_token", { length: 96 }).unique(),
+});
+
+export const turnos = pgTable("turnos", {
+  id: serial("id").primaryKey(),
+  fecha: date("fecha").notNull(),
+  dia: varchar("dia", { length: 80 }).notNull(),
+  horaInicio: time("hora_inicio").notNull(),
+  horaFin: time("hora_fin"),
+  fechaHoraInicio: timestamp("fecha_hora_inicio", { withTimezone: true }).notNull(),
+  fechaHoraFin: timestamp("fecha_hora_fin", { withTimezone: true }),
+  acto: varchar("acto", { length: 220 }).notNull(),
+  tipo: varchar("tipo", { length: 40 }).notNull(),
+  persona1Id: integer("persona_1_id").references(() => personas.id, { onDelete: "set null" }),
+  persona2Id: integer("persona_2_id").references(() => personas.id, { onDelete: "set null" }),
+  apoyoId: integer("apoyo_id").references(() => personas.id, { onDelete: "set null" }),
+  orden: integer("orden").default(0).notNull(),
 });
 
 /* IDEAS: secciones + items */

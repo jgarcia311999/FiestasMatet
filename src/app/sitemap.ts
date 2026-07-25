@@ -26,6 +26,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "daily",
       priority: 0.8,
     },
+    {
+      url: `${baseUrl}/horarios`,
+      lastModified: new Date(),
+      changeFrequency: "daily",
+      priority: 0.9,
+    },
     // Si quieres incluir dinámicamente cada evento:
     // ...events.map((event: any) => ({
     //   url: `${baseUrl}/eventos/${event.id}`,

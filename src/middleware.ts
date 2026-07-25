@@ -20,8 +20,8 @@ export async function middleware(req: NextRequest) {
     const url = req.nextUrl.clone();
     const isLogin = url.pathname.startsWith("/login");
 
-    // Solo protegemos layoutComision
-    const isPrivate = url.pathname.startsWith("/layoutComision");
+    // Protegemos el panel de comision y las nuevas rutas admin.
+    const isPrivate = url.pathname.startsWith("/layoutComision") || url.pathname.startsWith("/admin");
 
     if (!isPrivate) return NextResponse.next();
     if (isLogin) return NextResponse.next();
@@ -36,5 +36,5 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-    matcher: ["/layoutComision/:path*"],
+    matcher: ["/layoutComision/:path*", "/admin/:path*"],
 };
