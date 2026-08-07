@@ -53,6 +53,7 @@ export function emptyTurnoForm(nextOrder: number, date = ""): TurnoFormValues {
     persona_1_id: "",
     persona_2_id: "",
     apoyo_id: "",
+    apoyo_2_id: "",
     orden: nextOrder,
   };
 }
@@ -68,6 +69,7 @@ export function turnoToForm(turno: Turno): TurnoFormValues {
     persona_1_id: turno.persona_1_id == null ? "" : String(turno.persona_1_id),
     persona_2_id: turno.persona_2_id == null ? "" : String(turno.persona_2_id),
     apoyo_id: turno.apoyo_id == null ? "" : String(turno.apoyo_id),
+    apoyo_2_id: turno.apoyo_2_id == null ? "" : String(turno.apoyo_2_id),
     orden: turno.orden,
   };
 }

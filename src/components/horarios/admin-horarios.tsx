@@ -130,6 +130,9 @@ function TurnoCard({
         <div className="sm:col-span-2">
           <PersonaSelect label="Apoyo" value={form.apoyo_id} personas={personas} onChange={(value) => set("apoyo_id", value)} />
         </div>
+        <div className="sm:col-span-2">
+          <PersonaSelect label="Apoyo 2" value={form.apoyo_2_id} personas={personas} onChange={(value) => set("apoyo_2_id", value)} />
+        </div>
       </div>
 
       <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
@@ -192,6 +195,9 @@ function NewTurnoCard({ nextOrder, personas }: { nextOrder: number; personas: Pe
         <PersonaSelect label="Persona 2" value={form.persona_2_id} personas={personas} onChange={(value) => set("persona_2_id", value)} />
         <div className="sm:col-span-2">
           <PersonaSelect label="Apoyo" value={form.apoyo_id} personas={personas} onChange={(value) => set("apoyo_id", value)} />
+        </div>
+        <div className="sm:col-span-2">
+          <PersonaSelect label="Apoyo 2" value={form.apoyo_2_id} personas={personas} onChange={(value) => set("apoyo_2_id", value)} />
         </div>
       </div>
       <button disabled={mutation.isPending || !form.fecha || !form.hora_inicio || !form.acto.trim()} onClick={() => mutation.mutate()} className="mt-4 h-12 w-full rounded-lg bg-[#17352C] px-4 font-black text-white disabled:opacity-55">

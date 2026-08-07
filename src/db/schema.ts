@@ -48,6 +48,7 @@ export const turnos = pgTable("turnos", {
   persona1Id: integer("persona_1_id").references(() => personas.id, { onDelete: "set null" }),
   persona2Id: integer("persona_2_id").references(() => personas.id, { onDelete: "set null" }),
   apoyoId: integer("apoyo_id").references(() => personas.id, { onDelete: "set null" }),
+  apoyo2Id: integer("apoyo_2_id").references(() => personas.id, { onDelete: "set null" }),
   orden: integer("orden").default(0).notNull(),
 });
 

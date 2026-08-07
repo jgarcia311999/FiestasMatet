@@ -10,7 +10,7 @@ import type { Persona, Turno, TurnoTipo } from "@/types/horarios";
 
 export const dynamic = "force-dynamic";
 
-const TIPOS = ["cobro", "barra", "acto", "misa", "procesion", "noche", "otros"] as const;
+const TIPOS = ["cobro", "barra", "acto", "misa", "procesion", "noche", "toros", "otros"] as const;
 
 const TurnoSchema = z.object({
   fecha: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
@@ -22,6 +22,7 @@ const TurnoSchema = z.object({
   persona_1_id: z.union([z.string(), z.number(), z.literal(""), z.null()]).optional(),
   persona_2_id: z.union([z.string(), z.number(), z.literal(""), z.null()]).optional(),
   apoyo_id: z.union([z.string(), z.number(), z.literal(""), z.null()]).optional(),
+  apoyo_2_id: z.union([z.string(), z.number(), z.literal(""), z.null()]).optional(),
   orden: z.number().int().optional(),
 });
 
@@ -105,10 +106,12 @@ function buildTurnos(rows: Array<typeof turnos.$inferSelect>, people: Persona[])
       persona_1_id: turno.persona1Id,
       persona_2_id: turno.persona2Id,
       apoyo_id: turno.apoyoId,
+      apoyo_2_id: turno.apoyo2Id,
       orden: turno.orden,
       persona_1: turno.persona1Id ? peopleById.get(turno.persona1Id) ?? null : null,
       persona_2: turno.persona2Id ? peopleById.get(turno.persona2Id) ?? null : null,
       apoyo: turno.apoyoId ? peopleById.get(turno.apoyoId) ?? null : null,
+      apoyo_2: turno.apoyo2Id ? peopleById.get(turno.apoyo2Id) ?? null : null,
     }))
     .sort((a, b) => {
       if (a.fecha !== b.fecha) return a.fecha.localeCompare(b.fecha);
@@ -175,6 +178,7 @@ export async function POST(req: Request) {
         persona1Id: toNullableId(body.persona_1_id),
         persona2Id: toNullableId(body.persona_2_id),
         apoyoId: toNullableId(body.apoyo_id),
+        apoyo2Id: toNullableId(body.apoyo_2_id),
         orden: body.orden ?? 0,
       })
       .returning();
@@ -220,6 +224,7 @@ export async function PATCH(req: Request) {
         persona1Id: toNullableId(body.persona_1_id),
         persona2Id: toNullableId(body.persona_2_id),
         apoyoId: toNullableId(body.apoyo_id),
+        apoyo2Id: toNullableId(body.apoyo_2_id),
         orden: body.orden ?? 0,
       })
       .where(eq(turnos.id, id))

@@ -30,10 +30,12 @@ function buildTurnos(rows: Array<typeof turnos.$inferSelect>, people: Persona[])
     persona_1_id: turno.persona1Id,
     persona_2_id: turno.persona2Id,
     apoyo_id: turno.apoyoId,
+    apoyo_2_id: turno.apoyo2Id,
     orden: turno.orden,
     persona_1: turno.persona1Id ? peopleById.get(turno.persona1Id) ?? null : null,
     persona_2: turno.persona2Id ? peopleById.get(turno.persona2Id) ?? null : null,
     apoyo: turno.apoyoId ? peopleById.get(turno.apoyoId) ?? null : null,
+    apoyo_2: turno.apoyo2Id ? peopleById.get(turno.apoyo2Id) ?? null : null,
   }));
 }
 
@@ -82,6 +84,7 @@ function describePersonalTurno(turno: Turno, personaId: number, origin: string) 
     `Persona 2: ${turno.persona_2?.nombre ?? "-"}`,
     colleague ? `Compañero: ${colleague}` : "",
     turno.apoyo ? `Apoyo: ${turno.apoyo.nombre}` : "",
+    turno.apoyo_2 ? `Apoyo 2: ${turno.apoyo_2.nombre}` : "",
     `Tipo de acto: ${turno.tipo}`,
     "",
     "Consulta el horario actualizado:",

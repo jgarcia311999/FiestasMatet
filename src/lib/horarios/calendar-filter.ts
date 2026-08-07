@@ -2,8 +2,8 @@ import type { Turno } from "@/types/horarios";
 
 export type CalendarMode = "todo" | "mis-turnos";
 
-export function isTurnoPersona(turno: Pick<Turno, "persona_1_id" | "persona_2_id" | "apoyo_id">, personaId: number) {
-  return [turno.persona_1_id, turno.persona_2_id, turno.apoyo_id].includes(personaId);
+export function isTurnoPersona(turno: Pick<Turno, "persona_1_id" | "persona_2_id" | "apoyo_id" | "apoyo_2_id">, personaId: number) {
+  return [turno.persona_1_id, turno.persona_2_id, turno.apoyo_id, turno.apoyo_2_id].includes(personaId);
 }
 
 export function filterTurnosForCalendar(turnos: Turno[], personaId: number, mode: CalendarMode) {

@@ -1,84 +1,32 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchPersonas, fetchTurnos } from "@/lib/horarios/api";
 import { compareTurnos, formatDiaFecha, formatHora } from "@/lib/horarios/format";
 import type { Turno } from "@/types/horarios";
 import { HORARIOS_QUERY_KEY, PERSONAS_QUERY_KEY } from "./use-horarios-realtime";
 import { CalendarModal } from "./calendar-modal";
+import { HorariosAccessPanel, useHorariosAccess } from "./horarios-access";
 
 const EMPTY_TURNOS: Turno[] = [];
-const ACCESS_STORAGE_KEY = "fiestas-matet-horarios-access";
-const ACCESS_PASSWORD = "1234";
 
 function includesPersona(turno: Turno, personaId: string) {
-  return [turno.persona_1_id, turno.persona_2_id, turno.apoyo_id].includes(Number(personaId));
+  return [turno.persona_1_id, turno.persona_2_id, turno.apoyo_id, turno.apoyo_2_id].includes(Number(personaId));
 }
 
 export function PublicHorarios() {
-  const [accessGranted, setAccessGranted] = useState(false);
-  const [checkingAccess, setCheckingAccess] = useState(true);
-
-  useEffect(() => {
-    setAccessGranted(window.localStorage.getItem(ACCESS_STORAGE_KEY) === "granted");
-    setCheckingAccess(false);
-  }, []);
+  const { accessGranted, checkingAccess, grantAccess } = useHorariosAccess();
 
   if (checkingAccess) {
     return <main className="min-h-screen bg-[#F7F3E8]" />;
   }
 
   if (!accessGranted) {
-    return <HorariosAccessPanel onAccessGranted={() => setAccessGranted(true)} />;
+    return <HorariosAccessPanel onAccessGranted={grantAccess} />;
   }
 
   return <PublicHorariosContent />;
-}
-
-function HorariosAccessPanel({ onAccessGranted }: { onAccessGranted: () => void }) {
-  const router = useRouter();
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState(false);
-
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-
-    if (password === ACCESS_PASSWORD) {
-      window.localStorage.setItem(ACCESS_STORAGE_KEY, "granted");
-      onAccessGranted();
-      return;
-    }
-
-    setError(true);
-    router.replace("/");
-  }
-
-  return (
-    <main className="flex min-h-screen items-center justify-center bg-[#F7F3E8] px-4 text-[#17352C]">
-      <form onSubmit={handleSubmit} className="w-full max-w-sm rounded-lg border border-[#17352C]/15 bg-white p-5 shadow-sm">
-        <p className="text-[11px] font-bold uppercase tracking-[0.28em] text-[#17352C]/55">Comision de fiestas</p>
-        <h1 className="mt-2 text-5xl uppercase leading-none" style={{ fontFamily: "var(--font-bebas-neue)" }}>
-          Horarios
-        </h1>
-        <label className="mt-5 block">
-          <span className="mb-1 block text-sm font-black">Contraseña</span>
-          <input
-            autoFocus
-            inputMode="numeric"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            className="h-12 w-full rounded-lg border border-[#17352C]/25 px-3 text-lg"
-          />
-        </label>
-        <button type="submit" className="mt-4 h-12 w-full rounded-lg bg-[#17352C] px-4 font-black text-white">
-          Entrar
-        </button>
-        {error && <p className="mt-3 text-sm font-bold text-[#B42318]">Contraseña incorrecta.</p>}
-      </form>
-    </main>
-  );
 }
 
 function PublicHorariosContent() {
@@ -190,6 +138,12 @@ function PublicHorariosContent() {
                         <dt className="font-bold text-[#17352C]/60">Apoyo</dt>
                         <dd className="text-right">{turno.apoyo?.nombre ?? "-"}</dd>
                       </div>
+                      {turno.apoyo_2 && (
+                        <div className="flex justify-between gap-3 border-t border-[#17352C]/10 pt-2">
+                          <dt className="font-bold text-[#17352C]/60">Apoyo 2</dt>
+                          <dd className="text-right">{turno.apoyo_2.nombre}</dd>
+                        </div>
+                      )}
                     </dl>
                   </article>
                 ))}

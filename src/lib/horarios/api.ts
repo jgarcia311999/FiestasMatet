@@ -12,6 +12,7 @@ function toTurnoPayload(values: TurnoFormValues): TurnoInsert {
     persona_1_id: values.persona_1_id ? Number(values.persona_1_id) : null,
     persona_2_id: values.persona_2_id ? Number(values.persona_2_id) : null,
     apoyo_id: values.apoyo_id ? Number(values.apoyo_id) : null,
+    apoyo_2_id: values.apoyo_2_id ? Number(values.apoyo_2_id) : null,
     orden: values.orden,
   };
 }
@@ -79,6 +80,7 @@ export async function duplicateTurno(turno: Turno) {
     persona_1_id: turno.persona_1_id == null ? "" : String(turno.persona_1_id),
     persona_2_id: turno.persona_2_id == null ? "" : String(turno.persona_2_id),
     apoyo_id: turno.apoyo_id == null ? "" : String(turno.apoyo_id),
+    apoyo_2_id: turno.apoyo_2_id == null ? "" : String(turno.apoyo_2_id),
     orden: turno.orden + 1,
   });
 }
