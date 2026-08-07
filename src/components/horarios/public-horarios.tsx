@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchPersonas, fetchTurnos } from "@/lib/horarios/api";
 import { compareTurnos, formatDiaFecha, formatHora } from "@/lib/horarios/format";
@@ -10,6 +10,7 @@ import { CalendarModal } from "./calendar-modal";
 import { HorariosAccessPanel, useHorariosAccess } from "./horarios-access";
 
 const EMPTY_TURNOS: Turno[] = [];
+const HORARIOS_TIME_ZONE = "Europe/Madrid";
 
 function includesPersona(turno: Turno, personaId: string) {
   return [turno.persona_1_id, turno.persona_2_id, turno.apoyo_id, turno.apoyo_2_id].includes(Number(personaId));
@@ -21,6 +22,17 @@ function formatPersonas(turno: Turno) {
 
 function formatApoyos(turno: Turno) {
   return [turno.apoyo?.nombre, turno.apoyo_2?.nombre].filter(Boolean).join(" y ");
+}
+
+function getTodayDateKey() {
+  const parts = new Intl.DateTimeFormat("en", {
+    timeZone: HORARIOS_TIME_ZONE,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(new Date());
+  const getPart = (type: string) => parts.find((part) => part.type === type)?.value ?? "";
+  return `${getPart("year")}-${getPart("month")}-${getPart("day")}`;
 }
 
 export function PublicHorarios() {
@@ -40,6 +52,8 @@ export function PublicHorarios() {
 function PublicHorariosContent() {
   const [personaId, setPersonaId] = useState("");
   const [calendarModalOpen, setCalendarModalOpen] = useState(false);
+  const hasScrolledToToday = useRef(false);
+  const dayRefs = useRef(new Map<string, HTMLElement>());
   const turnosQuery = useQuery({ queryKey: HORARIOS_QUERY_KEY, queryFn: fetchTurnos, refetchInterval: 10_000 });
   const personasQuery = useQuery({ queryKey: PERSONAS_QUERY_KEY, queryFn: fetchPersonas, refetchInterval: 30_000 });
 
@@ -66,6 +80,17 @@ function PublicHorariosContent() {
 
   const isLoading = turnosQuery.isLoading || personasQuery.isLoading;
   const error = turnosQuery.error || personasQuery.error;
+
+  useEffect(() => {
+    if (hasScrolledToToday.current || isLoading || error || grouped.length === 0) return;
+
+    const today = getTodayDateKey();
+    const targetGroup = grouped.find((group) => group.date >= today) ?? grouped[grouped.length - 1];
+    window.requestAnimationFrame(() => {
+      dayRefs.current.get(targetGroup.date)?.scrollIntoView({ block: "start" });
+      hasScrolledToToday.current = true;
+    });
+  }, [error, grouped, isLoading]);
 
   return (
     <main className="min-h-screen bg-[#F7F3E8] text-[#17352C]">
@@ -116,7 +141,14 @@ function PublicHorariosContent() {
 
         <div className="space-y-8">
           {grouped.map((group) => (
-            <section key={group.date}>
+            <section
+              key={group.date}
+              ref={(node) => {
+                if (node) dayRefs.current.set(group.date, node);
+                else dayRefs.current.delete(group.date);
+              }}
+              className="scroll-mt-28"
+            >
               <div className="mb-3 flex items-end justify-between gap-3">
                 <h2 className="text-4xl uppercase leading-none" style={{ fontFamily: "var(--font-bebas-neue)" }}>
                   {formatDiaFecha(group.items[0])}
