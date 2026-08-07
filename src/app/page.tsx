@@ -6,6 +6,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { initGA, trackEvent } from "@/lib/analytics";
 
 const MADRID_TZ = "Europe/Madrid";
+const SHOW_HISTORY_SECTION = false;
 
 const CHAPTERS = [
   {
@@ -364,54 +365,56 @@ export default function Home() {
         );
       })}
 
-      <section className="border-b-2 border-[#1B4332] bg-[#A61F24]">
-        <div className="grid lg:grid-cols-2">
-          <div className="border-b-2 border-[#1B4332] px-5 py-16 sm:px-8 sm:py-24 lg:border-r-2 lg:border-b-0" data-reveal>
-            <p className="text-[10px] uppercase tracking-[0.45em] text-white/45">
-              Aspecto&nbsp;&bull;&nbsp;Archivo
-            </p>
-            <h2
-              className="mt-4 text-[3.8rem] uppercase leading-[0.86] text-white sm:text-[6rem] lg:text-[8rem]"
-              style={{ fontFamily: "var(--font-bebas-neue)" }}
-            >
-              Historia del pueblo
-            </h2>
-          </div>
-          <div
-            className="flex flex-col justify-between px-5 py-16 sm:px-8 sm:py-24"
-            data-reveal
-            style={{ "--reveal-delay": "0.1s" } as React.CSSProperties}
-          >
-            <p className="max-w-sm text-[15px] leading-7 text-white/75">
-              Portadas, carteles y programas desde 1976. Un archivo visual de cómo el pueblo ha
-              vivido sus fiestas a lo largo de los años.
-            </p>
-            <div className="mt-8 flex gap-3">
-              {[2004, 2013, 2024].map((year, i) => (
-                <div
-                  key={year}
-                  className="animate-in relative aspect-[3/4] w-20 overflow-hidden border border-white/20"
-                  style={{ "--reveal-delay": `${i * 0.08}s` } as React.CSSProperties}
-                >
-                  <Image
-                    src={encodeURI(`/LIBROS DE FIESTAS/PORTADAS/Portada ${year}.png`)}
-                    alt={`Portada ${year}`}
-                    fill
-                    className="object-cover grayscale opacity-75"
-                    unoptimized
-                  />
-                </div>
-              ))}
+      {SHOW_HISTORY_SECTION && (
+        <section className="border-b-2 border-[#1B4332] bg-[#A61F24]">
+          <div className="grid lg:grid-cols-2">
+            <div className="border-b-2 border-[#1B4332] px-5 py-16 sm:px-8 sm:py-24 lg:border-r-2 lg:border-b-0" data-reveal>
+              <p className="text-[10px] uppercase tracking-[0.45em] text-white/45">
+                Aspecto&nbsp;&bull;&nbsp;Archivo
+              </p>
+              <h2
+                className="mt-4 text-[3.8rem] uppercase leading-[0.86] text-white sm:text-[6rem] lg:text-[8rem]"
+                style={{ fontFamily: "var(--font-bebas-neue)" }}
+              >
+                Historia del pueblo
+              </h2>
             </div>
-            <Link
-              href="/historia"
-              className="mt-10 self-start border-2 border-white px-6 py-3 text-[11px] font-medium uppercase tracking-[0.32em] text-white transition hover:bg-white hover:text-[#A61F24]"
+            <div
+              className="flex flex-col justify-between px-5 py-16 sm:px-8 sm:py-24"
+              data-reveal
+              style={{ "--reveal-delay": "0.1s" } as React.CSSProperties}
             >
-              Ver archivo →
-            </Link>
+              <p className="max-w-sm text-[15px] leading-7 text-white/75">
+                Portadas, carteles y programas desde 1976. Un archivo visual de cómo el pueblo ha
+                vivido sus fiestas a lo largo de los años.
+              </p>
+              <div className="mt-8 flex gap-3">
+                {[2004, 2013, 2024].map((year, i) => (
+                  <div
+                    key={year}
+                    className="animate-in relative aspect-[3/4] w-20 overflow-hidden border border-white/20"
+                    style={{ "--reveal-delay": `${i * 0.08}s` } as React.CSSProperties}
+                  >
+                    <Image
+                      src={encodeURI(`/LIBROS DE FIESTAS/PORTADAS/Portada ${year}.png`)}
+                      alt={`Portada ${year}`}
+                      fill
+                      className="object-cover grayscale opacity-75"
+                      unoptimized
+                    />
+                  </div>
+                ))}
+              </div>
+              <Link
+                href="/historia"
+                className="mt-10 self-start border-2 border-white px-6 py-3 text-[11px] font-medium uppercase tracking-[0.32em] text-white transition hover:bg-white hover:text-[#A61F24]"
+              >
+                Ver archivo →
+              </Link>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
     </main>
   );
 }

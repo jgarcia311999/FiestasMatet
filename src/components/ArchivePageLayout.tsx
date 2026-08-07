@@ -3,6 +3,8 @@
 import Link from "next/link";
 import React, { useEffect } from "react";
 
+const SHOW_HISTORY_LINK = false;
+
 type ArchivePageLayoutProps = {
   title: string;
   kicker: string;
@@ -52,12 +54,14 @@ export default function ArchivePageLayout({
           <p className="text-[10px] uppercase tracking-[0.45em] font-medium hidden sm:block">
             Matet en fiestas
           </p>
-          <Link
-            href="/historia"
-            className="text-[10px] uppercase tracking-[0.45em] font-medium hover:opacity-50 transition-opacity hidden sm:block"
-          >
-            Historia
-          </Link>
+          {SHOW_HISTORY_LINK && (
+            <Link
+              href="/historia"
+              className="text-[10px] uppercase tracking-[0.45em] font-medium hover:opacity-50 transition-opacity hidden sm:block"
+            >
+              Historia
+            </Link>
+          )}
         </div>
       </header>
 
