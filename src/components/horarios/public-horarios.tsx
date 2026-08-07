@@ -15,6 +15,14 @@ function includesPersona(turno: Turno, personaId: string) {
   return [turno.persona_1_id, turno.persona_2_id, turno.apoyo_id, turno.apoyo_2_id].includes(Number(personaId));
 }
 
+function formatPersonas(turno: Turno) {
+  return [turno.persona_1?.nombre, turno.persona_2?.nombre].filter(Boolean).join(" y ");
+}
+
+function formatApoyos(turno: Turno) {
+  return [turno.apoyo?.nombre, turno.apoyo_2?.nombre].filter(Boolean).join(" y ");
+}
+
 export function PublicHorarios() {
   const { accessGranted, checkingAccess, grantAccess } = useHorariosAccess();
 
@@ -125,26 +133,12 @@ function PublicHorariosContent() {
                       </div>
                       <span className="rounded-full border border-[#17352C]/20 px-3 py-1 text-xs font-bold uppercase">{turno.tipo}</span>
                     </div>
-                    <dl className="mt-4 grid gap-2 text-sm">
-                      <div className="flex justify-between gap-3 border-t border-[#17352C]/10 pt-2">
-                        <dt className="font-bold text-[#17352C]/60">Persona 1</dt>
-                        <dd className="text-right">{turno.persona_1?.nombre ?? "-"}</dd>
-                      </div>
-                      <div className="flex justify-between gap-3 border-t border-[#17352C]/10 pt-2">
-                        <dt className="font-bold text-[#17352C]/60">Persona 2</dt>
-                        <dd className="text-right">{turno.persona_2?.nombre ?? "-"}</dd>
-                      </div>
-                      <div className="flex justify-between gap-3 border-t border-[#17352C]/10 pt-2">
-                        <dt className="font-bold text-[#17352C]/60">Apoyo</dt>
-                        <dd className="text-right">{turno.apoyo?.nombre ?? "-"}</dd>
-                      </div>
-                      {turno.apoyo_2 && (
-                        <div className="flex justify-between gap-3 border-t border-[#17352C]/10 pt-2">
-                          <dt className="font-bold text-[#17352C]/60">Apoyo 2</dt>
-                          <dd className="text-right">{turno.apoyo_2.nombre}</dd>
-                        </div>
+                    <div className="mt-4 space-y-2 border-t border-[#17352C]/10 pt-3 text-lg font-bold">
+                      <p>{formatPersonas(turno) || "-"}</p>
+                      {formatApoyos(turno) && (
+                        <p className="text-base text-[#17352C]/65">Apoyo: {formatApoyos(turno)}</p>
                       )}
-                    </dl>
+                    </div>
                   </article>
                 ))}
               </div>
