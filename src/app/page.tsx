@@ -211,15 +211,15 @@ export default function Home() {
                 data-reveal
                 style={{ "--reveal-delay": "0.1s" } as React.CSSProperties}
               >
-                Archivo visual del pueblo&nbsp;&bull;&nbsp;Desde 1976
+                Programa de fiestas&nbsp;&bull;&nbsp;Matet 2026
               </p>
               <p
                 className="mt-6 max-w-sm text-[15px] leading-7 text-[#1B4332]/80 sm:text-base"
                 data-reveal
                 style={{ "--reveal-delay": "0.18s" } as React.CSSProperties}
               >
-                Una portada para leer el programa de fiestas con rapidez, entrar a cada bloque por
-                ambiente y mantener cerca el archivo histórico del pueblo.
+                Aquí verás todos los actos de las fiestas, organizados por bloques para consultar
+                rápido qué toca cada día y guardar el programa en tu calendario.
               </p>
             </div>
             <div
